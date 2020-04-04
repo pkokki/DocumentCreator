@@ -95,9 +95,13 @@ namespace DocumentCreator
         {
             using var ms = new MemoryStream(buffer);
             using var doc = WordprocessingDocument.Open(ms, false);
+            
+            var x = doc.MainDocumentPart.Document.Body.Descendants<SdtElement>();
+            var y = x.Select(o => o.GetType().Name);
+            
             return doc.MainDocumentPart.Document.Body
-                .Descendants<SdtRun>()
-                .Select(e => new TemplateField(e.Descendants<SdtAlias>().FirstOrDefault().Val))
+                .Descendants<SdtElement>()
+                .Select(e => new TemplateField(e))
                 .ToList();
         }
 

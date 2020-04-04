@@ -1,0 +1,140 @@
+{
+  "name": "OP1",
+  "transformations": [
+    {
+      "targetId": 1,
+      "expression": "=SYSDATE()",
+      "expected": "4/4/2020"
+    },
+    {
+      "targetId": 2,
+      "expression": "=UPPER(rqd(\"ProductDescription\"))",
+      "expected": "ΠΡΟΘΕΣΜΙΑΚΗ ΜΕ BONUS 3 ΜΗΝΩΝ - ΑΠΟ ΕΥΡΩ 10.000"
+    },
+    {
+      "targetId": 3,
+      "expression": "=rqd(\"AccountNumber\")",
+      "expected": "923456789012345"
+    },
+    {
+      "targetId": 4,
+      "expression": "=LOWER(rqd(\"PS1014\"))",
+      "expected": "τριών (3)",
+      "comment": "WRITEINFULL(RQD(\"PS1014\");\"%s (%d)\";2)"
+    },
+    {
+      "targetId": 5,
+      "expression": "=rqd(\"PS1016\")",
+      "expected": "μηνών",
+      "comment": "FORMAT(RQD(\"PS1016\");2)"
+    },
+    {
+      "targetId": 6,
+      "expression": "=IF(rqd(\"PS1014\")/rqd(\"PS1015\")>2,\"έκαστης\",\"της πρώτης\")",
+      "expected": "έκαστης"
+    },
+    {
+      "targetId": 7,
+      "expression": "=rqd(\"PS1056\")",
+      "expected": "Ευρώ 10.000"
+    },
+    {
+      "targetId": 8,
+      "expression": "=PROPER(rqd(\"PS1014\"))",
+      "expected": "Τριμηνιαία",
+      "comment": "UPPERFIRST(DURATION(RQD(\"PS1014\"), RQD(\"PS1016\")))"
+    },
+    {
+      "targetId": 9,
+      "expression": "=rqd(\"PS1015\")",
+      "expected": "Μηνιαία",
+      "comment": "UPPERFIRST(DURATION(S1, \"Μήνας\"))"
+    },
+    {
+      "targetId": 10,
+      "expression": "=rqd(\"InterestTable\")",
+      "expected": "[]"
+    },
+    {
+      "targetId": 11,
+      "expression": "=RQR(\"Period\")",
+      "expected": "1ος μήνας"
+    },
+    {
+      "targetId": 12,
+      "expression": "=RQR(\"Interest\")",
+      "expected": "0,20%"
+    },
+    {
+      "targetId": 13,
+      "expression": "=RQR(\"Points\")",
+      "expected": "500"
+    },
+    {
+      "targetId": 14,
+      "expression": "=rqd(\"SEPA\")",
+      "expected": "0,170%"
+    },
+    {
+      "targetId": 15,
+      "expression": "=rqd(\"PS1015\")",
+      "expected": "μηνιαία",
+      "comment": "DURATION(S1, \"Μήνας\")"
+    },
+    {
+      "targetId": 16,
+      "expression": "=CONTENT(rqd(\"PS1053\")=\"START\")",
+      "expected": "C16"
+    },
+    {
+      "targetId": 17,
+      "expression": "=rqd(\"PS1015\")",
+      "expected": "ανά μήνα",
+      "comment": "DURATIONTYPE(RQD(\"PS1015\"),1)"
+    },
+    {
+      "targetId": 18,
+      "expression": "=CONTENT(rqd(\"PS1014\")-rqd(\"PS1015\")>2)"
+    },
+    {
+      "targetId": 19,
+      "expression": "=rqd(\"F1041\")",
+      "expected": "Ευρώ 5.000"
+    },
+    {
+      "targetId": 20,
+      "expression": "=rqd(\"F1042\")",
+      "expected": "Ευρώ 10.000"
+    },
+    {
+      "targetId": 21,
+      "expression": "=rqd(\"ProductDescription\")",
+      "expected": "Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000"
+    },
+    {
+      "targetId": 22,
+      "expression": "=rqd(\"AccountNumber\")",
+      "expected": "923456789012345"
+    },
+    {
+      "targetId": 23,
+      "expression": "=source(\"RQ\",\"RequestData.ProductDescription\")",
+      "expected": "Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000"
+    },
+    {
+      "targetId": 24,
+      "expression": "=RQL(\"Unit\")",
+      "expected": "123 - ΚΕΝΤΡΙΚΟ"
+    }
+  ],
+  "sources": [
+    {
+      "name": "RQ",
+      "value": "{\"LogHeader\":{\"RequestId\":\"123456\", \"Unit\":\"123\"},\"RequestData\":{\"ProductDescription\":\"Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000\",\"AccountNumber\":\"923456789012345\", \"SEPA\":0.17, \"PS1014\":3, \"PS1015\":1, \"PS1016\":\"MONTH\", \"PS1053\": \"START\", \"PS1056\":10000, \"F1041\":5000, \"F1042\":10000, \"InterestTable\":[{\"Period\":1,\"Interest\":0.2,\"Points\":500}, {\"Period\":3,\"Interest\":0.25,\"Points\":1000}]}}"
+    },
+    {
+      "name": "RS",
+      "value": "{\"X\":100}"
+    }
+  ]
+}
