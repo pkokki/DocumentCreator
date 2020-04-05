@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -7,25 +8,28 @@ namespace DocumentCreator.ExcelFormulaParser
     public class ExcelFormulaValue
     {
         private readonly ExcelFormulaToken token;
-        private readonly object value;
+        private readonly CultureInfo culture;
+        private ExcelValue value;
 
-        public ExcelFormulaValue(ExcelFormulaToken token) 
+        public ExcelFormulaValue(ExcelFormulaToken token, CultureInfo culture) 
         {
             this.token = token;
+            this.culture = culture;
         }
-        public ExcelFormulaValue(ExcelFormulaToken token, object value)
+        public ExcelFormulaValue(ExcelValue value)
         {
-            if (token != null) throw new InvalidOperationException();
             this.value = value;
         }
 
         public bool HasValue { get { return value != null; } }
-        public object Value
+        public ExcelValue Value
         {
             get
             {
                 if (token != null && token.Type != ExcelFormulaTokenType.Operand) throw new InvalidOperationException();
-                return value ?? token?.Value;
+                if (value == null && token != null)
+                    value = ExcelValue.Create(token, culture);
+                return value;
             }
         }
         public bool HasToken { get { return token != null; } }

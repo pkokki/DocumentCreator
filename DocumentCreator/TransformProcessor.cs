@@ -10,9 +10,6 @@ namespace DocumentCreator
 {
     public class TransformProcessor
     {
-        private static readonly SpecialResult DIV0 = new SpecialResult("#DIV/0!");
-        private static readonly SpecialResult NA = new SpecialResult("#N/A");
-
         private readonly CultureInfo culture, outCulture;
 
         public TransformProcessor() : this(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture)
@@ -51,7 +48,7 @@ namespace DocumentCreator
         public TransformResult Evaluate(long targetId, string expression, Dictionary<string, JToken> sources)
         {
             string error = null;
-            object value = null;
+            ExcelValue value = null;
 
             var excelFormula = new ExcelFormula(expression, culture);
             var tokens = new Queue<ExcelFormulaToken>(excelFormula.OfType<ExcelFormulaToken>());
@@ -62,8 +59,8 @@ namespace DocumentCreator
                 TraverseScope(scope, tokens, sources);
                 var operand = EvaluateSimpleExpression(scope);
                 value = operand.Value;
-                if (value is JArray)
-                    sources["#ROW#"] = ((JArray)value).FirstOrDefault();
+                if (value.InnerValue is JArray)
+                    sources["#ROW#"] = ((JArray)value.InnerValue).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -74,7 +71,7 @@ namespace DocumentCreator
             {
                 TargetId = targetId,
                 Expression = expression,
-                Value = ConvertToString(value),
+                Value = value?.ToString(outCulture),
                 Error = error
             };
         }
@@ -96,9 +93,11 @@ namespace DocumentCreator
                     {
                         case ExcelFormulaTokenType.Function:
                             var name = token.Value.ToUpper();
-                            var args = EvaluateFunctionArguments(childScope);
-                            var value = EvaluateFunction(name, args, sources);
-                            scope.Add(new ExcelFormulaValue(null, value));
+                            var args = EvaluateFunctionArguments(childScope)
+                                .Select(o => ExcelValue.Create(o, culture))
+                                .ToList();
+                            var value = ExcelValue.EvaluateFunction(name, args, culture, sources);
+                            scope.Add(new ExcelFormulaValue(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
                             var subExp = EvaluateSimpleExpression(childScope);
@@ -110,20 +109,20 @@ namespace DocumentCreator
                 }
                 else
                 {
-                    scope.Add(new ExcelFormulaValue(token));
+                    scope.Add(new ExcelFormulaValue(token, culture));
                 }
             }
         }
 
-        private object[] EvaluateFunctionArguments(ExcelFormulaValues scope)
+        private IEnumerable<ExcelFormulaValue> EvaluateFunctionArguments(ExcelFormulaValues scope)
         {
-            var args = new List<object>();
+            var args = new List<ExcelFormulaValue>();
             ExcelFormulaValues activeArg = null;
             foreach(var item in scope)
             {
                 if (item.HasToken && item.Token.Type == ExcelFormulaTokenType.Argument)
                 {
-                    args.Add(EvaluateSimpleExpression(activeArg).Value);
+                    args.Add(EvaluateSimpleExpression(activeArg));
                     activeArg = null;
                 }
                 else
@@ -132,58 +131,8 @@ namespace DocumentCreator
                     activeArg.Add(item);
                 }
             }
-            if (activeArg != null) args.Add(EvaluateSimpleExpression(activeArg).Value);
-            return args.ToArray();
-        }
-
-        
-        private object EvaluateFunction(string name, object[] args, Dictionary<string, JToken> sources)
-        {
-            switch (name)
-            {
-                // EXCEL TEXT FUNCTIONS
-                case "LEN":
-                    return Convert.ToString(args[0], culture).Length;
-                case "UPPER":
-                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToUpper(culture);
-                case "LOWER":
-                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToLower(culture);
-                case "PROPER":
-                    return args[0] == null ? null : culture.TextInfo.ToTitleCase(Convert.ToString(args[0], culture));
-                // EXCEL LOGICAL FUNCTIONS
-                case "AND":
-                    return args.All(o => Convert.ToBoolean(o));
-                case "IF":
-                    return Convert.ToBoolean(args[0]) ? args[1] : args[2];
-                case "IFERROR":
-                    return args[0] is SpecialResult ? args[1] : args[0];
-                case "IFNA":
-                    return NA.Equals(args[0]) ? args[1] : args[0];
-                case "NOT":
-                    return !Convert.ToBoolean(args[0]);
-                case "OR":
-                    return args.Any(o => Convert.ToBoolean(o));
-                case "XOR":
-                    return args.Aggregate((a, b) => Convert.ToBoolean(a) ^ Convert.ToBoolean(b));
-                
-                case "NA":
-                    return NA;
-                // CUSTOM UDF FUNCTIONS
-                case "SYSDATE":
-                    return DateTime.Today.ToString("d/M/yyyy");
-                case "SOURCE":
-                    return sources[args[0].ToString()]?.SelectToken(args[1].ToString());
-                case "RQD":
-                    return sources["RQ"]?["RequestData"]?[args[0]];
-                case "RQL":
-                    return sources["RQ"]?["LogHeader"]?[args[0]];
-                case "RQR":
-                    return sources["#ROW#"]?[args[0]];
-                case "CONTENT":
-                    return Convert.ToBoolean(args[0]) ? "#EMPTY_CONTENT#" : null;
-                default:
-                    throw new InvalidOperationException($"Unknown function name: {name}");
-            }
+            if (activeArg != null) args.Add(EvaluateSimpleExpression(activeArg));
+            return args;
         }
 
         private ExcelFormulaValue EvaluateSimpleExpression(ExcelFormulaValues parts)
@@ -197,9 +146,9 @@ namespace DocumentCreator
             PerformComparisons(parts);
 
             var value = parts.Single().Value;
-            if (value is string && decimal.TryParse((string)value, NumberStyles.Any, culture, out decimal d))
-                value = d;
-            return new ExcelFormulaValue(null, value);
+            //if (value is string && decimal.TryParse((string)value, NumberStyles.Any, culture, out decimal d))
+            //    value = d;
+            return new ExcelFormulaValue(value);
         }
 
         private void PerformComparisons(ExcelFormulaValues parts)
@@ -210,62 +159,24 @@ namespace DocumentCreator
                 var a = parts[index - 1].Value;
                 var oper = parts.GetAndRemoveAt(index);
                 var b = parts.GetAndRemoveAt(index).Value;
-                var result = EvaluateLogical(oper.Token.Value, a, b);
-                parts[index - 1] = new ExcelFormulaValue(null, result);
+                var result = ExcelValue.CreateBoolean(oper.Token.Value, a, b);
+                parts[index - 1] = new ExcelFormulaValue(result);
                 index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, ExcelFormulaTokenSubtype.Logical);
             }
         }
-
-        private object EvaluateLogical(string oper, object a, object b)
-        {
-            if (a == null)
-                return b == null;
-            else if (b == null)
-                return false;
-            // Both not null
-            object a1, b1;
-            try
-            {
-                a1 = a;
-                b1 = Convert.ChangeType(b, a.GetType());
-            }
-            catch
-            {
-                b1 = b;
-                try
-                {
-                    a1 = Convert.ChangeType(a, b.GetType());
-                }
-                catch
-                {
-                    return NA;
-                }
-            }
-            var comparable = a1 as IComparable;
-            if (comparable == null)
-                return NA;
-
-            switch (oper)
-            {
-                case "=": return comparable.CompareTo(b1) == 0;
-                case ">": return comparable.CompareTo(b1) > 0;
-                case ">=": return comparable.CompareTo(b1) >= 0;
-                case "<": return comparable.CompareTo(b1) < 0;
-                case "<=": return comparable.CompareTo(b1) <= 0;
-                default: throw new InvalidOperationException($"Unknown logical operator: {oper}");
-            }
-        }
-
+        
         private void PerformAdditionAndSubtraction(ExcelFormulaValues parts)
         {
             var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "+", "-");
             while (index > -1)
             {
-                var a = Convert.ToDecimal(parts[index - 1].Value, culture);
+                var a = ExcelValue.Create(parts[index - 1], culture);
                 var oper = parts.GetAndRemoveAt(index);
-                var b = Convert.ToDecimal(parts.GetAndRemoveAt(index).Value, culture);
+                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
+
                 var result = oper.Token.Value == "+" ? a + b : a - b;
-                parts[index - 1] = new ExcelFormulaValue(null, result);
+
+                parts[index - 1] = new ExcelFormulaValue(result);
                 index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "+", "-");
             }
         }
@@ -275,25 +186,15 @@ namespace DocumentCreator
             var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "*", "/");
             while (index > -1)
             {
-                var a = Convert.ToDecimal(parts[index - 1].Value, culture);
+                var a = ExcelValue.Create(parts[index - 1], culture);
                 var oper = parts.GetAndRemoveAt(index);
-                var b = Convert.ToDecimal(parts.GetAndRemoveAt(index).Value, culture);
-                var result = oper.Token.Value == "*" ? PerformMultiplication(a, b) : PerformDivision(a, b);
-                parts[index - 1] = new ExcelFormulaValue(null, result);
+                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
+                var result = oper.Token.Value == "*" ? a * b : a / b;
+                parts[index - 1] = new ExcelFormulaValue(result);
                 index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "*", "/");
             }
         }
 
-        private object PerformMultiplication(decimal a, decimal b)
-        {
-            return a * b;
-        }
-        private object PerformDivision(decimal a, decimal b)
-        {
-            if (b == 0)
-                return DIV0;
-            return a / b;
-        }
 
         private void PerformNegation(ExcelFormulaValues parts)
         {
@@ -301,7 +202,7 @@ namespace DocumentCreator
             if (index > -1)
             {
                 var operand = parts.GetAndRemoveAt(index + 1);
-                parts[index] = new ExcelFormulaValue(null, -Convert.ToDecimal(operand.Value, culture));
+                parts[index] = new ExcelFormulaValue(-ExcelValue.Create(operand, culture));
             }
         }
         private void ConvertPercentages(ExcelFormulaValues parts)
@@ -311,35 +212,8 @@ namespace DocumentCreator
             {
                 parts.RemoveAt(index);
                 var operand = parts[index];
-                parts[index] = new ExcelFormulaValue(null, Convert.ToDecimal(operand.Value) / 100);
+                parts[index] = new ExcelFormulaValue(ExcelValue.Create(operand, culture)/100M);
             }
-        }
-
-        private string ConvertToString(object value)
-        {
-            if (value == null)
-                return string.Empty;
-            else if (value is JArray)
-                return "[]";
-            else if (value is JObject)
-                return "{}";
-            else if (value is bool)
-                return Convert.ToString(value).ToUpper();
-            return Convert.ToString(value, outCulture);
-        }
-
-        public class SpecialResult
-        {
-            private readonly string value;
-
-            public SpecialResult(string value)
-            {
-                this.value = value;
-            }
-            public override string ToString()
-            {
-                return value;
-            }
-        }
+        }        
     }
 }
