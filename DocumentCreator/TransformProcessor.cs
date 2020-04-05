@@ -58,9 +58,9 @@ namespace DocumentCreator
 
             try
             {
-                var parts = new ExcelFormulaValues();
-                TraverseScope(parts, tokens, sources);
-                var operand = EvaluateSimpleExpression(parts);
+                var scope = new ExcelFormulaValues();
+                TraverseScope(scope, tokens, sources);
+                var operand = EvaluateSimpleExpression(scope);
                 value = operand.Value;
                 if (value is JArray)
                     sources["#ROW#"] = ((JArray)value).FirstOrDefault();
@@ -87,7 +87,7 @@ namespace DocumentCreator
                 if (token.Subtype == ExcelFormulaTokenSubtype.Stop)
                 {
                     return;
-                }              
+                }
                 else if (token.Subtype == ExcelFormulaTokenSubtype.Start)
                 {
                     var childScope = new ExcelFormulaValues();
@@ -95,8 +95,9 @@ namespace DocumentCreator
                     switch (token.Type)
                     {
                         case ExcelFormulaTokenType.Function:
+                            var name = token.Value.ToUpper();
                             var args = EvaluateFunctionArguments(childScope);
-                            var value = EvaluateFunction(token.Value.ToUpper(), args, sources);
+                            var value = EvaluateFunction(name, args, sources);
                             scope.Add(new ExcelFormulaValue(null, value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
@@ -104,7 +105,7 @@ namespace DocumentCreator
                             scope.Add(subExp);
                             break;
                         default:
-                            throw new NotImplementedException($"TokenType={token.Type}");
+                            throw new NotImplementedException($"Start TokenType={token.Type}");
                     }
                 }
                 else
@@ -140,31 +141,31 @@ namespace DocumentCreator
         {
             switch (name)
             {
-                // EXCEL FUNCTIONS
+                // EXCEL TEXT FUNCTIONS
                 case "LEN":
                     return Convert.ToString(args[0], culture).Length;
                 case "UPPER":
-                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToUpper();
+                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToUpper(culture);
                 case "LOWER":
-                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToLower();
+                    return args[0] == null ? null : Convert.ToString(args[0], culture).ToLower(culture);
                 case "PROPER":
                     return args[0] == null ? null : culture.TextInfo.ToTitleCase(Convert.ToString(args[0], culture));
                 // EXCEL LOGICAL FUNCTIONS
-                case "IF":
-                    return Convert.ToBoolean(args[0]) ? args[1] : args[2];
                 case "AND":
                     return args.All(o => Convert.ToBoolean(o));
-                case "OR":
-                    return args.Any(o => Convert.ToBoolean(o));
-                case "XOR":
-                    return args.Aggregate((a, b) => Convert.ToBoolean(a) ^ Convert.ToBoolean(b));
-                case "NOT":
-                    return !Convert.ToBoolean(args[0]);
+                case "IF":
+                    return Convert.ToBoolean(args[0]) ? args[1] : args[2];
                 case "IFERROR":
                     return args[0] is SpecialResult ? args[1] : args[0];
                 case "IFNA":
                     return NA.Equals(args[0]) ? args[1] : args[0];
-
+                case "NOT":
+                    return !Convert.ToBoolean(args[0]);
+                case "OR":
+                    return args.Any(o => Convert.ToBoolean(o));
+                case "XOR":
+                    return args.Aggregate((a, b) => Convert.ToBoolean(a) ^ Convert.ToBoolean(b));
+                
                 case "NA":
                     return NA;
                 // CUSTOM UDF FUNCTIONS
@@ -187,7 +188,6 @@ namespace DocumentCreator
 
         private ExcelFormulaValue EvaluateSimpleExpression(ExcelFormulaValues parts)
         {
-            // Evaluate items in parentheses
             PerformNegation(parts);
             ConvertPercentages(parts);
             // Perform exponentiation (^)
