@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <AssemblyName>DocumentCreator.Tests</AssemblyName>
+
+    <RootNamespace>DocumentCreator</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -10,14 +11,15 @@ namespace DocumentCreator.ExcelFormulaParser
     /// </summary>
     public class ExcelFormula : IList<ExcelFormulaToken>
     {
-
-        string formula;
-        List<ExcelFormulaToken> tokens;
+        private readonly string formula;
+        private readonly CultureInfo culture;
+        private List<ExcelFormulaToken> tokens;
 
         private ExcelFormula() { }
 
-        public ExcelFormula(string formula)
+        public ExcelFormula(string formula, CultureInfo culture)
         {
+            this.culture = culture;
             if (formula == null) throw new ArgumentNullException("formula");
             this.formula = formula.Trim();
             tokens = new List<ExcelFormulaToken>();
@@ -577,8 +579,8 @@ namespace DocumentCreator.ExcelFormulaParser
 
                 if ((token.Type == ExcelFormulaTokenType.Operand) && (token.Subtype == ExcelFormulaTokenSubtype.Nothing))
                 {
-                    double d;
-                    bool isNumber = double.TryParse(token.Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out d);
+                    decimal d;
+                    bool isNumber = decimal.TryParse(token.Value, System.Globalization.NumberStyles.Any, culture, out d);
                     if (!isNumber)
                         if ((token.Value == "TRUE") || (token.Value == "FALSE"))
                             token.Subtype = ExcelFormulaTokenSubtype.Logical;

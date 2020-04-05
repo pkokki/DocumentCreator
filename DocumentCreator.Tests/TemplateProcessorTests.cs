@@ -3,7 +3,7 @@ using System.Linq;
 using System.IO;
 using Xunit;
 
-namespace DocumentCreator.Tests
+namespace DocumentCreator
 {
     public class TemplateProcessorTests
     {
