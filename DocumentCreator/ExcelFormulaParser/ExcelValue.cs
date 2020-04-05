@@ -36,17 +36,13 @@ namespace DocumentCreator.ExcelFormulaParser
 
         public static ExcelValue Create(ExcelFormulaToken token, CultureInfo culture)
         {
-            switch (token.Subtype)
+            return token.Subtype switch
             {
-                case ExcelFormulaTokenSubtype.Text:
-                    return new TextValue(token.Value, culture);
-                case ExcelFormulaTokenSubtype.Number:
-                    return new DecimalValue(Convert.ToDecimal(token.Value, culture), culture);
-                case ExcelFormulaTokenSubtype.Logical:
-                    return new BooleanValue(Convert.ToBoolean(token.Value, culture));
-                default:
-                    throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}");
-            }
+                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, culture),
+                ExcelFormulaTokenSubtype.Number => new DecimalValue(Convert.ToDecimal(token.Value, culture), culture),
+                ExcelFormulaTokenSubtype.Logical => new BooleanValue(Convert.ToBoolean(token.Value, culture)),
+                _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
+            };
         }
 
         public static ExcelValue Create(ExcelFormulaValue efv, CultureInfo culture)
@@ -85,19 +81,18 @@ namespace DocumentCreator.ExcelFormulaParser
                         return ErrorValue.NA;
                     }
                 }
-                var comparable = a1 as IComparable;
-                if (comparable == null)
-                    return ErrorValue.NA;
+                if (!(a1 is IComparable comparable))
+                    return NA;
 
-                switch (oper)
+                return oper switch
                 {
-                    case "=": return new BooleanValue(comparable.CompareTo(b1) == 0);
-                    case ">": return new BooleanValue(comparable.CompareTo(b1) > 0);
-                    case ">=": return new BooleanValue(comparable.CompareTo(b1) >= 0);
-                    case "<": return new BooleanValue(comparable.CompareTo(b1) < 0);
-                    case "<=": return new BooleanValue(comparable.CompareTo(b1) <= 0);
-                    default: throw new InvalidOperationException($"Unknown logical operator: {oper}");
-                }
+                    "=" => new BooleanValue(comparable.CompareTo(b1) == 0),
+                    ">" => new BooleanValue(comparable.CompareTo(b1) > 0),
+                    ">=" => new BooleanValue(comparable.CompareTo(b1) >= 0),
+                    "<" => new BooleanValue(comparable.CompareTo(b1) < 0),
+                    "<=" => new BooleanValue(comparable.CompareTo(b1) <= 0),
+                    _ => throw new InvalidOperationException($"Unknown logical operator: {oper}"),
+                };
             }
         }
 

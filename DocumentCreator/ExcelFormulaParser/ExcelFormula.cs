@@ -526,7 +526,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 if (token == null) continue;
 
                 ExcelFormulaToken previous = tokens2.Previous;
-                ExcelFormulaToken next = tokens2.Next;
+                _ = tokens2.Next;
 
                 if ((token.Type == ExcelFormulaTokenType.OperatorInfix) && (token.Value == "-"))
                 {
@@ -579,8 +579,7 @@ namespace DocumentCreator.ExcelFormulaParser
 
                 if ((token.Type == ExcelFormulaTokenType.Operand) && (token.Subtype == ExcelFormulaTokenSubtype.Nothing))
                 {
-                    decimal d;
-                    bool isNumber = decimal.TryParse(token.Value, System.Globalization.NumberStyles.Any, culture, out d);
+                    bool isNumber = decimal.TryParse(token.Value, System.Globalization.NumberStyles.Any, culture, out _);
                     if (!isNumber)
                         if ((token.Value == "TRUE") || (token.Value == "FALSE"))
                             token.Subtype = ExcelFormulaTokenSubtype.Logical;
@@ -614,7 +613,7 @@ namespace DocumentCreator.ExcelFormulaParser
         {
 
             private int index = -1;
-            private List<ExcelFormulaToken> tokens;
+            private readonly List<ExcelFormulaToken> tokens;
 
             public ExcelFormulaTokens() : this(4) { }
 
@@ -688,7 +687,7 @@ namespace DocumentCreator.ExcelFormulaParser
         internal class ExcelFormulaStack
         {
 
-            private Stack<ExcelFormulaToken> stack = new Stack<ExcelFormulaToken>();
+            private readonly Stack<ExcelFormulaToken> stack = new Stack<ExcelFormulaToken>();
 
             public ExcelFormulaStack() { }
 

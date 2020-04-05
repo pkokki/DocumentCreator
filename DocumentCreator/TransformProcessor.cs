@@ -201,7 +201,7 @@ namespace DocumentCreator
             while (index > -1)
             {
                 var a = ExcelValue.Create(parts[index - 1], culture);
-                var oper = parts.GetAndRemoveAt(index);
+                _ = parts.GetAndRemoveAt(index);
                 var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
                 var result = a ^ b;
                 parts[index - 1] = new ExcelFormulaValue(result);
@@ -234,7 +234,7 @@ namespace DocumentCreator
             while (index > -1)
             {
                 var a = ExcelValue.Create(parts[index - 1], culture);
-                var oper = parts.GetAndRemoveAt(index);
+                _ = parts.GetAndRemoveAt(index);
                 var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
                 var result = a & b;
                 parts[index - 1] = new ExcelFormulaValue(result);
