@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <None Remove="Resources\example01.json" />
+    <None Remove="Resources\example01.xlsx" />
     <None Remove="Resources\template001.001.docx" />
     <None Remove="Resources\template001.002.docx" />
   </ItemGroup>
@@ -20,6 +21,7 @@
     <Content Include="Resources\example01.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\example01.xlsx" />
     <Content Include="Resources\template001.001.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
