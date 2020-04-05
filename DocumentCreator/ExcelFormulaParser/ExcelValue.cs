@@ -27,8 +27,8 @@ namespace DocumentCreator.ExcelFormulaParser
                 case JTokenType.Object: return new JsonTextValue(token, "{}", culture);
                 case JTokenType.Array: return new JsonTextValue(token, "[]", culture);
                 case JTokenType.Boolean: return new BooleanValue((bool)token);
-                case JTokenType.Integer: 
-                case JTokenType.Float: 
+                case JTokenType.Integer:
+                case JTokenType.Float:
                     return new DecimalValue((decimal)token, culture);
                 default: return new TextValue(token.ToString(), culture);
             }
@@ -118,7 +118,7 @@ namespace DocumentCreator.ExcelFormulaParser
         #endregion
 
         #region Methods 
-        
+
         protected abstract bool? AsBoolean();
         public abstract string ToString(CultureInfo culture);
 

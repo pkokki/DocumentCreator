@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentCreator.Model
+﻿namespace DocumentCreator.Model
 {
     public class TransformResult
     {

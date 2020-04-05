@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -35,7 +34,8 @@ namespace DocumentCreator
                 }, templateFields.Select(o => o.Name).ToArray());
 
             // POST api/Templates/{templateId}/Documents
-            var document = processor.CreateDocument(template.Id, JObject.FromObject(new {
+            var document = processor.CreateDocument(template.Id, JObject.FromObject(new
+            {
                 FromAccountNumber = "22222222222222",
                 FromAccountHolder = "",
                 ToAccountNumber = "33333333333333",
@@ -65,7 +65,8 @@ namespace DocumentCreator
             // as above
 
             // POST api/Templates/{templateId}/Mappings/{name}
-            processor.UpsertMapping(template.Id, "KEO", JObject.FromObject(new {
+            processor.UpsertMapping(template.Id, "KEO", JObject.FromObject(new
+            {
                 FromAccountNumber = "F1",
                 FromAccountHolder = "F2",
                 ToAccountNumber = "F3",

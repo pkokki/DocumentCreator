@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DocumentCreator.ExcelFormulaParser;
+using DocumentCreator.Model;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using DocumentCreator.ExcelFormulaParser;
-using DocumentCreator.Model;
-using Newtonsoft.Json.Linq;
 
 namespace DocumentCreator
 {
@@ -118,7 +118,7 @@ namespace DocumentCreator
         {
             var args = new List<ExcelFormulaValue>();
             ExcelFormulaValues activeArg = null;
-            foreach(var item in scope)
+            foreach (var item in scope)
             {
                 if (item.HasToken && item.Token.Type == ExcelFormulaTokenType.Argument)
                 {
@@ -164,7 +164,7 @@ namespace DocumentCreator
                 index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, ExcelFormulaTokenSubtype.Logical);
             }
         }
-        
+
         private void PerformAdditionAndSubtraction(ExcelFormulaValues parts)
         {
             var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "+", "-");
@@ -224,7 +224,7 @@ namespace DocumentCreator
             {
                 parts.RemoveAt(index);
                 var operand = parts[index];
-                parts[index] = new ExcelFormulaValue(ExcelValue.Create(operand, culture)/100M);
+                parts[index] = new ExcelFormulaValue(ExcelValue.Create(operand, culture) / 100M);
             }
         }
 
@@ -241,6 +241,6 @@ namespace DocumentCreator
                 index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "&");
             }
         }
-        
+
     }
 }

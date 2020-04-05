@@ -1,6 +1,5 @@
-using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace DocumentCreator

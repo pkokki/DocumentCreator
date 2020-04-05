@@ -1,10 +1,7 @@
 ﻿using DocumentCreator.Model;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +28,7 @@ namespace DocumentCreator
             Assert.NotNull(response);
             Assert.NotEmpty(response.Results);
             foreach (var result in response.Results)
-                output.WriteLine(result.ToString()); 
+                output.WriteLine(result.ToString());
             Assert.True(response.Results.TrueForAll(r => r.Error == null));
         }
 
@@ -61,7 +58,7 @@ namespace DocumentCreator
 
             AssertExpression("=LEN(\"123\")/LEN(\"1234\")", "0,75");
             AssertExpression("=IF(LEN(\"123\")/LEN(\"1234\")>1, 2, 3)", "3");
-        
+
             AssertExpression("=2^3", "8");
             AssertExpression("=3^2", "9");
             AssertExpression("=2^3.1", "8,57418770029034");

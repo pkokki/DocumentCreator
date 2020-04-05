@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentCreator.ExcelFormulaParser
+﻿namespace DocumentCreator.ExcelFormulaParser
 {
     /// <summary>
     /// Source: https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html

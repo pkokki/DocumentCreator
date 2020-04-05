@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DocumentFormat.OpenXml.Office2013.Word;
+﻿using DocumentFormat.OpenXml.Office2013.Word;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Linq;
 
 namespace DocumentCreator.Model
 {
@@ -18,15 +16,16 @@ namespace DocumentCreator.Model
             var sdtProperties = source.Elements<SdtProperties>().First();
 
             this.Name = sdtProperties.Elements<SdtAlias>().FirstOrDefault()?.Val;
-            this.Name ??= sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val; 
-            
+            this.Name ??= sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val;
+
             var parent = source.Ancestors<SdtElement>().FirstOrDefault();
-            if (parent != null) {
+            if (parent != null)
+            {
                 var parentProperties = parent.Elements<SdtProperties>().First();
                 this.Parent = parentProperties.Elements<SdtAlias>().FirstOrDefault()?.Val;
                 this.Parent ??= parentProperties.Elements<SdtId>().FirstOrDefault()?.Val;
             }
-            
+
             this.Type = source.GetType().Name;
             this.IsCollection = sdtProperties.Elements<SdtRepeatedSectionItem>().Any();
         }

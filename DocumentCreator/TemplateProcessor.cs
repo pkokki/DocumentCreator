@@ -51,7 +51,7 @@ namespace DocumentCreator
             var template = templates.First(o => o.Id == templateId);
             templates.Remove(template);
         }
-        
+
 
 
 
@@ -95,10 +95,10 @@ namespace DocumentCreator
         {
             using var ms = new MemoryStream(buffer);
             using var doc = WordprocessingDocument.Open(ms, false);
-            
+
             var x = doc.MainDocumentPart.Document.Body.Descendants<SdtElement>();
             var y = x.Select(o => o.GetType().Name);
-            
+
             return doc.MainDocumentPart.Document.Body
                 .Descendants<SdtElement>()
                 .Select(e => new TemplateField(e))
@@ -149,7 +149,7 @@ namespace DocumentCreator
         {
             var template = templates.First(o => o.Id == templateId);
             var mapping = template.TemplateMappings.First(o => o.Name == mappingName);
-            return CreateDocument(templateId, payload, 
+            return CreateDocument(templateId, payload,
                 sv => mapping.Transformations.First(t => t.Key == sv).Value.ToString());
         }
         private TemplateDocument CreateDocument(long templateId, JObject payload, Func<StringValue, string> transformer)

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace DocumentCreator.ExcelFormulaParser
 {
@@ -11,7 +9,7 @@ namespace DocumentCreator.ExcelFormulaParser
         private readonly CultureInfo culture;
         private ExcelValue value;
 
-        public ExcelFormulaValue(ExcelFormulaToken token, CultureInfo culture) 
+        public ExcelFormulaValue(ExcelFormulaToken token, CultureInfo culture)
         {
             this.token = token;
             this.culture = culture;

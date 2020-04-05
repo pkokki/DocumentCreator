@@ -1,12 +1,11 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace DocumentCreator.ExcelFormula
 {
     public class Text : BaseTest
     {
-        public Text(ITestOutputHelper output) : base(output) {}
+        public Text(ITestOutputHelper output) : base(output) { }
 
         [Fact(Skip = "NotImplemented")] public void ASC() { /* Changes full-width (double-byte) English letters or katakana within a character string to half-width (single-byte) characters */ }
         [Fact(Skip = "NotImplemented")] public void BAHTTEXT() { /* Converts a number to text, using the ß (baht) currency format */ }
@@ -70,7 +69,8 @@ namespace DocumentCreator.ExcelFormula
         [Fact(Skip = "NotImplemented")] public void TRIM() { /* Removes spaces from text */ }
         [Fact(Skip = "NotImplemented")] public void UNICHAR() { /* Returns the Unicode character that is references by the given numeric value */ }
         [Fact(Skip = "NotImplemented")] public void UNICODE() { /* Returns the number (code point) that corresponds to the first character of the text */ }
-        [Fact] public void UPPER() 
+        [Fact]
+        public void UPPER()
         {
             /* Converts text to uppercase */
             AssertExpression("=UPPER(\"abc\")", "ABC");
@@ -78,7 +78,7 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=UPPER(\"ΑΒΓ\")", "ΑΒΓ");
             AssertExpression("=UPPER(\"αβγ\")", "ΑΒΓ");
             AssertExpression("=UPPER(\"Πάνος\")", "ΠΑΝΟΣ");
-        } 
+        }
         [Fact(Skip = "NotImplemented")] public void VALUE() { /* Converts a text argument to a number */ }
 
     }

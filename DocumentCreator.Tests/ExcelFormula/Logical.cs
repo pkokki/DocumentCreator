@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace DocumentCreator.ExcelFormula
 {
     public class Logical : BaseTest
     {
-        public Logical(ITestOutputHelper output) : base(output) {}
+        public Logical(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public void TRUE()
