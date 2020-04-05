@@ -139,10 +139,10 @@ namespace DocumentCreator
         {
             PerformNegation(parts);
             ConvertPercentages(parts);
-            // Perform exponentiation (^)
+            PerformExponentiation(parts);
             PerformMultiplicationAndDivision(parts);
             PerformAdditionAndSubtraction(parts);
-            // Evaluate text operators (&)
+            EvaluateTextOperators(parts);
             PerformComparisons(parts);
 
             var value = parts.Single().Value;
@@ -195,7 +195,19 @@ namespace DocumentCreator
             }
         }
 
-
+        private void PerformExponentiation(ExcelFormulaValues parts)
+        {
+            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "^");
+            while (index > -1)
+            {
+                var a = ExcelValue.Create(parts[index - 1], culture);
+                var oper = parts.GetAndRemoveAt(index);
+                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
+                var result = a ^ b;
+                parts[index - 1] = new ExcelFormulaValue(result);
+                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "^");
+            }
+        }
         private void PerformNegation(ExcelFormulaValues parts)
         {
             var index = parts.IndexOf(ExcelFormulaTokenType.OperatorPrefix, "-");
@@ -214,6 +226,21 @@ namespace DocumentCreator
                 var operand = parts[index];
                 parts[index] = new ExcelFormulaValue(ExcelValue.Create(operand, culture)/100M);
             }
-        }        
+        }
+
+        private void EvaluateTextOperators(ExcelFormulaValues parts)
+        {
+            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "&");
+            while (index > -1)
+            {
+                var a = ExcelValue.Create(parts[index - 1], culture);
+                var oper = parts.GetAndRemoveAt(index);
+                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
+                var result = a & b;
+                parts[index - 1] = new ExcelFormulaValue(result);
+                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "&");
+            }
+        }
+        
     }
 }

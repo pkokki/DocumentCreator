@@ -61,13 +61,17 @@ namespace DocumentCreator
 
             AssertExpression("=LEN(\"123\")/LEN(\"1234\")", "0,75");
             AssertExpression("=IF(LEN(\"123\")/LEN(\"1234\")>1, 2, 3)", "3");
+        
+            AssertExpression("=2^3", "8");
+            AssertExpression("=3^2", "9");
+            AssertExpression("=2^3.1", "8,57418770029034");
         }
 
         private void AssertExpression(string expression, string expected)
         {
             TransformResult result = processor.Evaluate(0, expression, null);
             Assert.Null(result.Error);
-            Assert.True(expected.Equals(result.Value, StringComparison.InvariantCulture), $"{result.Value} != {expected}");
+            Assert.True(expected.Equals(result.Value), $"{result.Value} != {expected}");
         }
     }
 }

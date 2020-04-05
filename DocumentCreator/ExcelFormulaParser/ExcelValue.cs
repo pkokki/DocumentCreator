@@ -212,7 +212,16 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             return new DecimalValue(-Convert.ToDecimal(a.InnerValue), a.Culture);
         }
-
+        public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
+        {
+            var value = Convert.ToDecimal(Math.Pow(Convert.ToDouble(a.InnerValue), Convert.ToDouble(b.InnerValue)));
+            return new DecimalValue(value, a.Culture);
+        }
+        public static ExcelValue operator &(ExcelValue a, ExcelValue b)
+        {
+            var value = Convert.ToString(a.InnerValue) + Convert.ToString(b.InnerValue);
+            return new TextValue(value, a.Culture);
+        }
         #endregion
 
         #region Functions
@@ -225,15 +234,15 @@ namespace DocumentCreator.ExcelFormulaParser
                 case "LEN":
                     if (args[0] == NA) return NA;
                     return new DecimalValue(args[0].Text.Length, culture);
-                case "UPPER":
-                    if (args[0] == NA) return NA;
-                    return new TextValue(args[0].Text.ToUpper(culture), culture);
                 case "LOWER":
                     if (args[0] == NA) return NA;
                     return new TextValue(args[0].Text.ToLower(culture), culture);
                 case "PROPER":
                     if (args[0] == NA) return NA;
                     return new TextValue(culture.TextInfo.ToTitleCase(args[0].Text), culture);
+                case "UPPER":
+                    if (args[0] == NA) return NA;
+                    return new TextValue(args[0].Text.ToUpper(culture), culture);
 
                 // EXCEL LOGICAL FUNCTIONS
                 case "AND":
