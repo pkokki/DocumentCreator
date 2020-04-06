@@ -45,19 +45,19 @@ namespace DocumentCreator
             return response;
         }
 
-        public TransformResult Evaluate(long targetId, string expression, Dictionary<string, JToken> sources)
+        public TransformResult Evaluate(long targetId, string formula, Dictionary<string, JToken> sources)
         {
             string error = null;
             ExcelValue value = null;
 
-            var excelFormula = new ExcelFormula(expression, culture);
+            var excelFormula = new ExcelFormula(formula, culture);
             var tokens = new Queue<ExcelFormulaToken>(excelFormula.OfType<ExcelFormulaToken>());
 
             try
             {
-                var scope = new ExcelFormulaValues();
-                TraverseScope(scope, tokens, sources);
-                var operand = EvaluateSimpleExpression(scope);
+                var expression = new ExcelExpression();
+                TraverseExpression(expression, tokens, sources);
+                var operand = expression.Evaluate();
                 value = operand.Value;
                 if (value.InnerValue is JArray)
                     sources["#ROW#"] = ((JArray)value.InnerValue).FirstOrDefault();
@@ -70,13 +70,13 @@ namespace DocumentCreator
             return new TransformResult()
             {
                 TargetId = targetId,
-                Expression = expression,
+                Expression = formula,
                 Value = value?.ToString(outCulture),
                 Error = error
             };
         }
 
-        private void TraverseScope(ExcelFormulaValues scope, Queue<ExcelFormulaToken> tokens, Dictionary<string, JToken> sources)
+        private void TraverseExpression(ExcelExpression expression, Queue<ExcelFormulaToken> tokens, Dictionary<string, JToken> sources)
         {
             while (tokens.Any())
             {
@@ -87,21 +87,21 @@ namespace DocumentCreator
                 }
                 else if (token.Subtype == ExcelFormulaTokenSubtype.Start)
                 {
-                    var childScope = new ExcelFormulaValues();
-                    TraverseScope(childScope, tokens, sources);
+                    var childExpression = new ExcelExpression();
+                    TraverseExpression(childExpression, tokens, sources);
                     switch (token.Type)
                     {
                         case ExcelFormulaTokenType.Function:
                             var name = token.Value.ToUpper();
-                            var args = EvaluateFunctionArguments(childScope)
-                                .Select(o => ExcelValue.Create(o, culture))
+                            var args = EvaluateFunctionArguments(childExpression)
+                                .Select(o => o.Value)
                                 .ToList();
                             var value = ExcelValue.EvaluateFunction(name, args, culture, sources);
-                            scope.Add(new ExcelFormulaValue(value));
+                            expression.Add(new ExcelExpressionPart(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
-                            var subExp = EvaluateSimpleExpression(childScope);
-                            scope.Add(subExp);
+                            var subExpression = childExpression.Evaluate();
+                            expression.Add(subExpression);
                             break;
                         default:
                             throw new NotImplementedException($"Start TokenType={token.Type}");
@@ -109,138 +109,30 @@ namespace DocumentCreator
                 }
                 else
                 {
-                    scope.Add(new ExcelFormulaValue(token, culture));
+                    expression.Add(new ExcelExpressionPart(token, culture));
                 }
             }
         }
 
-        private IEnumerable<ExcelFormulaValue> EvaluateFunctionArguments(ExcelFormulaValues scope)
+        private IEnumerable<ExcelExpressionPart> EvaluateFunctionArguments(ExcelExpression expression)
         {
-            var args = new List<ExcelFormulaValue>();
-            ExcelFormulaValues activeArg = null;
-            foreach (var item in scope)
+            var args = new List<ExcelExpressionPart>();
+            ExcelExpression activeArg = null;
+            foreach (var item in expression)
             {
-                if (item.HasToken && item.Token.Type == ExcelFormulaTokenType.Argument)
+                if (item.TokenType == ExcelFormulaTokenType.Argument)
                 {
-                    args.Add(EvaluateSimpleExpression(activeArg));
+                    args.Add(activeArg.Evaluate());
                     activeArg = null;
                 }
                 else
                 {
-                    activeArg ??= new ExcelFormulaValues();
+                    activeArg ??= new ExcelExpression();
                     activeArg.Add(item);
                 }
             }
-            if (activeArg != null) args.Add(EvaluateSimpleExpression(activeArg));
+            if (activeArg != null) args.Add(activeArg.Evaluate());
             return args;
         }
-
-        private ExcelFormulaValue EvaluateSimpleExpression(ExcelFormulaValues parts)
-        {
-            PerformNegation(parts);
-            ConvertPercentages(parts);
-            PerformExponentiation(parts);
-            PerformMultiplicationAndDivision(parts);
-            PerformAdditionAndSubtraction(parts);
-            EvaluateTextOperators(parts);
-            PerformComparisons(parts);
-
-            var value = parts.Single().Value;
-            //if (value is string && decimal.TryParse((string)value, NumberStyles.Any, culture, out decimal d))
-            //    value = d;
-            return new ExcelFormulaValue(value);
-        }
-
-        private void PerformComparisons(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, ExcelFormulaTokenSubtype.Logical);
-            while (index > -1)
-            {
-                var a = parts[index - 1].Value;
-                var oper = parts.GetAndRemoveAt(index);
-                var b = parts.GetAndRemoveAt(index).Value;
-                var result = ExcelValue.CreateBoolean(oper.Token.Value, a, b);
-                parts[index - 1] = new ExcelFormulaValue(result);
-                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, ExcelFormulaTokenSubtype.Logical);
-            }
-        }
-
-        private void PerformAdditionAndSubtraction(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "+", "-");
-            while (index > -1)
-            {
-                var a = ExcelValue.Create(parts[index - 1], culture);
-                var oper = parts.GetAndRemoveAt(index);
-                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
-
-                var result = oper.Token.Value == "+" ? a + b : a - b;
-
-                parts[index - 1] = new ExcelFormulaValue(result);
-                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "+", "-");
-            }
-        }
-
-        private void PerformMultiplicationAndDivision(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "*", "/");
-            while (index > -1)
-            {
-                var a = ExcelValue.Create(parts[index - 1], culture);
-                var oper = parts.GetAndRemoveAt(index);
-                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
-                var result = oper.Token.Value == "*" ? a * b : a / b;
-                parts[index - 1] = new ExcelFormulaValue(result);
-                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "*", "/");
-            }
-        }
-
-        private void PerformExponentiation(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "^");
-            while (index > -1)
-            {
-                var a = ExcelValue.Create(parts[index - 1], culture);
-                _ = parts.GetAndRemoveAt(index);
-                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
-                var result = a ^ b;
-                parts[index - 1] = new ExcelFormulaValue(result);
-                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "^");
-            }
-        }
-        private void PerformNegation(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorPrefix, "-");
-            if (index > -1)
-            {
-                var operand = parts.GetAndRemoveAt(index + 1);
-                parts[index] = new ExcelFormulaValue(-ExcelValue.Create(operand, culture));
-            }
-        }
-        private void ConvertPercentages(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorPostfix, "%");
-            if (index > -1)
-            {
-                parts.RemoveAt(index);
-                var operand = parts[index];
-                parts[index] = new ExcelFormulaValue(ExcelValue.Create(operand, culture) / 100M);
-            }
-        }
-
-        private void EvaluateTextOperators(ExcelFormulaValues parts)
-        {
-            var index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "&");
-            while (index > -1)
-            {
-                var a = ExcelValue.Create(parts[index - 1], culture);
-                _ = parts.GetAndRemoveAt(index);
-                var b = ExcelValue.Create(parts.GetAndRemoveAt(index), culture);
-                var result = a & b;
-                parts[index - 1] = new ExcelFormulaValue(result);
-                index = parts.IndexOf(ExcelFormulaTokenType.OperatorInfix, "&");
-            }
-        }
-
     }
 }

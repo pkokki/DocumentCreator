@@ -45,13 +45,6 @@ namespace DocumentCreator.ExcelFormulaParser
             };
         }
 
-        public static ExcelValue Create(ExcelFormulaValue efv, CultureInfo culture)
-        {
-            if (efv.HasValue)
-                return efv.Value;
-            return Create(efv.Token, culture);
-        }
-
         public static ExcelValue CreateBoolean(string oper, ExcelValue v1, ExcelValue v2)
         {
             var a = v1.InnerValue;
