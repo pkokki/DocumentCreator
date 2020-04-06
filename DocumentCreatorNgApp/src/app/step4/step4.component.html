@@ -1,0 +1,8 @@
+<div>Send a JSON request to create a new document based on template and mappings</div>
+<div>POST to: <span [hidden]="!templateName || !mappingName">{{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}/document</span></div>
+<div>
+    <textarea [(ngModel)]="payload.body" placeholder="json payload" style="font-size: 11px; width: 100%;min-height: 100px;">
+    </textarea>
+</div>
+
+<button (click)="submit()">Submit</button>
