@@ -105,6 +105,15 @@ namespace DocumentCreator
                 .ToList();
         }
 
+        public byte[] CreateMappingsForTemplate(byte[] templateBytes)
+        {
+            throw new NotImplementedException();
+        }
+        public byte[] CreateDocument(byte[] mappingBytes, JObject payload)
+        {
+            throw new NotImplementedException();
+        }
+
 
 
         // GET api/Templates/{templateId}/Mappings

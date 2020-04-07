@@ -9,5 +9,5 @@ export class AppComponent {
   title = 'DocumentCreatorNgApp';
   templateName: string;
   mappingName: string;
-  apiUrl = "http://localhost:43456/api";
+  apiUrl = "https://localhost:44381/api";
 }
