@@ -148,8 +148,8 @@ namespace DocumentCreatorAPI.Controllers
             var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
 
             var sources = new Dictionary<string, JToken>();
-            foreach (JObject src in (JArray)payload["sources"])
-                sources[src["name"].ToString()] = src["value"];
+            foreach (JToken src in (JArray)payload["sources"])
+                sources[src["name"].ToString()] = JObject.Parse(src["value"].ToString());
 
             var results = new JArray();
             var total = 0;
@@ -157,7 +157,7 @@ namespace DocumentCreatorAPI.Controllers
             foreach (var mapping in (JArray)payload["transformations"])
             {
                 var expression = mapping["expression"].ToString();
-                var result = processor.Evaluate(0, expression, null);
+                var result = processor.Evaluate(0, expression, sources);
 
                 var json = new JObject();
                 json["targetId"] = mapping["targetId"];
