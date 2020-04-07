@@ -17,6 +17,7 @@ namespace DocumentCreator.Model
 
             this.Name = sdtProperties.Elements<SdtAlias>().FirstOrDefault()?.Val;
             this.Name ??= sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val;
+            this.Content = source.Elements<SdtContentBlock>().FirstOrDefault()?.InnerText;
 
             var parent = source.Ancestors<SdtElement>().FirstOrDefault();
             if (parent != null)
@@ -26,11 +27,13 @@ namespace DocumentCreator.Model
                 this.Parent ??= parentProperties.Elements<SdtId>().FirstOrDefault()?.Val;
             }
 
+
             this.Type = source.GetType().Name;
             this.IsCollection = sdtProperties.Elements<SdtRepeatedSectionItem>().Any();
         }
 
         public string Name { get; }
+        public string Content { get; }
         public bool IsCollection { get; }
         public string Parent { get; }
         public string Type { get; }

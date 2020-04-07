@@ -8,5 +8,9 @@
     <ProjectReference Include="..\DocumentCreator\DocumentCreator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 
 </Project>

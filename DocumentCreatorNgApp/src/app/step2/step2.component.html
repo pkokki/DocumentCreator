@@ -1,3 +1,9 @@
 <div>Ask DocumentCreator to download an Excel workbook for mappings definition:</div>
 
-<div>Download link: <a [hidden]="!templateName" href="{{apiUrl}}/templates/{{templateName}}/mappings" target="_blank">{{apiUrl}}/templates/{{templateName}}/mappings</a></div>
+<div>Download link: 
+    <a [hidden]="!templateName || !mappingName" 
+        href="{{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}" 
+        target="_blank">
+        {{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}
+    </a>
+</div>

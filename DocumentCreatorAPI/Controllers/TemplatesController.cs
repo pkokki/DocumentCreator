@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using DocumentCreator;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace DocumentCreatorAPI.Controllers
@@ -16,11 +13,9 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class TemplatesController : ControllerBase
     {
-        private readonly ILogger<TemplatesController> logger;
         private readonly IWebHostEnvironment hostEnv;
-        public TemplatesController(ILogger<TemplatesController> logger, IWebHostEnvironment hostEnv)
+        public TemplatesController(IWebHostEnvironment hostEnv)
         {
-            this.logger = logger;
             this.hostEnv = hostEnv;
         }
 
@@ -50,22 +45,45 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        [Route("{templateName}/mappings")]
-        public IActionResult GetTemplateEmptyMappings([FromRoute]string templateName)
+        [Route("{templateName}/mappings/{mappingsName}")]
+        public IActionResult GetTemplateMappings([FromRoute]string templateName, [FromRoute]string mappingsName)
         {
-            var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
-            var templateFiles = Directory.GetFiles(folder, $"{templateName}_*.docx").OrderByDescending(o => o);
-            if (templateFiles.Any())
+            var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
+            var latestTemplateFileName = Directory
+                .GetFiles(templatesFolder, $"{templateName}_*.docx")
+                .OrderByDescending(o => o)
+                .FirstOrDefault();
+            if (latestTemplateFileName != null)
             {
-                var processor = new TemplateProcessor();
-                var templateBytes = System.IO.File.ReadAllBytes(templateFiles.First());
-                var excelBytes = processor.CreateMappingsForTemplate(templateBytes);
-
-                var excelFileName = $"{templateName}.xlsm";
-                var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
-                return new FileContentResult(excelBytes, contentType)
+                var mappingsFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
+                var latestMappingsFileName = Directory
+                    .GetFiles(mappingsFolder, $"{Path.GetFileNameWithoutExtension(latestTemplateFileName)}_{mappingsName}_*.xlsm")
+                    .OrderByDescending(o => o)
+                    .FirstOrDefault();
+                
+                byte[] mappingsBuffer;
+                string mappingsFileName;
+                if (latestMappingsFileName != null)
                 {
-                    FileDownloadName = excelFileName
+                    mappingsBuffer = System.IO.File.ReadAllBytes(latestMappingsFileName);
+                    mappingsFileName = Path.GetFileName(latestMappingsFileName);
+                }
+                else
+                {
+                    var emptyMappingsPath = Path.Combine(hostEnv.ContentRootPath, "resources", "empty_mappings.xlsm");
+                    var templateBytes = System.IO.File.ReadAllBytes(latestTemplateFileName);
+
+                    var processor = new TemplateProcessor();
+                    var testUrl = $"{Request.Scheme}://{Request.Host}/api/templates/{templateName}/mappings/{mappingsName}/test";
+                    mappingsBuffer = processor.CreateMappingsForTemplate(emptyMappingsPath, mappingsName, testUrl, templateBytes);
+                    mappingsFileName = $"{Path.GetFileNameWithoutExtension(latestTemplateFileName)}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
+
+                    System.IO.File.WriteAllBytes(Path.Combine(mappingsFolder, mappingsFileName), mappingsBuffer);
+                }
+                var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
+                return new FileContentResult(mappingsBuffer, contentType)
+                {
+                    FileDownloadName = mappingsFileName
                 };
             }
             else
@@ -75,7 +93,7 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost, DisableRequestSizeLimit]
-        [Route("{templateName}/mappings")]
+        [Route("{templateName}/mappings/{mappingsName}")]
         public IActionResult CreateTemplateMappings([FromRoute]string templateName, [FromRoute]string mappingsName)
         {
             var formFile = Request.Form.Files[0];

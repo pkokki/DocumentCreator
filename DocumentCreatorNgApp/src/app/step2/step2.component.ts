@@ -7,6 +7,7 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class Step2Component implements OnInit {
   @Input() templateName: string;
+  @Input() mappingName: string;
   @Input() apiUrl: string;
   constructor() { }
 

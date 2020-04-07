@@ -1,7 +1,6 @@
 ﻿using DocumentCreator.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -95,20 +94,26 @@ namespace DocumentCreator
         {
             using var ms = new MemoryStream(buffer);
             using var doc = WordprocessingDocument.Open(ms, false);
-
-            var x = doc.MainDocumentPart.Document.Body.Descendants<SdtElement>();
-            var y = x.Select(o => o.GetType().Name);
-
-            return doc.MainDocumentPart.Document.Body
-                .Descendants<SdtElement>()
-                .Select(e => new TemplateField(e))
-                .ToList();
+            return OpenXmlWordProcessing.GetTemplateFields(doc);
         }
 
-        public byte[] CreateMappingsForTemplate(byte[] templateBytes)
+        public byte[] CreateMappingsForTemplate(string emptyMappingsPath, string mappingsName, string testUrl, byte[] templateBytes)
         {
-            throw new NotImplementedException();
+            using var ms = new MemoryStream(templateBytes);
+            using var templateDoc = WordprocessingDocument.Open(ms, false);
+            var templateFields = OpenXmlWordProcessing.GetTemplateFields(templateDoc);
+
+            var emptyBytes = File.ReadAllBytes(emptyMappingsPath);
+            using var mappingsStream = new MemoryStream();
+            mappingsStream.Write(emptyBytes, 0, emptyBytes.Length);
+            using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
+            {
+                OpenXmlSpreadsheet.FillMappingsSheet(mappingsDoc, mappingsName, templateFields, testUrl);
+            }
+            var excelBytes = mappingsStream.ToArray();
+            return excelBytes;
         }
+
         public byte[] CreateDocument(byte[] mappingBytes, JObject payload)
         {
             throw new NotImplementedException();
@@ -168,18 +173,7 @@ namespace DocumentCreator
             using var ms = new MemoryStream(templateBuffer);
             using (var doc = WordprocessingDocument.Open(ms, true))
             {
-                var fields = doc.MainDocumentPart.Document.Body
-                    .Descendants<SdtRun>()
-                    .Select(e => Tuple.Create(e, e.Descendants<SdtAlias>().FirstOrDefault().Val));
-                foreach (var field in fields)
-                {
-                    var value = payload.GetValue(transformer(field.Item2))?.ToString() ?? string.Empty;
-                    field.Item1
-                        .Descendants<SdtContentRun>().FirstOrDefault()
-                        .Descendants<Run>().FirstOrDefault()
-                        .Descendants<Text>().FirstOrDefault()
-                        .Text = value;
-                }
+                OpenXmlWordProcessing.CreateDocument(doc, payload, transformer);
             }
             var documentBuffer = ms.ToArray();
             var templateDocument = template.AddDocument(documentBuffer);
