@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using DocumentCreator;
@@ -121,10 +122,10 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var mappingInfo = new FileInfo(mappingFiles.First());
                 var mappingBytes = System.IO.File.ReadAllBytes(mappingInfo.FullName);
-                
+
                 var processor = new TemplateProcessor();
                 var documentBytes = processor.CreateDocument(mappingBytes, payload);
-                
+
                 var documentFileName = $"{mappingInfo.Name}_{DateTime.Now.Ticks}.docx";
                 System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
 
@@ -138,6 +139,39 @@ namespace DocumentCreatorAPI.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPost]
+        [Route("{templateName}/mappings/{mappingsName}/test")]
+        public IActionResult TestMappings([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
+        {
+            var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
+
+            var sources = new Dictionary<string, JToken>();
+            foreach (JObject src in (JArray)payload["sources"])
+                sources[src["name"].ToString()] = src["value"];
+
+            var results = new JArray();
+            var total = 0;
+            var errors = 0;
+            foreach (var mapping in (JArray)payload["transformations"])
+            {
+                var expression = mapping["expression"].ToString();
+                var result = processor.Evaluate(0, expression, null);
+
+                var json = new JObject();
+                json["targetId"] = mapping["targetId"];
+                json["expression"] = mapping["expression"];
+                json["result"] = result.Value;
+                ++total;
+                if (result.Error != null)
+                {
+                    ++errors;
+                    json["error"] = result.Error;
+                }
+                results.Add(json);
+            }
+            return Ok(JObject.FromObject(new { total, errors, results }));
         }
     }
 }
