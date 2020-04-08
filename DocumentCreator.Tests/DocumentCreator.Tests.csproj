@@ -13,6 +13,9 @@
   <ItemGroup>
     <None Remove="Resources\example01.json" />
     <None Remove="Resources\example01.xlsx" />
+    <None Remove="Resources\T01_637218725708848542.docx" />
+    <None Remove="Resources\T01_637218725708848542.json" />
+    <None Remove="Resources\T01_637218725708848542_M01_637218774956694571.xlsm" />
     <None Remove="Resources\template001.001.docx" />
     <None Remove="Resources\template001.002.docx" />
   </ItemGroup>
@@ -22,6 +25,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\example01.xlsx" />
+    <Content Include="Resources\T01_637218725708848542.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\T01_637218725708848542.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\T01_637218725708848542_M01_637218774956694571.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\template001.001.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

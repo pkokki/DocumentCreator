@@ -41,11 +41,12 @@ namespace DocumentCreator
                 UpdateCellFormula(worksheet, rowIndex, "J", "NA()");
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "K", string.Empty);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "L", string.Empty);
-                UpdateCellFormula(worksheet, rowIndex, "M", $"IF(J{rowIndex}=K{rowIndex},1,0)");
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "M", string.Empty);
+                UpdateCellFormula(worksheet, rowIndex, "N", $"IF(J{rowIndex}=K{rowIndex},1,0)");
                 ++rowIndex;
                 ++fieldId;
             }
-            UpdateCellText(stringTablePart, worksheet, 17, "P", testUrl);
+            UpdateCellText(stringTablePart, worksheet, 17, "Q", testUrl);
         }
 
         private static SharedStringTablePart GetSharedStringTablePart(SpreadsheetDocument doc)
@@ -100,6 +101,7 @@ namespace DocumentCreator
             cell.CellValue = new CellValue(value);
             cell.DataType = new EnumValue<CellValues>(valueType);
         }
+
         public static void UpdateCellFormula(Worksheet worksheet, uint rowIndex, string columnName, string text)
         {
             var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
@@ -144,6 +146,44 @@ namespace DocumentCreator
                     row.InsertBefore(targetCell, queryCell);
                 return targetCell;
             }
+        }
+
+        public static IEnumerable<Transformation> GetTransformations(SpreadsheetDocument doc)
+        {
+            var transformations = new List<Transformation>();
+            var worksheet = GetFirstWorkSheet(doc);
+            var stringTablePart = GetSharedStringTablePart(doc);
+            var rowIndex = 3U;
+            var name = string.Empty;
+            var expr = string.Empty;
+            do
+            {
+                name = string.Empty;
+                var nameAddress = $"B{rowIndex}";
+                var exprAddress = $"J{rowIndex}";
+                var nameCell = worksheet.Descendants<Cell>().
+                    Where(c => c.CellReference == nameAddress).FirstOrDefault();
+                if (nameCell != null)
+                {
+                    var cellValue = nameCell.InnerText;
+                    if (nameCell.DataType != null && nameCell.DataType.Value == CellValues.SharedString)
+                        name = stringTablePart.SharedStringTable.ElementAt(int.Parse(cellValue)).InnerText;
+                    var exprCell = worksheet.Descendants<Cell>().
+                        Where(c => c.CellReference == exprAddress).FirstOrDefault();
+                    if (exprCell != null)
+                        expr = exprCell.CellFormula.InnerText;
+                    if (name != null)
+                    {
+                        transformations.Add(new Transformation()
+                        {
+                            Name = name,
+                            Expression = expr
+                        });
+                    }
+                    ++rowIndex;
+                }
+            } while (name != string.Empty);
+            return transformations;
         }
     }
 }

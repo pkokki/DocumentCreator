@@ -60,5 +60,10 @@ namespace DocumentCreator
                     .Text = value;
             }
         }
+
+        public static void ReplaceContentControl(WordprocessingDocument doc, string name, string text)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

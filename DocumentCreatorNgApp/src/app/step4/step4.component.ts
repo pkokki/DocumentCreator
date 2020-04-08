@@ -3,6 +3,7 @@ import { State } from '../services/state/state.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap, catchError } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-step4',
@@ -11,7 +12,7 @@ import { Observable, of } from 'rxjs';
 })
 export class Step4Component implements OnInit {
   
-  constructor(public state: State, private http: HttpClient) { }
+  constructor(public state: State, private http: HttpClient, private sanitizer: DomSanitizer) { }
 
   submitError;
   submitResponse;
@@ -33,6 +34,7 @@ export class Step4Component implements OnInit {
     this.http.post(url, body, { headers: httpHeaders, responseType: 'arraybuffer' }).subscribe(
       response => {
         this.uploading = false;
+        console.log('response', response);
         this.downLoadFile(response, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       },
       err => { 
@@ -45,10 +47,16 @@ export class Step4Component implements OnInit {
 
   private downLoadFile(data: any, type: string) {
     let blob = new Blob([data], { type: type});
+    //let url = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
     let url = window.URL.createObjectURL(blob);
-    let pwa = window.open(url);
-    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
-        alert( 'Please disable your Pop-up blocker and try again.');
-    }
+    console.log('URL', url);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "xxxx.docx";
+    a.click();
+    //let pwa = window.open(url, '_blank');
+    //if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+    //    window.alert( 'Please disable your Pop-up blocker and try again.');
+    //}
   }
 }

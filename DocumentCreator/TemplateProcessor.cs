@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Packaging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -114,9 +115,45 @@ namespace DocumentCreator
             return excelBytes;
         }
 
-        public byte[] CreateDocument(byte[] mappingBytes, JObject payload)
+        public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
-            throw new NotImplementedException();
+            var transformations = Transform(templateBytes, mappingBytes, payload);
+
+            using var ms = new MemoryStream(templateBytes);
+            using (var doc = WordprocessingDocument.Open(ms, true))
+            {
+                foreach (var transformation in transformations)
+                {
+                    var text = transformation.Result.Error ?? transformation.Result.Value;
+                    OpenXmlWordProcessing.ReplaceContentControl(doc, transformation.Name, text);
+                }
+            }
+            var documentBytes = ms.ToArray();
+            return documentBytes;
+        }
+        public IEnumerable<Transformation> Transform(byte[] templateBytes, byte[] mappingBytes, JObject payload)
+        {
+            var sources = new Dictionary<string, JToken>();
+            sources.Add("RQ", payload);
+
+            using var mappingsStream = new MemoryStream(mappingBytes);
+            using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
+            var transformations = OpenXmlSpreadsheet.GetTransformations(mappingsDoc);
+
+            using var ms = new MemoryStream(templateBytes);
+            using var doc = WordprocessingDocument.Open(ms, false);
+            var templateFields = OpenXmlWordProcessing.GetTemplateFields(doc);
+
+            var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
+            foreach (var templateField in templateFields)
+            {
+                var transformation = transformations.FirstOrDefault(m => m.Name == templateField.Name);
+                if (transformation != null)
+                {
+                    transformation.Result = processor.Evaluate(0, transformation.Expression, sources);
+                }
+            }
+            return transformations;
         }
 
 

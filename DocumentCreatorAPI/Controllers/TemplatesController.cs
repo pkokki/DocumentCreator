@@ -102,15 +102,24 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-                // TODO: Find the real templateName
-                var fileName = $"{templateName}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
-                var fullFileName = Path.Combine(folder, fileName);
-                using var stream = new FileStream(fullFileName, FileMode.Create);
-                formFile.CopyTo(stream);
-                return Ok();
+                var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
+                var latestTemplateFileName = Directory
+                    .GetFiles(templatesFolder, $"{templateName}_*.docx")
+                    .OrderByDescending(o => o)
+                    .FirstOrDefault();
+                if (latestTemplateFileName != null)
+                {
+                    var templateVersion = Path.GetFileNameWithoutExtension(latestTemplateFileName);
+                    var fileName = $"{templateVersion}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
+                    
+                    var fullFileName = Path.Combine(folder, fileName);
+                    using var stream = new FileStream(fullFileName, FileMode.Create);
+                    formFile.CopyTo(stream);
+                    return Ok();
+                }
+                return NotFound();
             }
-            else
-                return BadRequest();
+            return BadRequest();
         }
 
         [HttpPost]
@@ -130,29 +139,35 @@ namespace DocumentCreatorAPI.Controllers
 
         private IActionResult CreateDocument(string templateName, string mappingsName, JObject payload)
         {
-            var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
-            var mappingFiles = Directory.GetFiles(folder, $"{templateName}*_{mappingsName}_*.xlsm").OrderByDescending(o => o);
-            if (mappingFiles.Any())
+            var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
+            var latestTemplateFileName = Directory
+                .GetFiles(templatesFolder, $"{templateName}_*.docx")
+                .OrderByDescending(o => o)
+                .FirstOrDefault();
+            if (latestTemplateFileName != null)
             {
-                var mappingInfo = new FileInfo(mappingFiles.First());
-                var mappingBytes = System.IO.File.ReadAllBytes(mappingInfo.FullName);
-
-                var processor = new TemplateProcessor();
-                var documentBytes = processor.CreateDocument(mappingBytes, payload);
-
-                var documentFileName = $"{mappingInfo.Name}_{DateTime.Now.Ticks}.docx";
-                System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
-
-                var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                return new FileContentResult(documentBytes, contentType)
+                var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
+                var mappingFiles = Directory.GetFiles(folder, $"{templateName}*_{mappingsName}_*.xlsm").OrderByDescending(o => o);
+                if (mappingFiles.Any())
                 {
-                    FileDownloadName = documentFileName
-                };
+                    var templateBytes = System.IO.File.ReadAllBytes(latestTemplateFileName);
+                    var mappingInfo = new FileInfo(mappingFiles.First());
+                    var mappingBytes = System.IO.File.ReadAllBytes(mappingInfo.FullName);
+
+                    var processor = new TemplateProcessor();
+                    var documentBytes = processor.CreateDocument(templateBytes, mappingBytes, payload);
+
+                    var documentFileName = $"{mappingInfo.Name}_{DateTime.Now.Ticks}.docx";
+                    System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
+
+                    var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    return new FileContentResult(documentBytes, contentType)
+                    {
+                        FileDownloadName = documentFileName
+                    };
+                }
             }
-            else
-            {
-                return NotFound();
-            }
+            return NotFound();
         }
 
         private IActionResult TestMappings([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
