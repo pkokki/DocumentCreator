@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { State } from './services/state/state.service';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'DocumentCreatorNgApp';
-  templateName: string;
-  mappingName: string;
-  apiUrl = "https://localhost:44381/api";
+  
+  constructor(public state: State) { }
+
 }

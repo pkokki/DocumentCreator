@@ -1,13 +1,11 @@
 <div>Prepare and upload a Word template with content controls:</div>
 
+<pre>POST {{state.apiBaseUrl}}/templates</pre>
+
 <div>
-    <label>Template:
-        <input [(ngModel)]="template.name" placeholder="name" (change)="nameChanged()"/>
-    </label>
-    <button [disabled]="uploading" (click)="addFile()">Select Word</button>
+    <button [disabled]="uploading" (click)="addFile()">Select Word to upload</button> {{fileName}}
 </div>
-<div>Selected file name: {{fileName}}</div>
-<div>POST to: <span [hidden]="!fileName">{{uploadUrl}}</span></div>
+
 <div style="color: red">{{errorMessage}}</div>
 
 <input type="file" #file style="display: none" (change)="onFileAdd()" />

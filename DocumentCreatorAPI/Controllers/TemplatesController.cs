@@ -102,6 +102,7 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                // TODO: Find the real templateName
                 var fileName = $"{templateName}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
                 var fullFileName = Path.Combine(folder, fileName);
                 using var stream = new FileStream(fullFileName, FileMode.Create);
@@ -113,11 +114,24 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost]
-        [Route("{templateName}/mappings/{mappingsName}/document")]
-        public IActionResult CreateDocument([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
+        [Route("{templateName}/mappings/{mappingsName}/{command}")]
+        public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
+            [FromRoute]string mappingsName,
+            [FromRoute]string command, 
+            [FromBody] JObject payload)
+        {
+            if ("document".Equals(command, StringComparison.CurrentCultureIgnoreCase))
+                return CreateDocument(templateName, mappingsName, payload);
+            else if ("test".Equals(command, StringComparison.CurrentCultureIgnoreCase))
+                return TestMappings(templateName, mappingsName, payload);
+            else
+                return NotFound();
+        }
+
+        private IActionResult CreateDocument(string templateName, string mappingsName, JObject payload)
         {
             var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
-            var mappingFiles = Directory.GetFiles(folder, $"{templateName}_{mappingsName}_*.xlsm").OrderByDescending(o => o);
+            var mappingFiles = Directory.GetFiles(folder, $"{templateName}*_{mappingsName}_*.xlsm").OrderByDescending(o => o);
             if (mappingFiles.Any())
             {
                 var mappingInfo = new FileInfo(mappingFiles.First());
@@ -141,9 +155,7 @@ namespace DocumentCreatorAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("{templateName}/mappings/{mappingsName}/test")]
-        public IActionResult TestMappings([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
+        private IActionResult TestMappings([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
         {
             var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
 

@@ -1,5 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { JsonPipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { State } from '../services/state/state.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { tap, catchError } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-step4',
@@ -7,19 +10,45 @@ import { JsonPipe } from '@angular/common';
   styleUrls: ['./step4.component.css']
 })
 export class Step4Component implements OnInit {
-  @Input() apiUrl: string;
-  @Input() templateName: string;
-  @Input() mappingName: string;
-  payload = {
-    body: JSON.stringify(JSON.parse('{"LogHeader":{"RequestId":"123456", "Unit":"123"},"RequestData":{"ProductDescription":"Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000","AccountNumber":"923456789012345", "SEPA":0.17, "PS1014":3, "PS1015":1, "PS1016":"MONTH", "PS1053": "START", "PS1056":10000, "F1041":5000, "F1042":10000, "InterestTable":[{"Period":1,"Interest":0.2,"Points":500}, {"Period":3,"Interest":0.25,"Points":1000}]}}'), null, 2)
-  };
+  
+  constructor(public state: State, private http: HttpClient) { }
 
-  constructor() { }
+  submitError;
+  submitResponse;
+  uploading = false;
 
   ngOnInit(): void {
   }
 
   submit() {
+    this.uploading = true;
+    this.submitError = null;
+    this.submitResponse = null;
+    const url = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName+ '/document';
+    const body = this.state.testPayload;
+    const httpHeaders = new HttpHeaders({
+      'Content-Type' : 'application/json',
+      'Cache-Control': 'no-cache'
+    }); 
+    this.http.post(url, body, { headers: httpHeaders, responseType: 'arraybuffer' }).subscribe(
+      response => {
+        this.uploading = false;
+        this.downLoadFile(response, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      },
+      err => { 
+        console.log(err);
+        this.uploading = false;
+        this.submitError = err.message;
+      }
+    );
+  }
 
+  private downLoadFile(data: any, type: string) {
+    let blob = new Blob([data], { type: type});
+    let url = window.URL.createObjectURL(blob);
+    let pwa = window.open(url);
+    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+        alert( 'Please disable your Pop-up blocker and try again.');
+    }
   }
 }

@@ -1,9 +1,15 @@
 <div>Ask DocumentCreator to download an Excel workbook for mappings definition:</div>
 
-<div>Download link: 
-    <a [hidden]="!templateName || !mappingName" 
-        href="{{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}" 
+<div><pre>GET {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre></div>
+
+<div>
+    <a [hidden]="!state.templateName || !state.mappingName" 
+        href="{{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}" 
         target="_blank">
-        {{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}
+        Click to download
     </a>
 </div>
+
+<p>Use the <code>Test Mappings</code> button in the Excel worksheet to test your expressions</p>
+<div><code>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}/test</code></div>
+

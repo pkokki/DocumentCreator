@@ -1,4 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { State } from '../services/state/state.service';
 
 @Component({
   selector: 'app-step2',
@@ -6,10 +7,7 @@ import { Component, OnInit, Input } from '@angular/core';
   styleUrls: ['./step2.component.css']
 })
 export class Step2Component implements OnInit {
-  @Input() templateName: string;
-  @Input() mappingName: string;
-  @Input() apiUrl: string;
-  constructor() { }
+  constructor(public state: State) { }
 
   ngOnInit(): void {
   }

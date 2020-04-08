@@ -1,8 +1,11 @@
 <div>Send a JSON request to create a new document based on template and mappings</div>
-<div>POST to: <span [hidden]="!templateName || !mappingName">{{apiUrl}}/templates/{{templateName}}/mappings/{{mappingName}}/document</span></div>
+<pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}/document</pre>
 <div>
-    <textarea [(ngModel)]="payload.body" placeholder="json payload" style="font-size: 11px; width: 100%;min-height: 100px;">
+    <textarea [(ngModel)]="state.testPayload" placeholder="json payload" style="font-size: 11px; width: 100%;min-height: 100px;">
     </textarea>
 </div>
 
-<button (click)="submit()">Submit</button>
+<button [disabled]="uploading" (click)="submit()">Submit</button>
+
+<div style="color: red">{{submitError}}</div>
+<div style="color: blue">{{submitResponse}}</div>

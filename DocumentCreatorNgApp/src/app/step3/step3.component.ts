@@ -1,5 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
-import { UploadService } from '../upload.service';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { UploadService } from '../services/upload/upload.service'
+import { State } from '../services/state/state.service';
 
 @Component({
   selector: 'app-step3',
@@ -7,28 +8,15 @@ import { UploadService } from '../upload.service';
   styleUrls: ['./step3.component.css']
 })
 export class Step3Component implements OnInit {
-  @Input() apiUrl: string;
-  @Input() templateName: string;
-  @Output() onMappingsNameChanged = new EventEmitter<string>();
-  @ViewChild('file', { static: false }) file;
+  @ViewChild('file', { static: false }) file: ElementRef;
   
-  mappings;
   uploading = false;
   errorMessage: string;
   fileName: string;
-  uploadUrl: string;
 
-  constructor(public uploadService: UploadService) { }
+  constructor(public state: State, private uploadService: UploadService) { }
 
   ngOnInit(): void {
-    this.mappings = {
-      name: 'M01'
-    };
-    this.onMappingsNameChanged.emit(this.mappings.name);
-  }
-
-  onNameChanged() {
-    this.onMappingsNameChanged.emit(this.mappings.name);
   }
 
   onFileAdd() {
@@ -38,9 +26,8 @@ export class Step3Component implements OnInit {
       this.uploading = true;
       this.errorMessage = null;
       this.fileName = file.name;
-      this.mappings.templateName = this.templateName;
-      this.uploadUrl = this.apiUrl + '/templates/' + this.templateName + '/mappings';
-      const progress = this.uploadService.upload(this.uploadUrl, this.mappings, file);
+      const uploadUrl = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName;
+      const progress = this.uploadService.upload(uploadUrl, null, file);
       progress.subscribe(end => {
         this.uploading = false;
       }, err => {

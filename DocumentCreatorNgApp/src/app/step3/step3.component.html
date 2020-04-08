@@ -1,12 +1,11 @@
-<p>Upload the Excel workbook:</p>
+<p>Upload the Excel workbook.</p>
+
+<pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre>
+
 <div>
-    <label>Mappings:
-        <input [(ngModel)]="mappings.name" placeholder="name" (change)="onNameChanged()"/>
-    </label>
-    <button [disabled]="uploading || !templateName" (click)="addFile()">Select Excel</button>
+    <button [disabled]="uploading || !state.templateName" (click)="addFile()">Select Excel to upload</button> {{fileName}}
 </div>
-<div>Selected file name: {{fileName}}</div>
-<div>POST to: <span [hidden]="!fileName">{{uploadUrl}}</span></div>
+
 <div style="color: red">{{errorMessage}}</div>
 
 <input type="file" #file style="display: none" (change)="onFileAdd()" />
