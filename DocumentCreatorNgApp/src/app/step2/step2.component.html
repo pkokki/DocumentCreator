@@ -3,11 +3,9 @@
 <div><pre>GET {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre></div>
 
 <div>
-    <a [hidden]="!state.templateName || !state.mappingName" 
-        href="{{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}" 
-        target="_blank">
-        Click to download
-    </a>
+    <button [disabled]="!state.templateName" 
+        (click)="download()"
+        >Download Excel mappings</button>
 </div>
 
 <p>Use the <code>Test Mappings</code> button in the Excel worksheet to test your expressions</p>

@@ -5,7 +5,7 @@
     </textarea>
 </div>
 
-<button [disabled]="uploading" (click)="submit()">Submit</button>
+<button [disabled]="uploading || !state.templateName || !state.mappingName" (click)="submit()">Create Word document</button>
 
 <div style="color: red">{{submitError}}</div>
 <div style="color: blue">{{submitResponse}}</div>

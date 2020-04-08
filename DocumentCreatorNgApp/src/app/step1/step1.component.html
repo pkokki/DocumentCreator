@@ -3,7 +3,7 @@
 <pre>POST {{state.apiBaseUrl}}/templates</pre>
 
 <div>
-    <button [disabled]="uploading" (click)="addFile()">Select Word to upload</button> {{fileName}}
+    <button [disabled]="uploading || !state.templateName" (click)="addFile()">Select Word to upload</button> {{fileName}}
 </div>
 
 <div style="color: red">{{errorMessage}}</div>

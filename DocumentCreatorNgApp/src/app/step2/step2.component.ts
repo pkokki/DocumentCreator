@@ -11,4 +11,9 @@ export class Step2Component implements OnInit {
 
   ngOnInit(): void {
   }
+
+  download() {
+    const url = this.state.apiBaseUrl+'/templates/'+this.state.templateName+'/mappings/'+this.state.mappingName;
+    window.open(url, '_blank');
+  }
 }
