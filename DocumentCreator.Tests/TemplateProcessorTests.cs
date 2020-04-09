@@ -91,9 +91,9 @@ namespace DocumentCreator
             Assert.Equal("Πρώτος προαιρετικός όρος", fields["F16"]);
             Assert.Equal("", fields["F18"]);
 
-            Assert.Equal("1|3", fields["F11"]);
-            Assert.Equal("0,2|0,25", fields["F12"]);
-            Assert.Equal("500|1000", fields["F13"]);
+            Assert.Equal("['1','3']", fields["F11"]);
+            Assert.Equal("['0,2','0,25']", fields["F12"]);
+            Assert.Equal("['500','1000']", fields["F13"]);
         }
     }
 }

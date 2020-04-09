@@ -47,33 +47,48 @@ namespace DocumentCreator
 
         public TransformResult Evaluate(long targetId, string formula, Dictionary<string, JToken> sources)
         {
-            string error = null;
-            ExcelValue value = null;
 
             var excelFormula = new ExcelFormula(formula, culture);
-            var tokens = new Queue<ExcelFormulaToken>(excelFormula.OfType<ExcelFormulaToken>());
-
-            try
+            var tokens = excelFormula.OfType<ExcelFormulaToken>();
+            var repetitions = 1;
+            if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function 
+                && string.Equals(t.Value, "RQR", StringComparison.InvariantCultureIgnoreCase)))
             {
-                var expression = new ExcelExpression();
-                TraverseExpression(expression, tokens, sources);
-                var operand = expression.Evaluate();
-                value = operand.Value;
-                if (value.InnerValue is JArray)
-                    sources["#ROW#"] = ((JArray)value.InnerValue).FirstOrDefault();
+                repetitions = sources["#COLL#"].Count();
             }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-            }
-
-            return new TransformResult()
+            var result = new TransformResult()
             {
                 TargetId = targetId,
                 Expression = formula,
-                Value = value?.ToString(outCulture),
-                Error = error
             };
+            try
+            {
+                for (var i = 0; i < repetitions; i++)
+                {
+                    sources["#ROW#"] = sources.ContainsKey("#COLL#") ? sources["#COLL#"]?.Skip(i).FirstOrDefault() : null;
+                    var queue = new Queue<ExcelFormulaToken>(tokens);
+                    var expression = new ExcelExpression();
+                    TraverseExpression(expression, queue, sources);
+                    var operand = expression.Evaluate();
+                    if (i == 0)
+                    {
+                        var value = operand.Value;
+                        if (value.InnerValue is JArray)
+                        {
+                            var collection = (JArray)value.InnerValue;
+                            sources["#COLL#"] = collection;
+                            result.ChildRows = collection.Count;
+                        }
+                        result.Value = value?.ToString(outCulture);
+                    }
+                    result.Rows.Add(operand.Value?.ToString(outCulture));
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Error = ex.Message;
+            }
+            return result;
         }
 
         private void TraverseExpression(ExcelExpression expression, Queue<ExcelFormulaToken> tokens, Dictionary<string, JToken> sources)

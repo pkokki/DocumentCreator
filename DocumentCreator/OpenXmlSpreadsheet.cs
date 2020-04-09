@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,36 +155,55 @@ namespace DocumentCreator
             var worksheet = GetFirstWorkSheet(doc);
             var stringTablePart = GetSharedStringTablePart(doc);
             var rowIndex = 3U;
-            var name = string.Empty;
-            var expr = string.Empty;
+            string name;
             do
             {
-                name = string.Empty;
-                var nameAddress = $"B{rowIndex}";
-                var exprAddress = $"J{rowIndex}";
-                var nameCell = worksheet.Descendants<Cell>().
-                    Where(c => c.CellReference == nameAddress).FirstOrDefault();
-                if (nameCell != null)
+                name = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}");
+                if (!string.IsNullOrEmpty(name))
                 {
-                    var cellValue = nameCell.InnerText;
-                    if (nameCell.DataType != null && nameCell.DataType.Value == CellValues.SharedString)
-                        name = stringTablePart.SharedStringTable.ElementAt(int.Parse(cellValue)).InnerText;
-                    var exprCell = worksheet.Descendants<Cell>().
-                        Where(c => c.CellReference == exprAddress).FirstOrDefault();
-                    if (exprCell != null)
-                        expr = exprCell.CellFormula.InnerText;
-                    if (name != null)
+                    var transformation = new Transformation()
                     {
-                        transformations.Add(new Transformation()
-                        {
-                            Name = name,
-                            Expression = expr
-                        });
-                    }
+                        Name = name,
+                        Parent = GetCellValue(worksheet, stringTablePart, $"C{rowIndex}"),
+                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"D{rowIndex}"),
+                        Expression = GetCellFormula(worksheet, $"J{rowIndex}")
+                    };
+                    transformations.Add(transformation);
                     ++rowIndex;
                 }
-            } while (name != string.Empty);
+            } while (!string.IsNullOrEmpty(name));
             return transformations;
         }
+
+        private static string GetCellFormula(Worksheet worksheet, string cellAddress)
+        {
+            var cell = worksheet.Descendants<Cell>().
+                        Where(c => c.CellReference == cellAddress).FirstOrDefault();
+            if (cell != null)
+                return cell.CellFormula.InnerText;
+            return null;
+        }
+
+        private static string GetCellValue(Worksheet worksheet, SharedStringTablePart stringTablePart, string cellAddress)
+        {
+            string cellValue = null;
+            var cell = worksheet.Descendants<Cell>().
+                    Where(c => c.CellReference == cellAddress).FirstOrDefault();
+            if (cell != null)
+            {
+                cellValue = cell.InnerText;
+                if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+                    cellValue = stringTablePart.SharedStringTable.ElementAt(int.Parse(cellValue)).InnerText;
+            }
+            return cellValue;
+        }
+        private static bool GetCellValueAsBoolean(Worksheet worksheet, SharedStringTablePart stringTablePart, string address)
+        {
+            var content = GetCellValue(worksheet, stringTablePart, address);
+            if (string.IsNullOrEmpty(content))
+                return false;
+            return content != "0";
+        }
+
     }
 }

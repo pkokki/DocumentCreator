@@ -65,33 +65,13 @@ namespace DocumentCreator
             }
         }
 
-        public static void ReplaceContentControl(WordprocessingDocument doc, string name, string text)
-        {
-            if (text == "[]")
-                return;
-            var sdt = FindSdt(doc, name);
-            var sdtContent = FindSdtContent(sdt, name);
-            
-            var textElem = sdtContent.Descendants<Text>().FirstOrDefault();
-            if (textElem == null && sdtContent.ChildElements.Count > 0)
-                throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", sdtContent.ChildElements.Select(o => o.GetType()))}");
-            if (textElem == null)
-            {
-                textElem = new Text();
-                sdtContent.Append(
-                    new Paragraph(
-                        new Run(
-                            //new RunProperties() { Languages = new Languages() { Val = "el-GR" } },
-                            textElem)));
-            }
-            textElem.Text = text;
-        }
-
         private static OpenXmlCompositeElement FindSdtContent(SdtElement sdt, string name)
         {
             OpenXmlCompositeElement sdtContent = sdt.Elements<SdtContentRun>().FirstOrDefault();
             if (sdtContent == null)
                 sdtContent = sdt.Elements<SdtContentBlock>().FirstOrDefault();
+            if (sdtContent == null)
+                sdtContent = sdt.Elements<SdtContentRow>().FirstOrDefault();
             if (sdtContent == null)
                 sdtContent = sdt.Elements<SdtContentCell>().FirstOrDefault();
             if (sdtContent == null)
@@ -101,7 +81,7 @@ namespace DocumentCreator
 
         public static void RemoveContentControlContent(WordprocessingDocument doc, string name)
         {
-            var sdt = FindSdt(doc, name);
+            var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
 
             if (sdt != null)
                 sdt.Remove();
@@ -109,7 +89,7 @@ namespace DocumentCreator
 
         public static string ShowContentControlContent(WordprocessingDocument doc, string name)
         {
-            var sdt = FindSdt(doc, name);
+            var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
             if (sdt != null)
             {
                 var sdtContent = FindSdtContent(sdt, name);
@@ -118,12 +98,74 @@ namespace DocumentCreator
             return null;
         }
 
-        private static SdtElement FindSdt(WordprocessingDocument doc, string name)
+        private static SdtElement FindSdt(OpenXmlCompositeElement parent, string name)
         {
-            return doc.MainDocumentPart.Document.Body
+            return parent
                 .Descendants<SdtElement>()
                 .Where(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any())
                 .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
+        }
+
+        public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName, 
+            int childCount, Dictionary<string, IEnumerable<string>> childValues)
+        {
+            var parentSdt = FindSdt(doc.MainDocumentPart.Document.Body, parentName);
+            var sdtContent = FindSdtContent(parentSdt, parentName);
+            if (sdtContent.ChildElements.Count != 1)
+                throw new NotImplementedException($"[{parentName}] Can not handle repeating sections with {sdtContent.ChildElements.Count} elements in content");
+            var sourceRow = sdtContent.FirstChild;
+            SdtElement newRow = (SdtElement)sourceRow;
+            for (var i = 0; i < childCount; i++)
+            {
+                if (i > 0)
+                {
+                    newRow = (SdtElement)sourceRow.CloneNode(true);
+                    newRow.SdtProperties?.Elements<SdtId>().FirstOrDefault()?.Remove();
+                    sourceRow.InsertAfterSelf(newRow);
+                }
+                foreach (var kvp in childValues)
+                {
+                    var childSdt = FindSdt(newRow, kvp.Key);
+                    var childSdtContent = FindSdtContent(childSdt, kvp.Key);
+                    SetTextElement(childSdtContent, kvp.Key, kvp.Value.ElementAt(i));
+                }
+            }
+        }
+
+        public static void SetTextElement(OpenXmlCompositeElement elem, string name, string text)
+        {
+            var textElem = elem.Descendants<Text>().FirstOrDefault();
+            if (textElem == null && elem.ChildElements.Count > 0)
+                throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", elem.ChildElements.Select(o => o.GetType()))}");
+            if (textElem == null)
+            {
+                textElem = new Text();
+                elem.Append(
+                    new Paragraph(
+                        new Run(
+                            //new RunProperties() { Languages = new Languages() { Val = "el-GR" } },
+                            textElem)));
+            }
+            textElem.Text = text;
+        }
+        public static string SetContentControlContent(WordprocessingDocument doc, string name, string text)
+        {
+            if (text == "#HIDE_CONTENT#")
+            {
+                RemoveContentControlContent(doc, name);
+                return string.Empty;
+            }
+            else if (text == "#SHOW_CONTENT#")
+            {
+                return ShowContentControlContent(doc, name);
+            }
+            else
+            {
+                var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
+                var sdtContent = FindSdtContent(sdt, name);
+                SetTextElement(sdtContent, name, text);
+                return text;
+            }
         }
     }
 }

@@ -118,41 +118,50 @@ namespace DocumentCreator
         public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var transformations = Transform(templateBytes, mappingBytes, payload);
-            return CreateDocument(transformations, templateBytes);
+            return MergeTemplateWithMappings(transformations, templateBytes);
         }
 
         public IEnumerable<Transformation> Transform2(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var transformations = Transform(templateBytes, mappingBytes, payload);
-            CreateDocument(transformations, templateBytes);
+            MergeTemplateWithMappings(transformations, templateBytes);
             return transformations;
         }
 
-        private byte[] CreateDocument(IEnumerable<Transformation> transformations, byte[] templateBytes)
+        private byte[] MergeTemplateWithMappings(IEnumerable<Transformation> transformations, byte[] templateBytes)
         {
             using var ms = new MemoryStream();
             ms.Write(templateBytes, 0, templateBytes.Length);
             using (var doc = WordprocessingDocument.Open(ms, true))
             {
-                foreach (var transformation in transformations)
+                foreach (var transformation in transformations.ToList())
                 {
-                    var text = transformation.Result.Error ?? transformation.Result.Value;
-                    if (text == "[]")
+                    if (transformation.IsCollection)
                     {
-                        continue;
+                        // Handle this and child transformations
+                        var childValues = new Dictionary<string, IEnumerable<string>>();
+                        transformations
+                            .Where(o => o.Parent == transformation.Name)
+                            .ToList()
+                            .ForEach(o => {
+                                childValues[o.Name] = o.Result.Rows;
+                                o.Result.Value = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
+                            });
+                        if (transformation.Result.ChildRows == 0)
+                            throw new InvalidOperationException($"[{transformation.Name}]: Collection is empty");
+                        OpenXmlWordProcessing.ProcessRepeatingSection(doc, transformation.Name, 
+                            transformation.Result.ChildRows, childValues);
+                        
                     }
-                    else if (text == "#HIDE_CONTENT#")
+                    else if (!string.IsNullOrEmpty(transformation.Parent))
                     {
-                        transformation.Result.Value = string.Empty;
-                        OpenXmlWordProcessing.RemoveContentControlContent(doc, transformation.Name);
-                    }
-                    else if (text == "#SHOW_CONTENT#")
-                    {
-                        transformation.Result.Value = OpenXmlWordProcessing.ShowContentControlContent(doc, transformation.Name);
+                        // Do nothing, handled by parent
                     }
                     else
                     {
-                        OpenXmlWordProcessing.ReplaceContentControl(doc, transformation.Name, text);
+                        var text = transformation.Result.Error ?? transformation.Result.Value;
+                        transformation.Result.Value 
+                            = OpenXmlWordProcessing.SetContentControlContent(doc, transformation.Name, text);
                     }
                 }
             }
