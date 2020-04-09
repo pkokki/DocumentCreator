@@ -118,7 +118,18 @@ namespace DocumentCreator
         public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var transformations = Transform(templateBytes, mappingBytes, payload);
+            return CreateDocument(transformations, templateBytes);
+        }
 
+        public IEnumerable<Transformation> Transform2(byte[] templateBytes, byte[] mappingBytes, JObject payload)
+        {
+            var transformations = Transform(templateBytes, mappingBytes, payload);
+            CreateDocument(transformations, templateBytes);
+            return transformations;
+        }
+
+        private byte[] CreateDocument(IEnumerable<Transformation> transformations, byte[] templateBytes)
+        {
             using var ms = new MemoryStream();
             ms.Write(templateBytes, 0, templateBytes.Length);
             using (var doc = WordprocessingDocument.Open(ms, true))
@@ -126,12 +137,30 @@ namespace DocumentCreator
                 foreach (var transformation in transformations)
                 {
                     var text = transformation.Result.Error ?? transformation.Result.Value;
-                    OpenXmlWordProcessing.ReplaceContentControl(doc, transformation.Name, text);
+                    if (text == "[]")
+                    {
+                        continue;
+                    }
+                    else if (text == "#HIDE_CONTENT#")
+                    {
+                        transformation.Result.Value = string.Empty;
+                        OpenXmlWordProcessing.RemoveContentControlContent(doc, transformation.Name);
+                    }
+                    else if (text == "#SHOW_CONTENT#")
+                    {
+                        transformation.Result.Value = OpenXmlWordProcessing.ShowContentControlContent(doc, transformation.Name);
+                    }
+                    else
+                    {
+                        OpenXmlWordProcessing.ReplaceContentControl(doc, transformation.Name, text);
+                    }
                 }
             }
             var documentBytes = ms.ToArray();
             return documentBytes;
         }
+
+        
         public IEnumerable<Transformation> Transform(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var sources = new Dictionary<string, JToken>();

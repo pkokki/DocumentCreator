@@ -69,11 +69,26 @@ namespace DocumentCreator
         {
             if (text == "[]")
                 return;
-            var sdt = doc.MainDocumentPart.Document.Body
-                .Descendants<SdtElement>()
-                .Where(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any())
-                .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
+            var sdt = FindSdt(doc, name);
+            var sdtContent = FindSdtContent(sdt, name);
+            
+            var textElem = sdtContent.Descendants<Text>().FirstOrDefault();
+            if (textElem == null && sdtContent.ChildElements.Count > 0)
+                throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", sdtContent.ChildElements.Select(o => o.GetType()))}");
+            if (textElem == null)
+            {
+                textElem = new Text();
+                sdtContent.Append(
+                    new Paragraph(
+                        new Run(
+                            //new RunProperties() { Languages = new Languages() { Val = "el-GR" } },
+                            textElem)));
+            }
+            textElem.Text = text;
+        }
 
+        private static OpenXmlCompositeElement FindSdtContent(SdtElement sdt, string name)
+        {
             OpenXmlCompositeElement sdtContent = sdt.Elements<SdtContentRun>().FirstOrDefault();
             if (sdtContent == null)
                 sdtContent = sdt.Elements<SdtContentBlock>().FirstOrDefault();
@@ -81,18 +96,34 @@ namespace DocumentCreator
                 sdtContent = sdt.Elements<SdtContentCell>().FirstOrDefault();
             if (sdtContent == null)
                 throw new InvalidOperationException($"[{name}] Νο content element: {string.Join(", ", sdt.ChildElements.Select(o => o.GetType()))}");
+            return sdtContent;
+        }
 
-            var textElem = sdtContent.Descendants<Text>().FirstOrDefault();
-            if (textElem == null && sdtContent.ChildElements.Count > 0)
-                throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", sdtContent.ChildElements.Select(o => o.GetType()))}");
-            if (textElem == null)
-                sdtContent.Append(
-                    new Paragraph(
-                        new Run(
-                            new RunProperties() { Languages = new Languages() { Val = "el-GR" } },
-                            new Text(text))));
-            else 
-                textElem.Text = text;
+        public static void RemoveContentControlContent(WordprocessingDocument doc, string name)
+        {
+            var sdt = FindSdt(doc, name);
+
+            if (sdt != null)
+                sdt.Remove();
+        }
+
+        public static string ShowContentControlContent(WordprocessingDocument doc, string name)
+        {
+            var sdt = FindSdt(doc, name);
+            if (sdt != null)
+            {
+                var sdtContent = FindSdtContent(sdt, name);
+                return sdtContent.InnerText;
+            }
+            return null;
+        }
+
+        private static SdtElement FindSdt(WordprocessingDocument doc, string name)
+        {
+            return doc.MainDocumentPart.Document.Body
+                .Descendants<SdtElement>()
+                .Where(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any())
+                .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
         }
     }
 }
