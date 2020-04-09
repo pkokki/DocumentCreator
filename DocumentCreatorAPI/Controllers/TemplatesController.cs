@@ -15,6 +15,7 @@ namespace DocumentCreatorAPI.Controllers
     public class TemplatesController : ControllerBase
     {
         private readonly IWebHostEnvironment hostEnv;
+
         public TemplatesController(IWebHostEnvironment hostEnv)
         {
             this.hostEnv = hostEnv;
@@ -132,7 +133,7 @@ namespace DocumentCreatorAPI.Controllers
             if ("document".Equals(command, StringComparison.CurrentCultureIgnoreCase))
                 return CreateDocument(templateName, mappingsName, payload);
             else if ("test".Equals(command, StringComparison.CurrentCultureIgnoreCase))
-                return TestMappings(templateName, mappingsName, payload);
+                return TestMappings(payload);
             else
                 return NotFound();
         }
@@ -172,7 +173,7 @@ namespace DocumentCreatorAPI.Controllers
             return NotFound();
         }
 
-        private IActionResult TestMappings([FromRoute]string templateName, [FromRoute]string mappingsName, [FromBody] JObject payload)
+        private IActionResult TestMappings(JObject payload)
         {
             var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
 
@@ -188,10 +189,12 @@ namespace DocumentCreatorAPI.Controllers
                 var expression = mapping["expression"].ToString();
                 var result = processor.Evaluate(0, expression, sources);
 
-                var json = new JObject();
-                json["targetId"] = mapping["targetId"];
-                json["expression"] = mapping["expression"];
-                json["result"] = result.Value;
+                var json = new JObject
+                {
+                    ["targetId"] = mapping["targetId"],
+                    ["expression"] = mapping["expression"],
+                    ["result"] = result.Value
+                };
                 ++total;
                 if (result.Error != null)
                 {

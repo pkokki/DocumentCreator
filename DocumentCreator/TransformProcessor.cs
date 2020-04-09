@@ -73,9 +73,8 @@ namespace DocumentCreator
                     if (i == 0)
                     {
                         var value = operand.Value;
-                        if (value.InnerValue is JArray)
+                        if (value.InnerValue is JArray collection)
                         {
-                            var collection = (JArray)value.InnerValue;
                             sources["#COLL#"] = collection;
                             result.ChildRows = collection.Count;
                         }

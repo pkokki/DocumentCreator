@@ -173,8 +173,10 @@ namespace DocumentCreator
 
         public IEnumerable<Transformation> Transform(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
-            var sources = new Dictionary<string, JToken>();
-            sources.Add("RQ", payload);
+            var sources = new Dictionary<string, JToken>
+            {
+                { "RQ", payload }
+            };
 
             using var mappingsStream = new MemoryStream(mappingBytes);
             using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
