@@ -30,7 +30,11 @@ namespace DocumentCreatorAPI
                 options.AddPolicy("AllowAny",
                 builder =>
                 {
-                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader() // at least .WithExposedHeaders("Content-Disposition")
+                        ;
                 });
             });
             services.AddControllers().AddNewtonsoftJson();

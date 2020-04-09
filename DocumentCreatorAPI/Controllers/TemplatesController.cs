@@ -151,16 +151,18 @@ namespace DocumentCreatorAPI.Controllers
                 if (mappingFiles.Any())
                 {
                     var templateBytes = System.IO.File.ReadAllBytes(latestTemplateFileName);
-                    var mappingInfo = new FileInfo(mappingFiles.First());
-                    var mappingBytes = System.IO.File.ReadAllBytes(mappingInfo.FullName);
+                    var mappingFileName = mappingFiles.First();
+                    var mappingBytes = System.IO.File.ReadAllBytes(mappingFileName);
 
                     var processor = new TemplateProcessor();
                     var documentBytes = processor.CreateDocument(templateBytes, mappingBytes, payload);
 
-                    var documentFileName = $"{mappingInfo.Name}_{DateTime.Now.Ticks}.docx";
+                    var documentFileName = $"{Path.GetFileNameWithoutExtension(mappingFileName)}_{DateTime.Now.Ticks}.docx";
                     System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
 
                     var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    
+                    Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
                     return new FileContentResult(documentBytes, contentType)
                     {
                         FileDownloadName = documentFileName

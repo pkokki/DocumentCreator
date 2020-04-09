@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { State } from '../services/state/state.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { tap, catchError } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -27,15 +25,18 @@ export class Step4Component implements OnInit {
     this.submitResponse = null;
     const url = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName+ '/document';
     const body = this.state.testPayload;
-    const httpHeaders = new HttpHeaders({
+    const headers = new HttpHeaders({
       'Content-Type' : 'application/json',
       'Cache-Control': 'no-cache'
     }); 
-    this.http.post(url, body, { headers: httpHeaders, responseType: 'arraybuffer' }).subscribe(
+    this.http.post<HttpResponse<Blob>>(url, body, { headers: headers, observe: 'response', responseType: 'blob' as 'json'}).subscribe(
       response => {
         this.uploading = false;
-        console.log('response', response);
-        this.downLoadFile(response, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
+        var contentDisposition = response.headers.get('content-disposition');
+        var filename = contentDisposition.split('filename=')[1].split(';')[0] ?? 'document.docx';
+        var contentType = response.headers.get('content-type');
+        this.downLoadFile(response.body, contentType, filename);
       },
       err => { 
         console.log(err);
@@ -45,18 +46,12 @@ export class Step4Component implements OnInit {
     );
   }
 
-  private downLoadFile(data: any, type: string) {
-    let blob = new Blob([data], { type: type});
-    //let url = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(blob));
+  private downLoadFile(data: any, contentType: string, filename: string) {
+    let blob = new Blob([data], { type: contentType});
     let url = window.URL.createObjectURL(blob);
-    console.log('URL', url);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "xxxx.docx";
+    a.download = filename;
     a.click();
-    //let pwa = window.open(url, '_blank');
-    //if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
-    //    window.alert( 'Please disable your Pop-up blocker and try again.');
-    //}
   }
 }
