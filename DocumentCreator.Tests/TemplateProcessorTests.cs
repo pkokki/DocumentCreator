@@ -52,6 +52,7 @@ namespace DocumentCreator
             var processor = new TemplateProcessor();
             var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
             Assert.NotEmpty(docBytes);
+            File.WriteAllBytes("../../../temp/DOCUMENT_T01_637218725708848542.docx", docBytes);
         }
 
         [Fact]

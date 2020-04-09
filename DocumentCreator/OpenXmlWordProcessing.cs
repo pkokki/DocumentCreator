@@ -26,8 +26,7 @@ namespace DocumentCreator
 
                 var field = new TemplateField()
                 {
-                    Name = sdtProperties.Elements<SdtAlias>().FirstOrDefault()?.Val?.ToString()
-                        ?? sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val,
+                    Name = ResolveTemplateFieldName(sdtProperties),
                     IsCollection = sdtProperties.Elements<SdtRepeatedSection>().Any(),
                     Content = sdt.Elements<SdtContentBlock>().FirstOrDefault()?.InnerText,
                     Type = sdt.GetType().Name
@@ -37,12 +36,17 @@ namespace DocumentCreator
                 if (parent != null)
                 {
                     var parentProperties = parent.Elements<SdtProperties>().First();
-                    field.Parent = parentProperties.Elements<SdtAlias>().FirstOrDefault()?.Val?.ToString() 
-                        ?? parentProperties.Elements<SdtId>().FirstOrDefault()?.Val;
+                    field.Parent = ResolveTemplateFieldName(parentProperties);
                 }
                 fields.Add(field);
             }
             return fields;
+        }
+
+        private static string ResolveTemplateFieldName(SdtProperties sdtProperties)
+        {
+            return sdtProperties.Elements<SdtAlias>().FirstOrDefault()?.Val?.ToString()
+                        ?? sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val;
         }
 
         public static void CreateDocument(WordprocessingDocument doc, JObject payload, Func<StringValue, string> transformer)
@@ -63,7 +67,32 @@ namespace DocumentCreator
 
         public static void ReplaceContentControl(WordprocessingDocument doc, string name, string text)
         {
-            throw new NotImplementedException();
+            if (text == "[]")
+                return;
+            var sdt = doc.MainDocumentPart.Document.Body
+                .Descendants<SdtElement>()
+                .Where(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any())
+                .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
+
+            OpenXmlCompositeElement sdtContent = sdt.Elements<SdtContentRun>().FirstOrDefault();
+            if (sdtContent == null)
+                sdtContent = sdt.Elements<SdtContentBlock>().FirstOrDefault();
+            if (sdtContent == null)
+                sdtContent = sdt.Elements<SdtContentCell>().FirstOrDefault();
+            if (sdtContent == null)
+                throw new InvalidOperationException($"[{name}] Νο content element: {string.Join(", ", sdt.ChildElements.Select(o => o.GetType()))}");
+
+            var textElem = sdtContent.Descendants<Text>().FirstOrDefault();
+            if (textElem == null && sdtContent.ChildElements.Count > 0)
+                throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", sdtContent.ChildElements.Select(o => o.GetType()))}");
+            if (textElem == null)
+                sdtContent.Append(
+                    new Paragraph(
+                        new Run(
+                            new RunProperties() { Languages = new Languages() { Val = "el-GR" } },
+                            new Text(text))));
+            else 
+                textElem.Text = text;
         }
     }
 }

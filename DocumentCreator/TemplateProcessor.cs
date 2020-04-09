@@ -119,7 +119,8 @@ namespace DocumentCreator
         {
             var transformations = Transform(templateBytes, mappingBytes, payload);
 
-            using var ms = new MemoryStream(templateBytes);
+            using var ms = new MemoryStream();
+            ms.Write(templateBytes, 0, templateBytes.Length);
             using (var doc = WordprocessingDocument.Open(ms, true))
             {
                 foreach (var transformation in transformations)
@@ -150,7 +151,7 @@ namespace DocumentCreator
                 var transformation = transformations.FirstOrDefault(m => m.Name == templateField.Name);
                 if (transformation != null)
                 {
-                    transformation.Result = processor.Evaluate(0, transformation.Expression, sources);
+                    transformation.Result = processor.Evaluate(0, "=" + transformation.Expression, sources);
                 }
             }
             return transformations;

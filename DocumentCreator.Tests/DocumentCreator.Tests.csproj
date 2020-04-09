@@ -53,4 +53,8 @@
     <ProjectReference Include="..\DocumentCreator\DocumentCreator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="temp\" />
+  </ItemGroup>
+
 </Project>
