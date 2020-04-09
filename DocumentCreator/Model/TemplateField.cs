@@ -1,8 +1,4 @@
-﻿using DocumentFormat.OpenXml.Office2013.Word;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Linq;
-
-namespace DocumentCreator.Model
+﻿namespace DocumentCreator.Model
 {
     public class TemplateField
     {

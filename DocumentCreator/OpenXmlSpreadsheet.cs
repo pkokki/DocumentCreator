@@ -2,8 +2,6 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -119,7 +117,7 @@ namespace DocumentCreator
                 return queryRow;
             }
             else
-            { 
+            {
                 Row row = new Row() { RowIndex = rowIndex };
                 if (queryRow == null)
                     sheetData.InsertAt(row, 0);

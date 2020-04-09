@@ -51,7 +51,7 @@ namespace DocumentCreator
             var excelFormula = new ExcelFormula(formula, culture);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
             var repetitions = 1;
-            if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function 
+            if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function
                 && string.Equals(t.Value, "RQR", StringComparison.InvariantCultureIgnoreCase)))
             {
                 repetitions = sources["#COLL#"].Count();

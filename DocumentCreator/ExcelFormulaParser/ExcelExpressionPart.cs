@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
 {
@@ -15,7 +15,7 @@ namespace DocumentCreator.ExcelFormulaParser
             this.originalToken = token;
             this.TokenType = token.Type;
             this.culture = culture;
-            if (token.Type == ExcelFormulaTokenType.OperatorInfix 
+            if (token.Type == ExcelFormulaTokenType.OperatorInfix
                 || token.Type == ExcelFormulaTokenType.OperatorPrefix
                 || token.Type == ExcelFormulaTokenType.OperatorPostfix
                 )
@@ -44,9 +44,9 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             return TokenType == ExcelFormulaTokenType.OperatorInfix && opers.Contains(originalToken.Value);
         }
-        public bool IsComparisonOperator => 
+        public bool IsComparisonOperator =>
             TokenType == ExcelFormulaTokenType.OperatorInfix && originalToken.Subtype == ExcelFormulaTokenSubtype.Logical;
-        
+
         public ExcelValue Value
         {
             get

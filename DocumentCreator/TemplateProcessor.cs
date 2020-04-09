@@ -143,15 +143,16 @@ namespace DocumentCreator
                         transformations
                             .Where(o => o.Parent == transformation.Name)
                             .ToList()
-                            .ForEach(o => {
+                            .ForEach(o =>
+                            {
                                 childValues[o.Name] = o.Result.Rows;
                                 o.Result.Value = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
                             });
                         if (transformation.Result.ChildRows == 0)
                             throw new InvalidOperationException($"[{transformation.Name}]: Collection is empty");
-                        OpenXmlWordProcessing.ProcessRepeatingSection(doc, transformation.Name, 
+                        OpenXmlWordProcessing.ProcessRepeatingSection(doc, transformation.Name,
                             transformation.Result.ChildRows, childValues);
-                        
+
                     }
                     else if (!string.IsNullOrEmpty(transformation.Parent))
                     {
@@ -160,7 +161,7 @@ namespace DocumentCreator
                     else
                     {
                         var text = transformation.Result.Error ?? transformation.Result.Value;
-                        transformation.Result.Value 
+                        transformation.Result.Value
                             = OpenXmlWordProcessing.SetContentControlContent(doc, transformation.Name, text);
                     }
                 }
@@ -169,7 +170,7 @@ namespace DocumentCreator
             return documentBytes;
         }
 
-        
+
         public IEnumerable<Transformation> Transform(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var sources = new Dictionary<string, JToken>();

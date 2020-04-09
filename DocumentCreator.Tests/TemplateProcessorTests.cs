@@ -48,7 +48,7 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes =  File.ReadAllBytes("./Resources/T01_637218725708848542.docx");
+            var wordBytes = File.ReadAllBytes("./Resources/T01_637218725708848542.docx");
             var excelBytes = File.ReadAllBytes("./Resources/T01_637218725708848542_M01_637218774956694571.xlsm");
             var payload = JObject.Parse(File.ReadAllText("./Resources/T01_637218725708848542.json"));
             var processor = new TemplateProcessor();

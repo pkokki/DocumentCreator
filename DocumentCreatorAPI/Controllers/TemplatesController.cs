@@ -1,12 +1,12 @@
-﻿using System;
+﻿using DocumentCreator;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using DocumentCreator;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -39,7 +39,7 @@ namespace DocumentCreatorAPI.Controllers
                 var fullFileName = Path.Combine(folder, fileName);
                 using var stream = new FileStream(fullFileName, FileMode.Create);
                 formFile.CopyTo(stream);
-               return Ok();
+                return Ok();
             }
             else
                 return BadRequest();
@@ -61,7 +61,7 @@ namespace DocumentCreatorAPI.Controllers
                     .GetFiles(mappingsFolder, $"{Path.GetFileNameWithoutExtension(latestTemplateFileName)}_{mappingsName}_*.xlsm")
                     .OrderByDescending(o => o)
                     .FirstOrDefault();
-                
+
                 byte[] mappingsBuffer;
                 string mappingsFileName;
                 if (latestMappingsFileName != null)
@@ -111,7 +111,7 @@ namespace DocumentCreatorAPI.Controllers
                 {
                     var templateVersion = Path.GetFileNameWithoutExtension(latestTemplateFileName);
                     var fileName = $"{templateVersion}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
-                    
+
                     var fullFileName = Path.Combine(folder, fileName);
                     using var stream = new FileStream(fullFileName, FileMode.Create);
                     formFile.CopyTo(stream);
@@ -126,7 +126,7 @@ namespace DocumentCreatorAPI.Controllers
         [Route("{templateName}/mappings/{mappingsName}/{command}")]
         public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
             [FromRoute]string mappingsName,
-            [FromRoute]string command, 
+            [FromRoute]string command,
             [FromBody] JObject payload)
         {
             if ("document".Equals(command, StringComparison.CurrentCultureIgnoreCase))
@@ -161,7 +161,7 @@ namespace DocumentCreatorAPI.Controllers
                     System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
 
                     var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                    
+
                     Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
                     return new FileContentResult(documentBytes, contentType)
                     {

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DocumentCreator.Model;
+﻿using DocumentCreator.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Office2013.Word;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DocumentCreator
 {
@@ -106,7 +106,7 @@ namespace DocumentCreator
                 .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
         }
 
-        public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName, 
+        public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
             int childCount, Dictionary<string, IEnumerable<string>> childValues)
         {
             var parentSdt = FindSdt(doc.MainDocumentPart.Document.Body, parentName);
