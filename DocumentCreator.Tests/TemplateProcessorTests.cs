@@ -63,7 +63,7 @@ namespace DocumentCreator
             var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
 
             Assert.NotEmpty(docBytes);
-            File.WriteAllBytes("../../../temp/CreateDocumentTest.docx", docBytes);
+            File.WriteAllBytes("./Output/CreateDocumentTest.docx", docBytes);
         }
 
         [Fact]
@@ -81,11 +81,11 @@ namespace DocumentCreator
             var fields = new Dictionary<string, string>();
             templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Value));
             Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
-            Assert.Equal("ΠΡΟΘΕΣΜΙΑΚΗ ΜΕ BONUS 3 ΜΗΝΩΝ - ΑΠΟ ΕΥΡΩ 10.000", fields["F02"]);
+            Assert.Equal("Ξ Ξ΅ΞΞΞ•Ξ£ΞΞ™Ξ‘ΞΞ— ΞΞ• BONUS 3 ΞΞ—ΞΞ©Ξ - Ξ‘Ξ Ξ Ξ•Ξ¥Ξ΅Ξ© 10.000", fields["F02"]);
             Assert.Equal("923456789012345", fields["F03"]);
             Assert.Equal("3", fields["F04"]);
             Assert.Equal("MONTH", fields["F05"]);
-            Assert.Equal("έκαστης", fields["F06"]);
+            Assert.Equal("Ξ­ΞΊΞ±ΟƒΟ„Ξ·Ο‚", fields["F06"]);
             Assert.Equal("10000", fields["F07"]);
             Assert.Equal("3", fields["F08"]);
             Assert.Equal("1", fields["F09"]);
@@ -95,11 +95,11 @@ namespace DocumentCreator
             Assert.Equal("1", fields["F17"]);
             Assert.Equal("5000", fields["F19"]);
             Assert.Equal("10000", fields["F20"]);
-            Assert.Equal("Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000", fields["F21"]);
+            Assert.Equal("Ξ ΟΞΏΞΈΞµΟƒΞΌΞΉΞ±ΞΊΞ® ΞΌΞµ Bonus 3 ΞΞ·Ξ½ΟΞ½ - Ξ‘Ο€Ο Ξ•Ο…ΟΟ 10.000", fields["F21"]);
             Assert.Equal("923456789012345", fields["F22"]);
             Assert.Equal("123", fields["F23"]);
 
-            Assert.Equal("Πρώτος προαιρετικός όρος", fields["F16"]);
+            Assert.Equal("Ξ ΟΟΟ„ΞΏΟ‚ Ο€ΟΞΏΞ±ΞΉΟΞµΟ„ΞΉΞΊΟΟ‚ ΟΟΞΏΟ‚", fields["F16"]);
             Assert.Equal("", fields["F18"]);
 
             Assert.Equal("['1','3']", fields["F11"]);
