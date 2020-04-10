@@ -86,7 +86,7 @@ namespace DocumentCreator
                             var args = EvaluateFunctionArguments(childExpression)
                                 .Select(o => o.Value)
                                 .ToList();
-                            var value = ExcelValue.EvaluateFunction(name, args, context.OutputLang, sources);
+                            var value = Functions.INSTANCE.Evaluate(name, args, context.OutputLang, sources);
                             expression.Add(new ExcelExpressionPart(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:

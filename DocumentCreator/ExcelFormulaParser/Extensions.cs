@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,6 +53,15 @@ namespace DocumentCreator.ExcelFormulaParser
                 result = defaultValue.Value;
             value = result ?? false;
             return !result.HasValue;
+        }
+        public static bool NotText(this List<ExcelValue> args, int index, string defaultValue, Language language, out string value)
+        {
+            value = null;
+            if (args.Count > index)
+                value = args[index].ToString(language);
+            if (value == null)
+                value = defaultValue;
+            return value == null;
         }
     }
 }

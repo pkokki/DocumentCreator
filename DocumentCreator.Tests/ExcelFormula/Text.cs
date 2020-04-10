@@ -47,8 +47,17 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=FIXED(PI()*100000,2)", "314.159,27");
             AssertExpression("=FIXED(PI()*100000,-2)", "314.200");
         }
-        // [Fact] public void LEFT() { /* Returns the leftmost characters from a text value */ }
         // [Fact] public void LEFTB() { /*  */ }
+        [Fact]
+        public void LEFT()
+        {
+            /* Returns the leftmost characters from a text value */
+            AssertExpression("=LEFT(\"ABCDEF\",2)", "AB");
+            AssertExpression("=LEFT(\"ABCDEF\",5)", "ABCDE");
+            AssertExpression("=LEFT(\"ABCDEF\",6)", "ABCDEF");
+            AssertExpression("=LEFT(\"ABCDEF\",7)", "ABCDEF");
+            AssertExpression("=LEFT(\"ABCDEF\")", "A");
+        }
         [Fact]
         public void LEN()
         {
@@ -71,8 +80,16 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=LOWER(\"αβγ\")", "αβγ");
             AssertExpression("=LOWER(\"ΠΆΝΟΣ\")", "πάνος");
         }
-        // [Fact] public void MID() { /* Returns a specific number of characters from a text string starting at the position you specify */ }
         // [Fact] public void MIDB() { /*  */ }
+        [Fact]
+        public void MID()
+        {
+            /* Returns a specific number of characters from a text string starting at the position you specify */
+            AssertExpression("=MID(\"abcdef\",3,1)", "c");
+            AssertExpression("=MID(\"abcdef\",1,1)", "a");
+            AssertExpression("=MID(\"abcdef\",6,1)", "f");
+            AssertExpression("=MID(\"abcdef\",3,13)", "cdef");
+        }
         // [Fact] public void NUMBERVALUE() { /* Converts text to number in a locale-independent manner */ }
         // [Fact] public void PHONETIC() { /* Extracts the phonetic (furigana) characters from a text string */ }
         [Fact]
@@ -85,8 +102,17 @@ namespace DocumentCreator.ExcelFormula
         // [Fact] public void REPLACE() { /* Replaces characters within text */ }
         // [Fact] public void REPLACEB() { /*  */ }
         // [Fact] public void REPT() { /* Repeats text a given number of times */ }
-        // [Fact] public void RIGHT() { /* Returns the rightmost characters from a text value */ }
         // [Fact] public void RIGHTB() { /*  */ }
+        [Fact]
+        public void RIGHT()
+        {
+            /* Returns the rightmost characters from a text value */
+            AssertExpression("=RIGHT(\"ABCDEF\",2)", "EF");
+            AssertExpression("=RIGHT(\"ABCDEF\")", "F");
+            AssertExpression("=RIGHT(\"ABCDEF\",5)", "BCDEF");
+            AssertExpression("=RIGHT(\"ABCDEF\",6)", "ABCDEF");
+            AssertExpression("=RIGHT(\"ABCDEF\",7)", "ABCDEF");
+        }
         // [Fact] public void SEARCH() { /* Finds one text value within another (not case-sensitive) */ }
         // [Fact] public void SEARCHB() { /*  */ }
         // [Fact] public void SUBSTITUTE() { /* Substitutes new text for old text in a text string */ }
