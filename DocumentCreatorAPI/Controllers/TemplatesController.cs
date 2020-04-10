@@ -1,12 +1,11 @@
 ﻿using DocumentCreator;
-using Microsoft.AspNetCore.Hosting;
+using DocumentCreator.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -14,11 +13,11 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class TemplatesController : ControllerBase
     {
-        private readonly IWebHostEnvironment hostEnv;
+        private readonly IRepository repository;
 
-        public TemplatesController(IWebHostEnvironment hostEnv)
+        public TemplatesController(IRepository repository)
         {
-            this.hostEnv = hostEnv;
+            this.repository = repository;
         }
 
         [HttpGet]
@@ -34,12 +33,9 @@ namespace DocumentCreatorAPI.Controllers
             var formFile = Request.Form.Files[0];
             if (formFile.Length > 0)
             {
-                var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-                var fileName = $"{templateName}_{DateTime.Now.Ticks}.docx";
-                var fullFileName = Path.Combine(folder, fileName);
-                using var stream = new FileStream(fullFileName, FileMode.Create);
-                formFile.CopyTo(stream);
+                var ms = new MemoryStream();
+                formFile.CopyTo(ms);
+                repository.CreateTemplate(templateName, ms.ToArray());
                 return Ok();
             }
             else
@@ -47,136 +43,80 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        [Route("{templateName}/mappings/{mappingsName}")]
-        public IActionResult GetTemplateMappings([FromRoute]string templateName, [FromRoute]string mappingsName)
+        [Route("{templateName}/mappings/{mappingName}")]
+        public IActionResult GetTemplateMapping([FromRoute]string templateName, [FromRoute]string mappingName)
         {
-            var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
-            var latestTemplateFileName = Directory
-                .GetFiles(templatesFolder, $"{templateName}_*.docx")
-                .OrderByDescending(o => o)
-                .FirstOrDefault();
-            if (latestTemplateFileName != null)
+            var mapping = repository.GetLatestMapping(templateName, mappingName);
+            if (mapping == null)
             {
-                var mappingsFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
-                var latestMappingsFileName = Directory
-                    .GetFiles(mappingsFolder, $"{Path.GetFileNameWithoutExtension(latestTemplateFileName)}_{mappingsName}_*.xlsm")
-                    .OrderByDescending(o => o)
-                    .FirstOrDefault();
+                var template = repository.GetLatestTemplate(templateName);
+                if (template == null)
+                    return NotFound();
+                var emptyMappingBuffer = repository.GetEmptyMapping().Buffer;
+                var testUrl = $"{Request.Scheme}://{Request.Host}/api/templates/{templateName}/mappings/{mappingName}/test";
 
-                byte[] mappingsBuffer;
-                string mappingsFileName;
-                if (latestMappingsFileName != null)
-                {
-                    mappingsBuffer = System.IO.File.ReadAllBytes(latestMappingsFileName);
-                    mappingsFileName = Path.GetFileName(latestMappingsFileName);
-                }
-                else
-                {
-                    var emptyMappingsPath = Path.Combine(hostEnv.ContentRootPath, "resources", "empty_mappings.xlsm");
-                    var templateBytes = System.IO.File.ReadAllBytes(latestTemplateFileName);
+                var processor = new TemplateProcessor();
+                var mappingBuffer = processor.CreateMappingForTemplate(emptyMappingBuffer, mappingName, testUrl, template.Buffer);
 
-                    var processor = new TemplateProcessor();
-                    var testUrl = $"{Request.Scheme}://{Request.Host}/api/templates/{templateName}/mappings/{mappingsName}/test";
-                    mappingsBuffer = processor.CreateMappingsForTemplate(emptyMappingsPath, mappingsName, testUrl, templateBytes);
-                    mappingsFileName = $"{Path.GetFileNameWithoutExtension(latestTemplateFileName)}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
-
-                    System.IO.File.WriteAllBytes(Path.Combine(mappingsFolder, mappingsFileName), mappingsBuffer);
-                }
-                var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
-                return new FileContentResult(mappingsBuffer, contentType)
-                {
-                    FileDownloadName = mappingsFileName
-                };
+                mapping = repository.CreateMapping(templateName, mappingName, mappingBuffer);
             }
-            else
+            var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
+            return new FileContentResult(mapping.Buffer, contentType)
             {
-                return NotFound();
-            }
+                FileDownloadName = mapping.FileName
+            };
         }
 
         [HttpPost, DisableRequestSizeLimit]
-        [Route("{templateName}/mappings/{mappingsName}")]
-        public IActionResult CreateTemplateMappings([FromRoute]string templateName, [FromRoute]string mappingsName)
+        [Route("{templateName}/mappings/{mappingName}")]
+        public IActionResult CreateTemplateMapping([FromRoute]string templateName, [FromRoute]string mappingName)
         {
             var formFile = Request.Form.Files[0];
             if (formFile.Length > 0)
             {
-                var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-                var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
-                var latestTemplateFileName = Directory
-                    .GetFiles(templatesFolder, $"{templateName}_*.docx")
-                    .OrderByDescending(o => o)
-                    .FirstOrDefault();
-                if (latestTemplateFileName != null)
-                {
-                    var templateVersion = Path.GetFileNameWithoutExtension(latestTemplateFileName);
-                    var fileName = $"{templateVersion}_{mappingsName}_{DateTime.Now.Ticks}.xlsm";
-
-                    var fullFileName = Path.Combine(folder, fileName);
-                    using var stream = new FileStream(fullFileName, FileMode.Create);
-                    formFile.CopyTo(stream);
-                    return Ok();
-                }
-                return NotFound();
+                var ms = new MemoryStream();
+                formFile.CopyTo(ms);
+                repository.CreateMapping(templateName, mappingName, ms.ToArray());
+                return Ok();
             }
-            return BadRequest();
+            else
+                return BadRequest();
         }
 
         [HttpPost]
-        [Route("{templateName}/mappings/{mappingsName}/{command}")]
+        [Route("{templateName}/mappings/{mappingName}/{command}")]
         public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
-            [FromRoute]string mappingsName,
+            [FromRoute]string mappingName,
             [FromRoute]string command,
             [FromBody] JObject payload)
         {
             if ("document".Equals(command, StringComparison.CurrentCultureIgnoreCase))
-                return CreateDocument(templateName, mappingsName, payload);
+                return CreateDocument(templateName, mappingName, payload);
             else if ("test".Equals(command, StringComparison.CurrentCultureIgnoreCase))
-                return TestMappings(payload);
+                return TestMapping(payload);
             else
                 return NotFound();
         }
 
-        private IActionResult CreateDocument(string templateName, string mappingsName, JObject payload)
+        private IActionResult CreateDocument(string templateName, string mappingName, JObject payload)
         {
-            var templatesFolder = Path.Combine(hostEnv.ContentRootPath, "temp", "templates");
-            var latestTemplateFileName = Directory
-                .GetFiles(templatesFolder, $"{templateName}_*.docx")
-                .OrderByDescending(o => o)
-                .FirstOrDefault();
-            if (latestTemplateFileName != null)
+            var processor = new TemplateProcessor();
+            var template = repository.GetLatestTemplate(templateName);
+            var mapping = repository.GetLatestMapping(templateName, mappingName);
+
+            var documentBytes = processor.CreateDocument(template.Buffer, mapping.Buffer, payload);
+            var document = repository.CreateDocument(templateName, mappingName, documentBytes);
+
+            var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
+            return new FileContentResult(document.Buffer, contentType)
             {
-                var folder = Path.Combine(hostEnv.ContentRootPath, "temp", "mappings");
-                var mappingFiles = Directory.GetFiles(folder, $"{templateName}*_{mappingsName}_*.xlsm").OrderByDescending(o => o);
-                if (mappingFiles.Any())
-                {
-                    var templateBytes = System.IO.File.ReadAllBytes(latestTemplateFileName);
-                    var mappingFileName = mappingFiles.First();
-                    var mappingBytes = System.IO.File.ReadAllBytes(mappingFileName);
-
-                    var processor = new TemplateProcessor();
-                    var documentBytes = processor.CreateDocument(templateBytes, mappingBytes, payload);
-
-                    var documentFileName = $"{Path.GetFileNameWithoutExtension(mappingFileName)}_{DateTime.Now.Ticks}.docx";
-                    System.IO.File.WriteAllBytes(Path.Combine(hostEnv.ContentRootPath, "temp", "documents", documentFileName), documentBytes);
-
-                    var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-
-                    Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
-                    return new FileContentResult(documentBytes, contentType)
-                    {
-                        FileDownloadName = documentFileName
-                    };
-                }
-            }
-            return NotFound();
+                FileDownloadName = document.FileName
+            };
         }
 
-        private IActionResult TestMappings(JObject payload)
+        private IActionResult TestMapping(JObject payload)
         {
-            var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
-
             var sources = new Dictionary<string, JToken>();
             foreach (JToken src in (JArray)payload["sources"])
                 sources[src["name"].ToString()] = JObject.Parse(src["value"].ToString());
@@ -184,6 +124,7 @@ namespace DocumentCreatorAPI.Controllers
             var results = new JArray();
             var total = 0;
             var errors = 0;
+            var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
             foreach (var mapping in (JArray)payload["transformations"])
             {
                 var expression = mapping["expression"].ToString();

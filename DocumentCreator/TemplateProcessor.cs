@@ -98,15 +98,14 @@ namespace DocumentCreator
             return OpenXmlWordProcessing.GetTemplateFields(doc);
         }
 
-        public byte[] CreateMappingsForTemplate(string emptyMappingsPath, string mappingsName, string testUrl, byte[] templateBytes)
+        public byte[] CreateMappingForTemplate(byte[] emptyMapping, string mappingsName, string testUrl, byte[] templateBytes)
         {
             using var ms = new MemoryStream(templateBytes);
             using var templateDoc = WordprocessingDocument.Open(ms, false);
             var templateFields = OpenXmlWordProcessing.GetTemplateFields(templateDoc);
 
-            var emptyBytes = File.ReadAllBytes(emptyMappingsPath);
             using var mappingsStream = new MemoryStream();
-            mappingsStream.Write(emptyBytes, 0, emptyBytes.Length);
+            mappingsStream.Write(emptyMapping, 0, emptyMapping.Length);
             using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
             {
                 OpenXmlSpreadsheet.FillMappingsSheet(mappingsDoc, mappingsName, templateFields, testUrl);
