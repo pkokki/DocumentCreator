@@ -124,7 +124,7 @@ namespace DocumentCreatorAPI.Controllers
             var results = new JArray();
             var total = 0;
             var errors = 0;
-            var processor = new TransformProcessor(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
+            var processor = new ExpressionEvaluator(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
             foreach (var mapping in (JArray)payload["transformations"])
             {
                 var expression = mapping["expression"].ToString();

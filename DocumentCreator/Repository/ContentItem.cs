@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentCreator.Repository
+﻿namespace DocumentCreator.Repository
 {
     public class ContentItem
     {

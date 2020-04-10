@@ -8,47 +8,24 @@ using System.Linq;
 
 namespace DocumentCreator
 {
-    public class TransformProcessor
+    public class ExpressionEvaluator
     {
         private readonly CultureInfo culture, outCulture;
 
-        public TransformProcessor() : this(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture)
+        public ExpressionEvaluator() : this(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture)
         {
         }
 
-        public TransformProcessor(CultureInfo culture, CultureInfo outCulture)
+        public ExpressionEvaluator(CultureInfo culture, CultureInfo outCulture)
         {
             this.culture = culture;
             this.outCulture = outCulture;
         }
 
-        public TransformResponse Test(JObject request)
+        public ExpressionResult Evaluate(long targetId, string expression, Dictionary<string, JToken> sources)
         {
-            var response = new TransformResponse(request["name"].ToString());
-
-            var sources = new Dictionary<string, JToken>();
-            foreach (var source in request["sources"] as JArray)
-            {
-                sources.Add(source["name"].ToString(), JObject.Parse(source["value"].ToString()));
-            }
-            var transformations = request["transformations"] as JArray;
-            foreach (var transformation in transformations)
-            {
-                var targetId = (long)transformation["targetId"];
-                var expression = (string)transformation["expression"];
-                //var expected = (string)transformation["expected"];
-                //var comment = (string)transformation["comment"];
-
-                var result = Evaluate(targetId, expression, sources);
-                response.AddResult(result);
-            }
-            return response;
-        }
-
-        public TransformResult Evaluate(long targetId, string formula, Dictionary<string, JToken> sources)
-        {
-
-            var excelFormula = new ExcelFormula(formula, culture);
+            sources ??= new Dictionary<string, JToken>();
+            var excelFormula = new ExcelFormula(expression, culture);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
             var repetitions = 1;
             if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function
@@ -56,10 +33,10 @@ namespace DocumentCreator
             {
                 repetitions = sources["#COLL#"].Count();
             }
-            var result = new TransformResult()
+            var result = new ExpressionResult()
             {
                 TargetId = targetId,
-                Expression = formula,
+                Expression = expression,
             };
             try
             {
@@ -67,9 +44,9 @@ namespace DocumentCreator
                 {
                     sources["#ROW#"] = sources.ContainsKey("#COLL#") ? sources["#COLL#"]?.Skip(i).FirstOrDefault() : null;
                     var queue = new Queue<ExcelFormulaToken>(tokens);
-                    var expression = new ExcelExpression();
-                    TraverseExpression(expression, queue, sources);
-                    var operand = expression.Evaluate();
+                    var excelExpression = new ExcelExpression();
+                    TraverseExpression(excelExpression, queue, sources);
+                    var operand = excelExpression.Evaluate();
                     if (i == 0)
                     {
                         var value = operand.Value;

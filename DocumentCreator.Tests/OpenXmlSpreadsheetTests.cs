@@ -7,12 +7,14 @@ namespace DocumentCreator
     public class OpenXmlSpreadsheetTests
     {
         [Fact]
-        public void GetTransformations()
+        public void CanGetTemplateFieldExpressions()
         {
-            using var ms = new MemoryStream(File.ReadAllBytes(@".\Resources\T01_637218725708848542_M01_637218774956694571.xlsm"));
+            using var ms = new MemoryStream(File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm"));
             using var doc = SpreadsheetDocument.Open(ms, false);
-            var transformations = OpenXmlSpreadsheet.GetTransformations(doc);
-            Assert.NotEmpty(transformations);
+
+            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc);
+
+            Assert.NotEmpty(templateFieldExpressions);
         }
     }
 }

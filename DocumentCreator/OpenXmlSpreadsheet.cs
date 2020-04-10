@@ -147,9 +147,9 @@ namespace DocumentCreator
             }
         }
 
-        public static IEnumerable<Transformation> GetTransformations(SpreadsheetDocument doc)
+        public static IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc)
         {
-            var transformations = new List<Transformation>();
+            var templateFieldExpressions = new List<TemplateFieldExpression>();
             var worksheet = GetFirstWorkSheet(doc);
             var stringTablePart = GetSharedStringTablePart(doc);
             var rowIndex = 3U;
@@ -159,18 +159,18 @@ namespace DocumentCreator
                 name = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}");
                 if (!string.IsNullOrEmpty(name))
                 {
-                    var transformation = new Transformation()
+                    var templateFieldExpression = new TemplateFieldExpression()
                     {
                         Name = name,
                         Parent = GetCellValue(worksheet, stringTablePart, $"C{rowIndex}"),
                         IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"D{rowIndex}"),
                         Expression = GetCellFormula(worksheet, $"J{rowIndex}")
                     };
-                    transformations.Add(transformation);
+                    templateFieldExpressions.Add(templateFieldExpression);
                     ++rowIndex;
                 }
             } while (!string.IsNullOrEmpty(name));
-            return transformations;
+            return templateFieldExpressions;
         }
 
         private static string GetCellFormula(Worksheet worksheet, string cellAddress)

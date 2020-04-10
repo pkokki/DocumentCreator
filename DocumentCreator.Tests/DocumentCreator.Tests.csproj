@@ -11,33 +11,39 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\example01.json" />
-    <None Remove="Resources\example01.xlsx" />
-    <None Remove="Resources\T01_637218725708848542.docx" />
-    <None Remove="Resources\T01_637218725708848542.json" />
-    <None Remove="Resources\T01_637218725708848542_M01_637218774956694571.xlsm" />
-    <None Remove="Resources\template001.001.docx" />
-    <None Remove="Resources\template001.002.docx" />
+    <None Remove="Resources\CreateDocument.docx" />
+    <None Remove="Resources\CreateDocument.json" />
+    <None Remove="Resources\CreateDocument.xlsm" />
+    <None Remove="Resources\CreateMappingForTemplate.docx" />
+    <None Remove="Resources\CreateMappingForTemplate.xlsm" />
+    <None Remove="Resources\FindTemplateFields001.docx" />
+    <None Remove="Resources\FindTemplateFields002.docx" />
+    <None Remove="Resources\OpenXmlSpreadsheetTests001.xlsm" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\example01.json">
+    <Content Include="Resources\CreateDocument.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\example01.xlsx" />
-    <Content Include="Resources\T01_637218725708848542.docx">
+    <Content Include="Resources\CreateMappingForTemplate.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\T01_637218725708848542.json">
+    <Content Include="Resources\CreateDocument.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\T01_637218725708848542_M01_637218774956694571.xlsm">
+    <Content Include="Resources\CreateDocument.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\template001.001.docx">
+    <Content Include="Resources\OpenXmlSpreadsheetTests001.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\template001.002.docx">
+    <Content Include="Resources\CreateMappingForTemplate.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\FindTemplateFields001.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\FindTemplateFields002.docx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

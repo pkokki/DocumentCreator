@@ -10,11 +10,13 @@ namespace DocumentCreator
     public class TemplateProcessorTests
     {
         [Fact]
-        public void CanReadFieldsOfTemplate001Version001()
+        public void CanFindTemplateFields001()
         {
+            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx");
+
             var processor = new TemplateProcessor();
-            var buffer = File.ReadAllBytes("./Resources/template001.001.docx");
             var templateFields = processor.FindTemplateFields(buffer);
+
             Assert.Equal(7, templateFields.Count());
             Assert.Equal(new string[] {
                 "FromAccountNumber",
@@ -28,47 +30,56 @@ namespace DocumentCreator
         }
 
         [Fact]
-        public void CanReadFieldsOfTemplate001Version002()
+        public void CanFindTemplateFields002()
         {
+            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields002.docx");
+
             var processor = new TemplateProcessor();
-            var buffer = File.ReadAllBytes("./Resources/template001.002.docx");
             var templateFields = processor.FindTemplateFields(buffer);
-            Assert.Equal(7, templateFields.Count());
-            Assert.Equal(new string[] {
-                "FromAccountNumber",
-                "FromAccountHolder",
-                "ToAccountNumber",
-                "Currency",
-                "Amount",
-                "TransactionDateTime",
-                "BUN"
-            }, templateFields.Select(o => o.Name).ToArray());
+
+            Assert.Equal(11, templateFields.Count());
+        }
+
+        [Fact]
+        public void CanCreateMappingForTemplate()
+        {
+            var emptyMapping = File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm");
+            var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
+
+            var processor = new TemplateProcessor();
+            var bytes = processor.CreateMappingForTemplate(emptyMapping, "M01", "http://localhost/api", templateBytes);
+
+            Assert.NotEmpty(bytes);
         }
 
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes = File.ReadAllBytes("./Resources/T01_637218725708848542.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/T01_637218725708848542_M01_637218774956694571.xlsm");
-            var payload = JObject.Parse(File.ReadAllText("./Resources/T01_637218725708848542.json"));
+            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
+            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
+            var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
+
             var processor = new TemplateProcessor();
             var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
+
             Assert.NotEmpty(docBytes);
-            File.WriteAllBytes("../../../temp/DOCUMENT_T01_637218725708848542.docx", docBytes);
+            File.WriteAllBytes("../../../temp/CreateDocumentTest.docx", docBytes);
         }
 
         [Fact]
-        public void CanTransformTemplateAndMappings()
+        public void CanCreateDocumentInMemory()
         {
-            var wordBytes = File.ReadAllBytes("./Resources/T01_637218725708848542.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/T01_637218725708848542_M01_637218774956694571.xlsm");
-            var payload = JObject.Parse(File.ReadAllText("./Resources/T01_637218725708848542.json"));
+            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
+            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
+            var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
+
             var processor = new TemplateProcessor();
-            var transformations = processor.Transform2(wordBytes, excelBytes, payload);
-            Assert.NotEmpty(transformations);
-            Assert.True(transformations.All(o => o.Result.Error == null));
+            var templateFieldExpressions = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
+
+            Assert.NotEmpty(templateFieldExpressions);
+            Assert.True(templateFieldExpressions.All(o => o.Result.Error == null));
             var fields = new Dictionary<string, string>();
-            transformations.ToList().ForEach(o => fields.Add(o.Name, o.Result.Value));
+            templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Value));
             Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
             Assert.Equal("пяохеслиай╧ ле BONUS 3 лгм©м - ап╪ еуя© 10.000", fields["F02"]);
             Assert.Equal("923456789012345", fields["F03"]);

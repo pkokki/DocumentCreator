@@ -2,9 +2,9 @@
 
 namespace DocumentCreator.Model
 {
-    public class TransformResult
+    public class ExpressionResult
     {
-        public TransformResult()
+        public ExpressionResult()
         {
             Rows = new List<string>();
         }

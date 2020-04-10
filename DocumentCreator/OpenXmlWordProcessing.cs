@@ -3,7 +3,6 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Office2013.Word;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,22 +46,6 @@ namespace DocumentCreator
         {
             return sdtProperties.Elements<SdtAlias>().FirstOrDefault()?.Val?.ToString()
                         ?? sdtProperties.Elements<SdtId>().FirstOrDefault()?.Val;
-        }
-
-        public static void CreateDocument(WordprocessingDocument doc, JObject payload, Func<StringValue, string> transformer)
-        {
-            var fields = doc.MainDocumentPart.Document.Body
-                    .Descendants<SdtRun>()
-                    .Select(e => System.Tuple.Create(e, e.Descendants<SdtAlias>().FirstOrDefault().Val));
-            foreach (var field in fields)
-            {
-                var value = payload.GetValue(transformer(field.Item2))?.ToString() ?? string.Empty;
-                field.Item1
-                    .Descendants<SdtContentRun>().FirstOrDefault()
-                    .Descendants<Run>().FirstOrDefault()
-                    .Descendants<Text>().FirstOrDefault()
-                    .Text = value;
-            }
         }
 
         private static OpenXmlCompositeElement FindSdtContent(SdtElement sdt, string name)
@@ -148,6 +131,7 @@ namespace DocumentCreator
             }
             textElem.Text = text;
         }
+
         public static string SetContentControlContent(WordprocessingDocument doc, string name, string text)
         {
             if (text == "#HIDE_CONTENT#")
