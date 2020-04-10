@@ -47,9 +47,14 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             return value?.ToString(this);
         }
 
-        public string ToString(decimal value)
+        public string ToString(decimal value, int? decimals = null, bool commas = false)
         {
-            return Convert.ToString(value, culture);
+            string format = null;
+            if (commas)
+                format = $"N{decimals}";
+            else if (decimals.HasValue)
+                format = $"F{decimals.Value}";
+            return value.ToString(format, culture);
         }
 
         public decimal ToDecimal(string value)
@@ -78,6 +83,13 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
         public bool TryParseDecimal(string value, out decimal result)
         {
             return decimal.TryParse(value, NumberStyles.Any, culture, out result);
+        }
+
+        public int? IndexOf(string target, string text, int startIndex)
+        {
+            if (target != null && text != null && startIndex >= 0)
+                return target.IndexOf(text, startIndex, StringComparison.CurrentCulture) + 1;
+            return null;
         }
     }
 }

@@ -46,48 +46,51 @@ namespace DocumentCreator.ExcelFormulaParser
             };
         }
 
-        public static ExcelValue CreateBoolean(string oper, ExcelValue v1, ExcelValue v2)
+        public static ExcelValue CreateBoolean(string oper, ExcelValue v1, ExcelValue v2, bool ignoreCase = true)
         {
-            var a = v1.InnerValue;
-            var b = v2.InnerValue;
-            if (a == null)
-                return new BooleanValue(b == null);
-            else if (b == null)
-                return FALSE;
-            else
+            if (v1 == NA|| v2 == NA)
+                return NA;
+            if (v1 is ErrorValue)
+                return v1;
+            if (v2 is ErrorValue)
+                return v2;
+            if (oper == "=")
             {
-                // Both not null
-                object a1, b1;
-                try
-                {
-                    a1 = a;
-                    b1 = Convert.ChangeType(b, a.GetType());
-                }
-                catch
-                {
-                    b1 = b;
-                    try
-                    {
-                        a1 = Convert.ChangeType(a, b.GetType());
-                    }
-                    catch
-                    {
-                        return ErrorValue.NA;
-                    }
-                }
-                if (!(a1 is IComparable comparable))
-                    return NA;
-
-                return oper switch
-                {
-                    "=" => new BooleanValue(comparable.CompareTo(b1) == 0),
-                    ">" => new BooleanValue(comparable.CompareTo(b1) > 0),
-                    ">=" => new BooleanValue(comparable.CompareTo(b1) >= 0),
-                    "<" => new BooleanValue(comparable.CompareTo(b1) < 0),
-                    "<=" => new BooleanValue(comparable.CompareTo(b1) <= 0),
-                    _ => throw new InvalidOperationException($"Unknown logical operator: {oper}"),
-                };
+                if (v1 is BooleanValue) 
+                    return new BooleanValue(v1 == v2);
+                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
+                if (v1 is DecimalValue && v2 is DecimalValue)
+                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) == 0);
+                return FALSE;
             }
+            if (oper == "<" || oper == "<=")
+            {
+                var tmp = v1;
+                v1 = v2;
+                v2 = tmp;
+                oper = oper == "<" ? ">=" : ">";
+            }
+            if (oper == ">")
+            {
+                if (v1 is BooleanValue) return new BooleanValue(v1 == TRUE && v2 == FALSE);
+                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) > 0);
+                if (v1 is DecimalValue && v2 is DecimalValue)
+                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) > 0);
+                return new BooleanValue(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) > 0);
+
+            }
+            if (oper == ">=")
+            {
+                if (v1 is BooleanValue) return new BooleanValue(!(v1 == FALSE && v2 == TRUE));
+                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) >= 0);
+                if (v1 is DecimalValue && v2 is DecimalValue)
+                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) >= 0);
+                return new BooleanValue(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) >= 0);
+            }
+            throw new InvalidOperationException($"Unhandled comparison {v1?.GetType().Name ?? "NULL"} {oper} {v2?.GetType().Name ?? "NULL"}");
         }
 
         #endregion
@@ -113,13 +116,14 @@ namespace DocumentCreator.ExcelFormulaParser
 
         #region Methods 
 
-        protected abstract bool? AsBoolean();
+        protected internal abstract bool? AsBoolean();
+        protected internal abstract decimal? AsDecimal();
         public abstract string ToString(Language language);
 
         #endregion
 
         #region Private classes
-        private class ErrorValue : ExcelValue
+        internal class ErrorValue : ExcelValue
         {
             public ErrorValue(string text) : base(null, text, Language.Invariant)
             {
@@ -127,43 +131,59 @@ namespace DocumentCreator.ExcelFormulaParser
 
             public override string ToString(Language language) { return Text; }
 
-            protected override bool? AsBoolean() { return null; }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() { return null; }
         }
 
-        private class TextValue : ExcelValue
+        internal class TextValue : ExcelValue
         {
             public TextValue(string text, Language language) : base(text, text, language)
             {
             }
-            protected override bool? AsBoolean() { return null; }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() 
+            {
+                if (decimal.TryParse(Text, out decimal v))
+                    return v;
+                return null;
+            }
             public override string ToString(Language language) { return Text; }
         }
 
-        private class JsonTextValue : ExcelValue
+        internal class JsonTextValue : ExcelValue
         {
             public JsonTextValue(JToken token, string text, Language language) : base(token, text, language)
             {
             }
-            protected override bool? AsBoolean() { return null; }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() { return null; }
             public override string ToString(Language language) { return Text; }
         }
 
-        private class BooleanValue : ExcelValue
+        internal class BooleanValue : ExcelValue
         {
             public BooleanValue(bool value) : base(value, value ? "TRUE" : "FALSE", Language.Invariant)
             {
             }
-            protected override bool? AsBoolean() { return (bool)InnerValue; }
+            protected internal override bool? AsBoolean() { return (bool)InnerValue; }
+            protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
             public override string ToString(Language language) { return Text; }
         }
 
-        private class DecimalValue : ExcelValue
+        internal class DecimalValue : ExcelValue
         {
-            public DecimalValue(decimal value, Language language) : base(value, language.ToString(value), language)
+            private readonly int? decimals;
+            private readonly bool commas;
+
+            public DecimalValue(decimal value, Language language, int? decimals = null, bool commas = false) 
+                : base(value, language.ToString(value, decimals, commas), language)
             {
+                this.decimals = decimals;
+                this.commas = commas;
             }
-            protected override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
-            public override string ToString(Language language) { return language.ToString((decimal)InnerValue); }
+            protected internal override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
+            protected internal override decimal? AsDecimal() { return (decimal)InnerValue; }
+            public override string ToString(Language language) { return language.ToString((decimal)InnerValue, decimals, commas); }
         }
 
         #endregion
@@ -220,6 +240,28 @@ namespace DocumentCreator.ExcelFormulaParser
             switch (name)
             {
                 // EXCEL TEXT FUNCTIONS
+                case "EXACT":
+                    return CreateBoolean("=", args[0], args[1], false);
+                case "FIND":
+                    var arg3 = (args.Count > 2 && args[2].AsDecimal().HasValue) ? (int)args[2].AsDecimal().Value : 0;
+                    var result = language.IndexOf(args[1].Text, args[0].Text, arg3);
+                    if (result == null)
+                        return NA;
+                    if (result <= 0)
+                        return VALUE;
+                    return new DecimalValue(result.Value, language);
+                case "FIXED":
+                    if (args.ContainErrorValues()) return NA;
+                    if (args.NotDecimal(0, null, out decimal num)) return VALUE;
+                    if (args.NotInteger(1, 2, out int decimals)) return VALUE;
+                    if (args.NotBoolean(2, false, out bool noComma)) return VALUE;
+                    if (decimals < 0)
+                    {
+                        var factor = Convert.ToDecimal(Math.Pow(10, -decimals));
+                        num = Math.Round(num / factor, 0) * factor;
+                        decimals = 0;
+                    }
+                    return new DecimalValue(num, language, decimals, !noComma);
                 case "LEN":
                     if (args[0] == NA) return NA;
                     return new DecimalValue(args[0].Text.Length, language);
@@ -257,6 +299,7 @@ namespace DocumentCreator.ExcelFormulaParser
 
                 // EXCEL ****** FUNCTIONS
                 case "NA": return NA;
+                case "PI": return new DecimalValue(3.14159265358979M, language);
 
                 // CUSTOM UDF FUNCTIONS
                 case "SYSDATE":

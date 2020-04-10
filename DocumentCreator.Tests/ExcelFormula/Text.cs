@@ -16,10 +16,37 @@ namespace DocumentCreator.ExcelFormula
         // [Fact] public void CONCATENATE() { /* Joins several text items into one text item */ }
         // [Fact] public void DBCS() { /* Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters */ }
         // [Fact] public void DOLLAR() { /* Converts a number to text, using the $ (dollar) currency format */ }
-        // [Fact] public void EXACT() { /* Checks to see if two text values are identical */ }
-        // [Fact] public void FIND() { /* Finds one text value within another (case-sensitive) */ }
+        [Fact]
+        public void EXACT()
+        {
+            /* Checks to see if two text values are identical */
+            AssertExpression("=\"a\"=\"A\"", "TRUE");
+            AssertExpression("=\"ω\"=\"Ω\"", "TRUE");
+            AssertExpression("=EXACT(\"a\", \"A\")", "FALSE");
+            AssertExpression("=EXACT(\"Ω\", \"ω\")", "FALSE");
+        }
         // [Fact] public void FINDB() { /*  */ }
-        // [Fact] public void FIXED() { /* Formats a number as text with a fixed number of decimals */ }
+        [Fact]
+        public void FIND()
+        {
+            /* Finds one text value within another (case-sensitive) */
+            AssertExpression("=FIND(\"a\", \"Bananarama\")", "2");
+            AssertExpression("=FIND(\"a\", \"Bananarama\", 5)", "6");
+            AssertExpression("=FIND(\"o\", \"Bananarama\")", "#VALUE!");
+            AssertExpression("=FIND(\"A\", \"Bananarama\")", "#VALUE!");
+        }
+        [Fact]
+        public void FIXED()
+        {
+            // /* Formats a number as text with a fixed number of decimals */
+            AssertExpression("=FIXED(PI()*100000,2,TRUE)", "314159,27");
+            AssertExpression("=FIXED(PI()*100000,2,FALSE)", "314.159,27");
+            AssertExpression("=FIXED(PI()*100000,0,FALSE)", "314.159");
+            AssertExpression("=FIXED(PI()*100000,0,TRUE)", "314159");
+            AssertExpression("=FIXED(PI()*100000)", "314.159,27");
+            AssertExpression("=FIXED(PI()*100000,2)", "314.159,27");
+            AssertExpression("=FIXED(PI()*100000,-2)", "314.200");
+        }
         // [Fact] public void LEFT() { /* Returns the leftmost characters from a text value */ }
         // [Fact] public void LEFTB() { /*  */ }
         [Fact]
