@@ -81,7 +81,7 @@ namespace DocumentCreator
             var fields = new Dictionary<string, string>();
             templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Value));
             Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
-            Assert.Equal("пяохеслиай╧ ле BONUS 3 лгм©м - ап╪ еуя© 10.000", fields["F02"]);
+            Assert.Equal("пяохеслиайг ле BONUS 3 лгмым - апо еуяы 10.000", fields["F02"]);
             Assert.Equal("923456789012345", fields["F03"]);
             Assert.Equal("3", fields["F04"]);
             Assert.Equal("MONTH", fields["F05"]);

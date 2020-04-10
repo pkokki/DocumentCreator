@@ -1,31 +1,30 @@
 ﻿using DocumentCreator.ExcelFormulaParser;
+using DocumentCreator.ExcelFormulaParser.Languages;
 using DocumentCreator.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace DocumentCreator
 {
     public class ExpressionEvaluator
     {
-        private readonly CultureInfo culture, outCulture;
+        private readonly ExpressionContext context;
 
-        public ExpressionEvaluator() : this(CultureInfo.InvariantCulture, CultureInfo.CurrentCulture)
+        public ExpressionEvaluator() : this(Language.Invariant, Language.ElGr)
         {
         }
 
-        public ExpressionEvaluator(CultureInfo culture, CultureInfo outCulture)
+        public ExpressionEvaluator(Language inputLang, Language outputLang)
         {
-            this.culture = culture;
-            this.outCulture = outCulture;
+            context = new ExpressionContext(inputLang, outputLang);
         }
 
         public ExpressionResult Evaluate(long targetId, string expression, Dictionary<string, JToken> sources)
         {
             sources ??= new Dictionary<string, JToken>();
-            var excelFormula = new ExcelFormula(expression, culture);
+            var excelFormula = new ExcelFormula(expression, context);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
             var repetitions = 1;
             if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function
@@ -55,9 +54,9 @@ namespace DocumentCreator
                             sources["#COLL#"] = collection;
                             result.ChildRows = collection.Count;
                         }
-                        result.Value = value?.ToString(outCulture);
+                        result.Value = context.OutputLang.ToString(value);
                     }
-                    result.Rows.Add(operand.Value?.ToString(outCulture));
+                    result.Rows.Add(context.OutputLang.ToString(operand.Value));
                 }
             }
             catch (Exception ex)
@@ -87,7 +86,7 @@ namespace DocumentCreator
                             var args = EvaluateFunctionArguments(childExpression)
                                 .Select(o => o.Value)
                                 .ToList();
-                            var value = ExcelValue.EvaluateFunction(name, args, culture, sources);
+                            var value = ExcelValue.EvaluateFunction(name, args, context.OutputLang, sources);
                             expression.Add(new ExcelExpressionPart(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
@@ -100,7 +99,7 @@ namespace DocumentCreator
                 }
                 else
                 {
-                    expression.Add(new ExcelExpressionPart(token, culture));
+                    expression.Add(new ExcelExpressionPart(token, context));
                 }
             }
         }

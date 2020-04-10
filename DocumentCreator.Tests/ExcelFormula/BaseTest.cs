@@ -1,4 +1,5 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using DocumentCreator.Model;
 using System;
 using System.Globalization;
 using Xunit;
@@ -10,13 +11,13 @@ namespace DocumentCreator.ExcelFormula
     {
         protected readonly ITestOutputHelper output;
         protected readonly ExpressionEvaluator processor;
-        protected readonly CultureInfo culture;
+        protected readonly Language language;
 
         public BaseTest(ITestOutputHelper output)
         {
             this.output = output;
-            culture = CultureInfo.GetCultureInfo("el-GR");
-            processor = new ExpressionEvaluator(CultureInfo.InvariantCulture, culture);
+            language = Language.ElGr;
+            processor = new ExpressionEvaluator(Language.Invariant, language);
         }
 
         protected void AssertExpression(string expression, string expected)

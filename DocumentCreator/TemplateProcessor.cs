@@ -1,4 +1,5 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using DocumentCreator.Model;
 using DocumentFormat.OpenXml.Packaging;
 using Newtonsoft.Json.Linq;
 using System;
@@ -104,7 +105,7 @@ namespace DocumentCreator
             using var doc = WordprocessingDocument.Open(ms, false);
             var templateFields = OpenXmlWordProcessing.GetTemplateFields(doc);
 
-            var processor = new ExpressionEvaluator(CultureInfo.InvariantCulture, CultureInfo.GetCultureInfo("el-GR"));
+            var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
             foreach (var templateField in templateFields)
             {
                 var templateFieldExpression = templateFieldExpressions.FirstOrDefault(m => m.Name == templateField.Name);

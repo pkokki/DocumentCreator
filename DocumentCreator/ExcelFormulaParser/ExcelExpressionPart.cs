@@ -1,5 +1,5 @@
-﻿using System;
-using System.Globalization;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using System;
 using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -7,14 +7,14 @@ namespace DocumentCreator.ExcelFormulaParser
     public class ExcelExpressionPart
     {
         private readonly ExcelFormulaToken originalToken;
-        private readonly CultureInfo culture;
+        private readonly ExpressionContext context;
         private ExcelValue value;
 
-        public ExcelExpressionPart(ExcelFormulaToken token, CultureInfo culture)
+        public ExcelExpressionPart(ExcelFormulaToken token, ExpressionContext context)
         {
             this.originalToken = token;
             this.TokenType = token.Type;
-            this.culture = culture;
+            this.context = context;
             if (token.Type == ExcelFormulaTokenType.OperatorInfix
                 || token.Type == ExcelFormulaTokenType.OperatorPrefix
                 || token.Type == ExcelFormulaTokenType.OperatorPostfix
@@ -55,7 +55,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 {
                     if (originalToken != null && originalToken.Type != ExcelFormulaTokenType.Operand)
                         throw new InvalidOperationException($"Token of type {originalToken.Type} do not have Value");
-                    value = ExcelValue.Create(originalToken, culture);
+                    value = ExcelValue.Create(originalToken, context);
                 }
                 return value;
             }

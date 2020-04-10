@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,27 +21,27 @@ namespace DocumentCreator.ExcelFormulaParser
 
         #region Factories
 
-        public static ExcelValue Create(JToken token, CultureInfo culture)
+        public static ExcelValue Create(JToken token, Language language)
         {
             switch (token.Type)
             {
-                case JTokenType.Object: return new JsonTextValue(token, "{}", culture);
-                case JTokenType.Array: return new JsonTextValue(token, "[]", culture);
+                case JTokenType.Object: return new JsonTextValue(token, "{}", language);
+                case JTokenType.Array: return new JsonTextValue(token, "[]", language);
                 case JTokenType.Boolean: return new BooleanValue((bool)token);
                 case JTokenType.Integer:
                 case JTokenType.Float:
-                    return new DecimalValue((decimal)token, culture);
-                default: return new TextValue(token.ToString(), culture);
+                    return new DecimalValue((decimal)token, language);
+                default: return new TextValue(token.ToString(), language);
             }
         }
 
-        public static ExcelValue Create(ExcelFormulaToken token, CultureInfo culture)
+        public static ExcelValue Create(ExcelFormulaToken token, ExpressionContext context)
         {
             return token.Subtype switch
             {
-                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, culture),
-                ExcelFormulaTokenSubtype.Number => new DecimalValue(Convert.ToDecimal(token.Value, culture), culture),
-                ExcelFormulaTokenSubtype.Logical => new BooleanValue(Convert.ToBoolean(token.Value, culture)),
+                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, context.OutputLang),
+                ExcelFormulaTokenSubtype.Number => new DecimalValue(context.InputLang.ToDecimal(token.Value), context.OutputLang),
+                ExcelFormulaTokenSubtype.Logical => new BooleanValue(context.InputLang.ToBoolean(token.Value)),
                 _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
             };
         }
@@ -93,18 +94,18 @@ namespace DocumentCreator.ExcelFormulaParser
 
         #region Constructor 
 
-        protected ExcelValue(object value, string text, CultureInfo culture)
+        protected ExcelValue(object value, string text, Language language)
         {
             this.InnerValue = value;
             this.Text = text ?? string.Empty;
-            this.Culture = culture;
+            this.Language = language;
         }
 
         #endregion
 
         #region Properties
 
-        protected CultureInfo Culture { get; }
+        protected Language Language { get; }
         public object InnerValue { get; }
         public string Text { get; }
 
@@ -113,56 +114,56 @@ namespace DocumentCreator.ExcelFormulaParser
         #region Methods 
 
         protected abstract bool? AsBoolean();
-        public abstract string ToString(CultureInfo culture);
+        public abstract string ToString(Language language);
 
         #endregion
 
         #region Private classes
         private class ErrorValue : ExcelValue
         {
-            public ErrorValue(string text) : base(null, text, CultureInfo.InvariantCulture)
+            public ErrorValue(string text) : base(null, text, Language.Invariant)
             {
             }
 
-            public override string ToString(CultureInfo culture) { return Text; }
+            public override string ToString(Language language) { return Text; }
 
             protected override bool? AsBoolean() { return null; }
         }
 
         private class TextValue : ExcelValue
         {
-            public TextValue(string text, CultureInfo culture) : base(text, text, culture)
+            public TextValue(string text, Language language) : base(text, text, language)
             {
             }
             protected override bool? AsBoolean() { return null; }
-            public override string ToString(CultureInfo culture) { return Text; }
+            public override string ToString(Language language) { return Text; }
         }
 
         private class JsonTextValue : ExcelValue
         {
-            public JsonTextValue(JToken token, string text, CultureInfo culture) : base(token, text, culture)
+            public JsonTextValue(JToken token, string text, Language language) : base(token, text, language)
             {
             }
             protected override bool? AsBoolean() { return null; }
-            public override string ToString(CultureInfo culture) { return Text; }
+            public override string ToString(Language language) { return Text; }
         }
 
         private class BooleanValue : ExcelValue
         {
-            public BooleanValue(bool value) : base(value, value ? "TRUE" : "FALSE", CultureInfo.InvariantCulture)
+            public BooleanValue(bool value) : base(value, value ? "TRUE" : "FALSE", Language.Invariant)
             {
             }
             protected override bool? AsBoolean() { return (bool)InnerValue; }
-            public override string ToString(CultureInfo culture) { return Text; }
+            public override string ToString(Language language) { return Text; }
         }
 
         private class DecimalValue : ExcelValue
         {
-            public DecimalValue(decimal value, CultureInfo culture) : base(value, Convert.ToString(value, culture), culture)
+            public DecimalValue(decimal value, Language language) : base(value, language.ToString(value), language)
             {
             }
             protected override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
-            public override string ToString(CultureInfo culture) { return Convert.ToString(InnerValue, culture); }
+            public override string ToString(Language language) { return language.ToString((decimal)InnerValue); }
         }
 
         #endregion
@@ -172,17 +173,17 @@ namespace DocumentCreator.ExcelFormulaParser
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
             var value = Convert.ToDecimal(a.InnerValue) + Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Culture);
+            return new DecimalValue(value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
             var value = Convert.ToDecimal(a.InnerValue) - Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Culture);
+            return new DecimalValue(value, a.Language);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
             var value = Convert.ToDecimal(a.InnerValue) * Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Culture);
+            return new DecimalValue(value, a.Language);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
         {
@@ -194,43 +195,43 @@ namespace DocumentCreator.ExcelFormulaParser
             if (denominator == 0M)
                 return DIV0;
             var value = Convert.ToDecimal(a.InnerValue) / denominator;
-            return new DecimalValue(value, a.Culture);
+            return new DecimalValue(value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a)
         {
-            return new DecimalValue(-Convert.ToDecimal(a.InnerValue), a.Culture);
+            return new DecimalValue(-Convert.ToDecimal(a.InnerValue), a.Language);
         }
         public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
         {
             var value = Convert.ToDecimal(Math.Pow(Convert.ToDouble(a.InnerValue), Convert.ToDouble(b.InnerValue)));
-            return new DecimalValue(value, a.Culture);
+            return new DecimalValue(value, a.Language);
         }
         public static ExcelValue operator &(ExcelValue a, ExcelValue b)
         {
             var value = Convert.ToString(a.InnerValue) + Convert.ToString(b.InnerValue);
-            return new TextValue(value, a.Culture);
+            return new TextValue(value, a.Language);
         }
         #endregion
 
         #region Functions
 
-        public static ExcelValue EvaluateFunction(string name, List<ExcelValue> args, CultureInfo culture, Dictionary<string, JToken> sources)
+        public static ExcelValue EvaluateFunction(string name, List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
         {
             switch (name)
             {
                 // EXCEL TEXT FUNCTIONS
                 case "LEN":
                     if (args[0] == NA) return NA;
-                    return new DecimalValue(args[0].Text.Length, culture);
+                    return new DecimalValue(args[0].Text.Length, language);
                 case "LOWER":
                     if (args[0] == NA) return NA;
-                    return new TextValue(args[0].Text.ToLower(culture), culture);
+                    return new TextValue(language.ToLower(args[0].Text), language);
                 case "PROPER":
                     if (args[0] == NA) return NA;
-                    return new TextValue(culture.TextInfo.ToTitleCase(args[0].Text), culture);
+                    return new TextValue(language.ToProper(args[0].Text), language);
                 case "UPPER":
                     if (args[0] == NA) return NA;
-                    return new TextValue(args[0].Text.ToUpper(culture), culture);
+                    return new TextValue(language.ToUpper(args[0].Text), language);
 
                 // EXCEL LOGICAL FUNCTIONS
                 case "AND":
@@ -259,17 +260,17 @@ namespace DocumentCreator.ExcelFormulaParser
 
                 // CUSTOM UDF FUNCTIONS
                 case "SYSDATE":
-                    return new TextValue(DateTime.Today.ToString("d/M/yyyy"), culture);
+                    return new TextValue(DateTime.Today.ToString("d/M/yyyy"), language);
                 case "SOURCE":
-                    return Create(sources[args[0].Text.ToString()]?.SelectToken(args[1].Text.ToString()), culture);
+                    return Create(sources[args[0].Text.ToString()]?.SelectToken(args[1].Text.ToString()), language);
                 case "RQD":
-                    return Create(sources["RQ"]?["RequestData"]?[args[0].Text], culture);
+                    return Create(sources["RQ"]?["RequestData"]?[args[0].Text], language);
                 case "RQL":
-                    return Create(sources["RQ"]?["LogHeader"]?[args[0].Text], culture);
+                    return Create(sources["RQ"]?["LogHeader"]?[args[0].Text], language);
                 case "RQR":
-                    return Create(sources["#ROW#"]?[args[0].Text], culture);
+                    return Create(sources["#ROW#"]?[args[0].Text], language);
                 case "CONTENT":
-                    return new TextValue((args[0].AsBoolean() ?? false) ? "#SHOW_CONTENT#" : "#HIDE_CONTENT#", culture);
+                    return new TextValue((args[0].AsBoolean() ?? false) ? "#SHOW_CONTENT#" : "#HIDE_CONTENT#", language);
                 default: throw new InvalidOperationException($"Unknown function name: {name}");
             }
         }
