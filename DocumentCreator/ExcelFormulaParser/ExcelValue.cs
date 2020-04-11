@@ -42,6 +42,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, context.OutputLang),
                 ExcelFormulaTokenSubtype.Number => new DecimalValue(context.InputLang.ToDecimal(token.Value), context.OutputLang),
                 ExcelFormulaTokenSubtype.Logical => new BooleanValue(context.InputLang.ToBoolean(token.Value)),
+                ExcelFormulaTokenSubtype.Range => new RangeValue(token.Value),
                 _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
             };
         }
@@ -167,6 +168,16 @@ namespace DocumentCreator.ExcelFormulaParser
             }
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
             protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
+            public override string ToString(Language language) { return Text; }
+        }
+
+        internal class RangeValue : ExcelValue
+        {
+            public RangeValue(string value) : base(value, value, Language.Invariant)
+            {
+            }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() { return null; }
             public override string ToString(Language language) { return Text; }
         }
 

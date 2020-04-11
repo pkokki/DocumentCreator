@@ -105,15 +105,15 @@ namespace DocumentCreator
             using var doc = WordprocessingDocument.Open(ms, false);
             var templateFields = OpenXmlWordProcessing.GetTemplateFields(doc);
 
-            var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
+            var expressions = new List<TemplateFieldExpression>();
             foreach (var templateField in templateFields)
             {
-                var templateFieldExpression = templateFieldExpressions.FirstOrDefault(m => m.Name == templateField.Name);
-                if (templateFieldExpression != null)
-                {
-                    templateFieldExpression.Result = processor.Evaluate(0, "=" + templateFieldExpression.Expression, sources);
-                }
+                var expression = templateFieldExpressions.FirstOrDefault(m => m.Name == templateField.Name);
+                if (expression != null)
+                    expressions.Add(expression);
             }
+            var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
+            processor.Evaluate(expressions, sources);
             return templateFieldExpressions;
         }
     }

@@ -128,7 +128,7 @@ namespace DocumentCreatorAPI.Controllers
             foreach (var mapping in (JArray)payload["transformations"])
             {
                 var expression = mapping["expression"].ToString();
-                var result = processor.Evaluate(0, expression, sources);
+                var result = processor.Evaluate("F01", expression, sources);
 
                 var json = new JObject
                 {
