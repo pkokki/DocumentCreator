@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,8 +8,11 @@ namespace DocumentCreator.ExcelFormulaParser
 {
     public class ExcelExpression : List<ExcelExpressionPart>
     {
-        public ExcelExpressionPart Evaluate()
+        public ExcelExpressionPart Evaluate(IDictionary<string, JToken> sources, Language language)
         {
+            ResolveRangeValues(sources, language);
+            if (this.Any(p => p.HasRangeValue))
+                throw new InvalidOperationException("ExcelExpression.Evaluate: Found unresolved range value during evaluation.");
             // https://support.office.com/en-us/article/calculation-operators-and-precedence-in-excel-48be406d-4975-4d31-b2b8-7af9e0e2878a
             PerformNegation();
             ConvertPercentages();
@@ -21,6 +26,24 @@ namespace DocumentCreator.ExcelFormulaParser
             //if (value is string && decimal.TryParse((string)value, NumberStyles.Any, culture, out decimal d))
             //    value = d;
             return new ExcelExpressionPart(value);
+        }
+
+        private void ResolveRangeValues(IDictionary<string, JToken> sources, Language language)
+        {
+            for (var index = 0; index < this.Count; index++)
+            {
+                var partValue = this[index];
+                if (partValue.HasRangeValue)
+                {
+                    var rangeAddress = partValue.Value.Text;
+                    var source = (JObject)sources["#OWN#"];
+                    if (source.ContainsKey(rangeAddress))
+                    {
+                        var value = source[rangeAddress];
+                        this[index] = new ExcelExpressionPart(ExcelValue.Create(value, language));
+                    }
+                }
+            }
         }
 
         private void PerformNegation()

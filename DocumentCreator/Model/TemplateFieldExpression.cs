@@ -2,10 +2,12 @@
 {
     public class TemplateFieldExpression
     {
-        public string Name { get; internal set; }
-        public string Expression { get; internal set; }
-        public string Parent { get; internal set; }
-        public bool IsCollection { get; internal set; }
-        public ExpressionResult Result { get; internal set; }
+        public string Name { get; set; }
+        public string Cell { get; set; }
+        public string Expression { get; set; }
+        public string Parent { get; set; }
+        public bool IsCollection { get; set; }
+        // TODO: Remove from here - make it standalone
+        public ExpressionResult Result { get; set; } 
     }
 }

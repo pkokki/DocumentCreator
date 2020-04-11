@@ -8,7 +8,7 @@ namespace DocumentCreator.Model
         {
             Rows = new List<string>();
         }
-        public long TargetId { get; set; }
+        public string ExpressionName { get; set; }
         public string Expression { get; set; }
         public string Value { get; set; }
         public string Error { get; set; }

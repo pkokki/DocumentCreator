@@ -164,7 +164,8 @@ namespace DocumentCreator
                         Name = name,
                         Parent = GetCellValue(worksheet, stringTablePart, $"C{rowIndex}"),
                         IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"D{rowIndex}"),
-                        Expression = GetCellFormula(worksheet, $"J{rowIndex}")
+                        Expression = GetCellFormula(worksheet, $"J{rowIndex}"),
+                        Cell = $"J{rowIndex}"
                     };
                     templateFieldExpressions.Add(templateFieldExpression);
                     ++rowIndex;

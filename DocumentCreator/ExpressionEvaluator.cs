@@ -21,7 +21,23 @@ namespace DocumentCreator
             context = new ExpressionContext(inputLang, outputLang);
         }
 
-        public ExpressionResult Evaluate(long targetId, string expression, Dictionary<string, JToken> sources)
+        // TODO: Refactor to return IEnumerable<ExpressionResult>
+        public void Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, Dictionary<string, JToken> sources)
+        {
+            sources ??= new Dictionary<string, JToken>();
+            sources["#OWN#"] = new JObject();
+            foreach (var templateFieldExpression in templateFieldExpressions)
+            {
+                var expr = templateFieldExpression.Expression;
+                if (!expr.StartsWith("="))
+                    expr = "=" + expr;
+                var exprName = templateFieldExpression.Cell ?? templateFieldExpression.Name;
+                var result = Evaluate(exprName, expr, sources);
+                templateFieldExpression.Result = result;
+            }
+        }
+
+        public ExpressionResult Evaluate(string exprName, string expression, Dictionary<string, JToken> sources)
         {
             sources ??= new Dictionary<string, JToken>();
             var excelFormula = new ExcelFormula(expression, context);
@@ -34,7 +50,7 @@ namespace DocumentCreator
             }
             var result = new ExpressionResult()
             {
-                TargetId = targetId,
+                ExpressionName = exprName,
                 Expression = expression,
             };
             try
@@ -45,7 +61,7 @@ namespace DocumentCreator
                     var queue = new Queue<ExcelFormulaToken>(tokens);
                     var excelExpression = new ExcelExpression();
                     TraverseExpression(excelExpression, queue, sources);
-                    var operand = excelExpression.Evaluate();
+                    var operand = excelExpression.Evaluate(sources, context.OutputLang);
                     if (i == 0)
                     {
                         var value = operand.Value;
@@ -54,6 +70,8 @@ namespace DocumentCreator
                             sources["#COLL#"] = collection;
                             result.ChildRows = collection.Count;
                         }
+                        if (sources.ContainsKey("#OWN#"))
+                            sources["#OWN#"][exprName] = JToken.FromObject(value.InnerValue);
                         result.Value = context.OutputLang.ToString(value);
                     }
                     result.Rows.Add(context.OutputLang.ToString(operand.Value));
@@ -83,14 +101,14 @@ namespace DocumentCreator
                     {
                         case ExcelFormulaTokenType.Function:
                             var name = token.Value.ToUpper();
-                            var args = EvaluateFunctionArguments(childExpression)
+                            var args = EvaluateFunctionArguments(childExpression, sources)
                                 .Select(o => o.Value)
                                 .ToList();
                             var value = Functions.INSTANCE.Evaluate(name, args, context.OutputLang, sources);
                             expression.Add(new ExcelExpressionPart(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
-                            var subExpression = childExpression.Evaluate();
+                            var subExpression = childExpression.Evaluate(sources, context.OutputLang);
                             expression.Add(subExpression);
                             break;
                         default:
@@ -104,7 +122,7 @@ namespace DocumentCreator
             }
         }
 
-        private IEnumerable<ExcelExpressionPart> EvaluateFunctionArguments(ExcelExpression expression)
+        private IEnumerable<ExcelExpressionPart> EvaluateFunctionArguments(ExcelExpression expression, IDictionary<string, JToken> sources)
         {
             var args = new List<ExcelExpressionPart>();
             ExcelExpression activeArg = null;
@@ -112,7 +130,7 @@ namespace DocumentCreator
             {
                 if (item.TokenType == ExcelFormulaTokenType.Argument)
                 {
-                    args.Add(activeArg.Evaluate());
+                    args.Add(activeArg.Evaluate(sources, context.OutputLang));
                     activeArg = null;
                 }
                 else
@@ -121,8 +139,10 @@ namespace DocumentCreator
                     activeArg.Add(item);
                 }
             }
-            if (activeArg != null) args.Add(activeArg.Evaluate());
+            if (activeArg != null) args.Add(activeArg.Evaluate(sources, context.OutputLang));
             return args;
         }
+
+        
     }
 }
