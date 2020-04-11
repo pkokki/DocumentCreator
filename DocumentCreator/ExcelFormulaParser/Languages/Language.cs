@@ -9,6 +9,7 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
     {
         private readonly CultureInfo culture;
 
+
         public static Language Invariant
         {
             get
@@ -24,6 +25,14 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             }
         }
 
+        protected Language(CultureInfo culture)
+        {
+            this.culture = culture;
+            EmptyText = new ExcelValue.TextValue(string.Empty, this);
+        }
+
+        internal ExcelValue.TextValue EmptyText { get; }
+
         protected string ReplaceLetters(string text, char[] toReplace, char[] replacements)
         {
             var builder = new StringBuilder(text);
@@ -36,12 +45,7 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             }
             return builder.ToString();
         }
-
-        protected Language(CultureInfo culture)
-        {
-            this.culture = culture;
-        }
-
+        
         public string ToString(ExcelValue value)
         {
             return value?.ToString(this);
@@ -59,7 +63,11 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
 
         public decimal ToDecimal(string value)
         {
-            return Convert.ToDecimal(value, culture);
+            var result = decimal.Parse(value, NumberStyles.Number, culture);
+            // Check for wrong thousands separators
+            if (value != ToString(result))
+                throw new ArgumentException($"Wrong decimal text: '{value}' -> '{result}'");
+            return result;
         }
 
         public bool ToBoolean(string value)
@@ -90,6 +98,11 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             if (target != null && text != null && startIndex >= 0)
                 return target.IndexOf(text, startIndex, StringComparison.CurrentCulture) + 1;
             return null;
+        }
+
+        public string Replace(string text, string oldText, string newText, bool ignoreCase)
+        {
+            return text.Replace(oldText, newText, ignoreCase, culture);
         }
     }
 }

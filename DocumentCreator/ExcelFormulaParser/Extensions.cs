@@ -26,6 +26,20 @@ namespace DocumentCreator.ExcelFormulaParser
             value = result ?? 0M;
             return !result.HasValue;
         }
+        public static bool NotPosInteger(this List<ExcelValue> args, int index, int? defaultValue, out int value)
+        {
+            if (!NotInteger(args, index, defaultValue, out value) && value > 0)
+                return false;
+            value = 0;
+            return true;
+        }
+        public static bool NotNegInteger(this List<ExcelValue> args, int index, int? defaultValue, out int value)
+        {
+            if (!NotInteger(args, index, defaultValue, out value) && value >= 0)
+                return false;
+            value = 0;
+            return true;
+        }
         public static bool NotInteger(this List<ExcelValue> args, int index, int? defaultValue, out int value)
         {
             int? result = null;

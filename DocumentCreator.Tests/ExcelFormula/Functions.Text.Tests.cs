@@ -99,8 +99,25 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=PROPER(\"abc\")", "Abc");
             AssertExpression("=PROPER(\"abc def\")", "Abc Def");
         }
-        // [Fact] public void REPLACE() { /* Replaces characters within text */ }
         // [Fact] public void REPLACEB() { /*  */ }
+        [Fact]
+        public void REPLACE()
+        {
+            /* Replaces characters within text */
+            AssertExpression("=REPLACE(\"123456789\",1,1,\"\")", "23456789");
+            AssertExpression("=REPLACE(\"123456789\",1,1,\"A\")", "A23456789");
+            AssertExpression("=REPLACE(\"123456789\",20,1,\"A\")", "123456789A");
+            AssertExpression("=REPLACE(\"123456789\",5,1,\"A\")", "1234A6789");
+            AssertExpression("=REPLACE(\"123456789\",0,1,\"A\")", "#N/A");
+            AssertExpression("=REPLACE(\"123456789\",1,2,\"A\")", "A3456789");
+            AssertExpression("=REPLACE(\"123456789\",20,2,\"A\")", "123456789A");
+            AssertExpression("=REPLACE(\"123456789\",5,2,\"A\")", "1234A789");
+            AssertExpression("=REPLACE(\"123456789\",1,0,\"A\")", "A123456789");
+            AssertExpression("=REPLACE(\"123456789\",1,2,\"AB\")", "AB3456789");
+            AssertExpression("=REPLACE(\"123456789\",20,2,\"AB\")", "123456789AB");
+            AssertExpression("=REPLACE(\"123456789\",5,2,\"AB\")", "1234AB789");
+            AssertExpression("=REPLACE(\"123456789\",1,0,\"AB\")", "AB123456789");
+        }
         // [Fact] public void REPT() { /* Repeats text a given number of times */ }
         // [Fact] public void RIGHTB() { /*  */ }
         [Fact]
@@ -113,13 +130,75 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=RIGHT(\"ABCDEF\",6)", "ABCDEF");
             AssertExpression("=RIGHT(\"ABCDEF\",7)", "ABCDEF");
         }
-        // [Fact] public void SEARCH() { /* Finds one text value within another (not case-sensitive) */ }
         // [Fact] public void SEARCHB() { /*  */ }
-        // [Fact] public void SUBSTITUTE() { /* Substitutes new text for old text in a text string */ }
-        // [Fact] public void T() { /* Converts its arguments to text */ }
-        // [Fact] public void TEXT() { /* Formats a number and converts it to text */ }
+        [Fact]
+        public void SEARCH()
+        {
+            /* Finds one text value within another (not case-sensitive) */
+            AssertExpression("=SEARCH(\"a\",\"bananarama\")", "2");
+            AssertExpression("=SEARCH(\"o\",\"bananarama\")", "#N/A");
+            AssertExpression("=SEARCH(\"1\",\"654321\")", "6");
+            AssertExpression("=SEARCH(\"1,1\",\"Section 1,1\")", "9");
+            AssertExpression("=SEARCH(1,\"Section 1,1\")", "9");
+            AssertExpression("=SEARCH(1.1,\"Section 1,1\")", "9");
+            AssertExpression("=SEARCH(1.1,\"Section 1.1\")", "#N/A");
+            AssertExpression("=SEARCH(\"a\",\"bananarama\",0)", "#N/A");
+            AssertExpression("=SEARCH(\"a\",\"bananarama\",10)", "10");
+            AssertExpression("=SEARCH(\"a\",\"bananarama\",11)", "#N/A");
+        }
+        [Fact]
+        public void SUBSTITUTE()
+        {
+            /* Substitutes new text for old text in a text string */
+            AssertExpression("=SUBSTITUTE(\"ABCDFGH\",\"A\",\"_\")", "_BCDFGH");
+            AssertExpression("=SUBSTITUTE(\"ABCDFGH\",\"ABC\",\"_\")", "_DFGH");
+            AssertExpression("=SUBSTITUTE(\"ABCDFGH\",\"A\",\"___\")", "___BCDFGH");
+            AssertExpression("=SUBSTITUTE(\"AaAa\",\"A\",\"_\")", "_a_a");
+            AssertExpression("=SUBSTITUTE(\"ABCDFGH\",\"\",\"_\")", "ABCDFGH");
+            AssertExpression("=SUBSTITUTE(\"ABCDFGH\",\"B\",\"\")", "ACDFGH");
+            AssertExpression("=SUBSTITUTE(\"\",\"B\",\"_\")", "");
+            AssertExpression("=SUBSTITUTE(\"A\",\"B\",\"_\")", "A");
+            AssertExpression("=SUBSTITUTE(1234,3,\"_\")", "12_4");
+            AssertExpression("=SUBSTITUTE(1234.56,\"4,5\",\"_\")", "123_6");
+            AssertExpression("=SUBSTITUTE(TRUE,\"R\",\"_\")", "T_UE");
+            AssertExpression("=SUBSTITUTE(\"Bananarama\",\"a\",\"_\",0)", "#N/A");
+            AssertExpression("=SUBSTITUTE(\"Bananarama\",\"a\",\"_\",3)", "Banan_rama");
+            AssertExpression("=SUBSTITUTE(\"Bananarama\",\"a\",\"_\",5)", "Bananaram_");
+            AssertExpression("=SUBSTITUTE(\"Bananarama\",\"a\",\"_\",6)", "Bananarama");
+
+        }
+        [Fact]
+        public void T()
+        {
+            /* Converts its arguments to text */
+            AssertExpression("=T(\"\")", "");
+            AssertExpression("=T(\"12345\")", "12345");
+            AssertExpression("=T(\"ABC\")", "ABC");
+            AssertExpression("=T(TRUE)", "");
+            AssertExpression("=T(FALSE)", "");
+            AssertExpression("=T(0)", "");
+            AssertExpression("=T(1234)", "");
+            AssertExpression("=T(123.4)", "");
+            AssertExpression("=T(NA())", "#N/A");
+        }
+        //[Fact]
+        //public void TEXT()
+        //{
+        //    /* Formats a number and converts it to text */
+        //}
         // [Fact] public void TEXTJOIN() { /* Combines the text from multiple ranges and/or strings, and includes a delimiter you specify between each text value that will be combined. If the delimiter is an empty text string, this function will effectively concatenate the ranges. */ }
-        // [Fact] public void TRIM() { /* Removes spaces from text */ }
+        [Fact]
+        public void TRIM()
+        {
+            /* Removes spaces from text */
+            AssertExpression("=TRIM(\"\")", "");
+            AssertExpression("=TRIM(\"ABC\")", "ABC");
+            AssertExpression("=TRIM(NA())", "#N/A");
+            AssertExpression("=TRIM(\"ABC \")", "ABC");
+            AssertExpression("=TRIM(\" ABC\")", "ABC");
+            AssertExpression("=TRIM(\" ABC \")", "ABC");
+            AssertExpression("=TRIM(\"   ABC   \")", "ABC");
+        }
         // [Fact] public void UNICHAR() { /* Returns the Unicode character that is references by the given numeric value */ }
         // [Fact] public void UNICODE() { /* Returns the number (code point) that corresponds to the first character of the text */ }
         [Fact]
@@ -132,7 +211,19 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=UPPER(\"αβγ\")", "ΑΒΓ");
             AssertExpression("=UPPER(\"Πάνος\")", "ΠΑΝΟΣ");
         }
-        // [Fact] public void VALUE() { /* Converts a text argument to a number */ }
-
+        [Fact]
+        public void VALUE()
+        {
+            /* Converts a text argument to a number */
+            AssertExpression("=VALUE(1)", "1");
+            AssertExpression("=VALUE(TRUE)", "#VALUE!");
+            AssertExpression("=VALUE(FALSE)", "#VALUE!");
+            AssertExpression("=VALUE(NA())", "#N/A");
+            AssertExpression("=VALUE(\"\")", "#VALUE!");
+            AssertExpression("=VALUE(\"123\")", "123");
+            AssertExpression("=VALUE(\"123,12\")", "123,12");
+            AssertExpression("=VALUE(\"123.12\")", "#VALUE!");
+            AssertExpression("=VALUE(1.2)", "1,2");
+        }
     }
 }

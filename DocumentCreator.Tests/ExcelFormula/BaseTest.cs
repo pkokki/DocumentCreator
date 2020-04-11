@@ -22,6 +22,8 @@ namespace DocumentCreator.ExcelFormula
 
         protected void AssertExpression(string expression, string expected)
         {
+            // CONCATENATE("AssertExpression(""";SUBSTITUTE(SUBSTITUTE(FORMULATEXT(J25);"""";"\""");";";",");""", """;IFERROR(J25;"#N/A");""");")
+            // CONCATENATE("AssertExpression(""";SUBSTITUTE(SUBSTITUTE(FORMULATEXT(B58);"""";"\""");";";",");""", """;IFERROR(B58;IF(ISNA(B58);"#N/A";"#VALUE!"));""");")
             ExpressionResult result = processor.Evaluate(0, expression, null);
             Assert.Null(result.Error);
             Assert.True(expected.Equals(result.Value, StringComparison.InvariantCulture), $"{result.Value} != {expected}");

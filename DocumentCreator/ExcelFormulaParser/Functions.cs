@@ -27,8 +27,15 @@ namespace DocumentCreator.ExcelFormulaParser
             Registry.Add("LOWER", LOWER);
             Registry.Add("MID", MID);
             Registry.Add("PROPER", PROPER);
+            Registry.Add("REPLACE", REPLACE);
             Registry.Add("RIGHT", RIGHT);
+            Registry.Add("SEARCH", SEARCH);
+            Registry.Add("SUBSTITUTE", SUBSTITUTE);
+            Registry.Add("T", T);
+            Registry.Add("TEXT", TEXT);
+            Registry.Add("TRIM", TRIM);
             Registry.Add("UPPER", UPPER);
+            Registry.Add("VALUE", VALUE);
 
             Registry.Add("AND", AND);
             Registry.Add("IF", IF);
