@@ -12,8 +12,21 @@ namespace DocumentCreator.ExcelFormula
         // [Fact] public void CHAR() { /* Returns the character specified by the code number */ }
         // [Fact] public void CLEAN() { /* Removes all nonprintable characters from text */ }
         // [Fact] public void CODE() { /* Returns a numeric code for the first character in a text string */ }
-        // [Fact] public void CONCAT() { /* Combines the text from multiple ranges and/or strings, but it doesn't provide the delimiter or IgnoreEmpty arguments. */ }
-        // [Fact] public void CONCATENATE() { /* Joins several text items into one text item */ }
+        
+        [Fact]
+        public void CONCATENATE()
+        {
+            /* Joins several text items into one text item */
+            AssertExpression("=CONCATENATE(\"A\")", "A");
+            AssertExpression("=CONCATENATE(\"A\",\"B\")", "AB");
+            AssertExpression("=CONCATENATE(TRUE,FALSE)", "TRUEFALSE");
+            AssertExpression("=CONCATENATE(1.2,\"3,4\")", "1,23,4");
+            AssertExpression("=CONCATENATE(1.2,\"3.4\")", "1,23.4");
+            AssertExpression("=CONCATENATE(\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\")", "123456789");
+            AssertExpression("=CONCATENATE(1,2,3,4,5,6,7,8,9)", "123456789");
+            AssertExpression("=CONCATENATE(1,2,3,4,5,6,7,8,9,NA())", "#N/A");
+
+        }
         // [Fact] public void DBCS() { /* Changes half-width (single-byte) English letters or katakana within a character string to full-width (double-byte) characters */ }
         // [Fact] public void DOLLAR() { /* Converts a number to text, using the $ (dollar) currency format */ }
         [Fact]

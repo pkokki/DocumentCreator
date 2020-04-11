@@ -9,6 +9,14 @@ namespace DocumentCreator.ExcelFormulaParser
 {
     public partial class Functions
     {
+        public ExcelValue CONCATENATE(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        {
+            if (args.ContainErrorValues()) return ExcelValue.NA;
+            var parts = args.Select(a => a.ToString(language));
+            var result = string.Join(string.Empty, parts);
+            return new ExcelValue.TextValue(result, language);
+        }
+
         public ExcelValue EXACT(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
         {
             return ExcelValue.CreateBoolean("=", args[0], args[1], false);

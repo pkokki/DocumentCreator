@@ -19,6 +19,7 @@ namespace DocumentCreator.ExcelFormulaParser
             Registry.Add("NA", NA);
             Registry.Add("PI", PI);
 
+            Registry.Add("CONCATENATE", CONCATENATE);
             Registry.Add("EXACT", EXACT);
             Registry.Add("FIND", FIND);
             Registry.Add("FIXED", FIXED);
