@@ -19,7 +19,7 @@ namespace DocumentCreator
             return OpenXmlWordProcessing.GetTemplateFields(doc);
         }
 
-        public byte[] CreateMappingForTemplate(byte[] emptyMapping, string mappingsName, string testUrl, byte[] templateBytes)
+        public byte[] CreateMappingForTemplate(byte[] emptyMapping, string templateName, string mappingsName, string testUrl, byte[] templateBytes)
         {
             using var ms = new MemoryStream(templateBytes);
             using var templateDoc = WordprocessingDocument.Open(ms, false);
@@ -29,7 +29,7 @@ namespace DocumentCreator
             mappingsStream.Write(emptyMapping, 0, emptyMapping.Length);
             using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
             {
-                OpenXmlSpreadsheet.FillMappingsSheet(mappingsDoc, mappingsName, templateFields, testUrl);
+                OpenXmlSpreadsheet.FillMappingsSheet(mappingsDoc, templateName, mappingsName, templateFields, testUrl);
             }
             var excelBytes = mappingsStream.ToArray();
             return excelBytes;
@@ -66,7 +66,7 @@ namespace DocumentCreator
                             .ForEach(o =>
                             {
                                 childValues[o.Name] = o.Result.Rows;
-                                o.Result.Value = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
+                                o.Result.Text = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
                             });
                         if (templateFieldExpression.Result.ChildRows == 0)
                             throw new InvalidOperationException($"[{templateFieldExpression.Name}]: Collection is empty");
@@ -80,9 +80,12 @@ namespace DocumentCreator
                     }
                     else
                     {
-                        var text = templateFieldExpression.Result.Error ?? templateFieldExpression.Result.Value;
-                        templateFieldExpression.Result.Value
-                            = OpenXmlWordProcessing.SetContentControlContent(doc, templateFieldExpression.Name, text);
+                        var text = templateFieldExpression.Result.Error ?? templateFieldExpression.Result.Text;
+                        if (OpenXmlWordProcessing.SetContentControlContent(doc, templateFieldExpression.Name, text, out string newText))
+                        {
+                            templateFieldExpression.Result.Value = newText;
+                            templateFieldExpression.Result.Text = newText;
+                        }
                     }
                 }
             }

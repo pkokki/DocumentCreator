@@ -26,7 +26,7 @@ namespace DocumentCreator.ExcelFormula
             // CONCATENATE("AssertExpression(""";SUBSTITUTE(SUBSTITUTE(FORMULATEXT(B58);"""";"\""");";";",");""", """;IFERROR(B58;IF(ISNA(B58);"#N/A";"#VALUE!"));""");")
             ExpressionResult result = processor.Evaluate("F01", expression, null);
             Assert.Null(result.Error);
-            Assert.True(expected.Equals(result.Value, StringComparison.InvariantCulture), $"{result.Value} != {expected}");
+            Assert.Equal(expected, result.Text);
         }
     }
 }

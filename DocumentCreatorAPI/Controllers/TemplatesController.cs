@@ -1,4 +1,5 @@
 ﻿using DocumentCreator;
+using DocumentCreator.Model;
 using DocumentCreator.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -23,7 +24,7 @@ namespace DocumentCreatorAPI.Controllers
         [HttpGet]
         public string Get()
         {
-            return "Hello, World!";
+            return "Hello, Templates!";
         }
 
         [HttpPost, DisableRequestSizeLimit]
@@ -53,10 +54,10 @@ namespace DocumentCreatorAPI.Controllers
                 if (template == null)
                     return NotFound();
                 var emptyMappingBuffer = repository.GetEmptyMapping().Buffer;
-                var testUrl = $"{Request.Scheme}://{Request.Host}/api/templates/{templateName}/mappings/{mappingName}/test";
+                var testUrl = $"{Request.Scheme}://{Request.Host}/api/evaluations";
 
                 var processor = new TemplateProcessor();
-                var mappingBuffer = processor.CreateMappingForTemplate(emptyMappingBuffer, mappingName, testUrl, template.Buffer);
+                var mappingBuffer = processor.CreateMappingForTemplate(emptyMappingBuffer, templateName, mappingName, testUrl, template.Buffer);
 
                 mapping = repository.CreateMapping(templateName, mappingName, mappingBuffer);
             }
@@ -84,21 +85,10 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost]
-        [Route("{templateName}/mappings/{mappingName}/{command}")]
+        [Route("{templateName}/mappings/{mappingName}/{document}")]
         public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
             [FromRoute]string mappingName,
-            [FromRoute]string command,
             [FromBody] JObject payload)
-        {
-            if ("document".Equals(command, StringComparison.CurrentCultureIgnoreCase))
-                return CreateDocument(templateName, mappingName, payload);
-            else if ("test".Equals(command, StringComparison.CurrentCultureIgnoreCase))
-                return TestMapping(payload);
-            else
-                return NotFound();
-        }
-
-        private IActionResult CreateDocument(string templateName, string mappingName, JObject payload)
         {
             var processor = new TemplateProcessor();
             var template = repository.GetLatestTemplate(templateName);
@@ -113,38 +103,6 @@ namespace DocumentCreatorAPI.Controllers
             {
                 FileDownloadName = document.FileName
             };
-        }
-
-        private IActionResult TestMapping(JObject payload)
-        {
-            var sources = new Dictionary<string, JToken>();
-            foreach (JToken src in (JArray)payload["sources"])
-                sources[src["name"].ToString()] = JObject.Parse(src["value"].ToString());
-
-            var results = new JArray();
-            var total = 0;
-            var errors = 0;
-            var processor = new ExpressionEvaluator();
-            foreach (var mapping in (JArray)payload["transformations"])
-            {
-                var expression = mapping["expression"].ToString();
-                var result = processor.Evaluate("F01", expression, sources);
-
-                var json = new JObject
-                {
-                    ["targetId"] = mapping["targetId"],
-                    ["expression"] = mapping["expression"],
-                    ["result"] = result.Value
-                };
-                ++total;
-                if (result.Error != null)
-                {
-                    ++errors;
-                    json["error"] = result.Error;
-                }
-                results.Add(json);
-            }
-            return Ok(JObject.FromObject(new { total, errors, results }));
         }
     }
 }

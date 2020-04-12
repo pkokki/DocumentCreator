@@ -17,7 +17,7 @@ namespace DocumentCreator
             return worksheet;
         }
 
-        public static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, string mappingName, IEnumerable<TemplateField> templateFields, string testUrl)
+        public static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, string templateName, string mappingName, IEnumerable<TemplateField> templateFields, string testUrl)
         {
             var worksheet = GetFirstWorkSheet(mappingsDoc);
             var stringTablePart = GetSharedStringTablePart(mappingsDoc);
@@ -32,19 +32,22 @@ namespace DocumentCreator
                     UpdateCellValue(worksheet, rowIndex, "D", "1", CellValues.Boolean);
                 else
                     UpdateCellText(stringTablePart, worksheet, rowIndex, "D", string.Empty);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "E", string.Empty);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "F", field.Content);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "G", string.Empty);
 
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "H", mappingName);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "I", field.Name);
-                UpdateCellFormula(worksheet, rowIndex, "J", "NA()");
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "J", string.Empty);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "K", string.Empty);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "L", string.Empty);
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "M", string.Empty);
-                UpdateCellFormula(worksheet, rowIndex, "N", $"IF(J{rowIndex}=K{rowIndex},1,0)");
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "N", string.Empty);
+                //UpdateCellFormula(worksheet, rowIndex, "N", $"=IF(AND(J{rowIndex}=\"\";M{rowIndex}=\"\");\"\";IF(J{rowIndex}=M{rowIndex};1;2))");
                 ++rowIndex;
                 ++fieldId;
             }
+            UpdateCellText(stringTablePart, worksheet, 15, "Q", templateName);
             UpdateCellText(stringTablePart, worksheet, 17, "Q", testUrl);
         }
 
@@ -164,6 +167,7 @@ namespace DocumentCreator
                         Name = name,
                         Parent = GetCellValue(worksheet, stringTablePart, $"C{rowIndex}"),
                         IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"D{rowIndex}"),
+                        Content = GetCellValue(worksheet, stringTablePart, $"E{rowIndex}"),
                         Expression = GetCellFormula(worksheet, $"J{rowIndex}"),
                         Cell = $"J{rowIndex}"
                     };

@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace DocumentCreator.Model
 {
-    public class ExpressionResult
+    public class ExpressionResult : EvaluationResult
     {
         public ExpressionResult()
         {
             Rows = new List<string>();
         }
-        public string ExpressionName { get; set; }
+        
         public string Expression { get; set; }
-        public string Value { get; set; }
-        public string Error { get; set; }
+        
+        [JsonIgnore]
         public List<string> Rows { get; set; }
 
+        [JsonIgnore]
         public int ChildRows { get; set; }
 
         public override string ToString()

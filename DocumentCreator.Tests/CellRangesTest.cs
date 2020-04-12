@@ -24,7 +24,8 @@ namespace DocumentCreator
             
             Assert.NotNull(expressions[2].Result);
             Assert.Null(expressions[2].Result.Error);
-            Assert.Equal("7", expressions[2].Result.Value);
+            Assert.Equal("7", expressions[2].Result.Text);
+            Assert.Equal(7M, expressions[2].Result.Value);
         }
     }
 }
