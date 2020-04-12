@@ -21,6 +21,28 @@ namespace DocumentCreator
             context = new ExpressionContext(inputLang, outputLang);
         }
 
+        public EvaluationResponse Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
+        {
+            var expressions = new List<TemplateFieldExpression>(request.Expressions);
+            var sourceDict = new Dictionary<string, JToken>();
+            if (request.Sources != null)
+                foreach (var source in request.Sources)
+                    sourceDict[source.Name] = source.Payload;
+
+            PreEvaluate(expressions, templateFields);
+            Evaluate(expressions, sourceDict);
+            PostEvaluate(expressions);
+        
+            var response = new EvaluationResponse()
+            {
+                Total = expressions.Count(o => !string.IsNullOrEmpty(o.Expression)),
+                Errors = expressions.Count(o => !string.IsNullOrEmpty(o.Result.Error)),
+                Results = expressions.Select(o => o.Result)
+            };
+            return response;
+        }
+
+        
         // TODO: Refactor to return IEnumerable<ExpressionResult>
         public void Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, Dictionary<string, JToken> sources)
         {
@@ -29,11 +51,21 @@ namespace DocumentCreator
             foreach (var templateFieldExpression in templateFieldExpressions)
             {
                 var expr = templateFieldExpression.Expression;
-                if (!expr.StartsWith("="))
-                    expr = "=" + expr;
-                var exprName = templateFieldExpression.Cell ?? templateFieldExpression.Name;
-                var result = Evaluate(exprName, expr, sources);
-                templateFieldExpression.Result = result;
+                if (string.IsNullOrWhiteSpace(expr) || expr == "=")
+                {
+                    templateFieldExpression.Result = new ExpressionResult()
+                    {
+                        Name = templateFieldExpression.Name,
+                    };
+                }
+                else
+                {
+                    if (!expr.StartsWith("="))
+                        expr = "=" + expr;
+                    var exprName = templateFieldExpression.Cell ?? templateFieldExpression.Name;
+                    var result = Evaluate(exprName, expr, sources);
+                    templateFieldExpression.Result = result;
+                }
             }
         }
 
@@ -50,7 +82,7 @@ namespace DocumentCreator
             }
             var result = new ExpressionResult()
             {
-                ExpressionName = exprName,
+                Name = exprName,
                 Expression = expression,
             };
             try
@@ -71,8 +103,9 @@ namespace DocumentCreator
                             result.ChildRows = collection.Count;
                         }
                         if (sources.ContainsKey("#OWN#"))
-                            sources["#OWN#"][exprName] = JToken.FromObject(value.InnerValue);
-                        result.Value = context.OutputLang.ToString(value);
+                            sources["#OWN#"][exprName] = value.InnerValue != null ? JToken.FromObject(value.InnerValue) : null;
+                        result.Value = value.InnerValue; //################ context.OutputLang.ToString(value);
+                        result.Text = context.OutputLang.ToString(value);
                     }
                     result.Rows.Add(context.OutputLang.ToString(operand.Value));
                 }
@@ -143,6 +176,47 @@ namespace DocumentCreator
             return args;
         }
 
-        
+        private void PreEvaluate(List<TemplateFieldExpression> expressions, IEnumerable<TemplateField> templateFields)
+        {
+            if (templateFields != null)
+            {
+                foreach (var expression in expressions)
+                {
+                    expression.Content = templateFields.FirstOrDefault(o => o.Name == expression.Name)?.Content;
+                }
+            }
+        }
+
+        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions)
+        {
+            foreach (var expression in expressions)
+            {
+                if (expression.IsCollection)
+                {
+                    expressions
+                        .Where(o => o.Parent == expression.Name)
+                        .ToList()
+                        .ForEach(o =>
+                        {
+                            o.Result.Text = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
+                        });
+                }
+                else if (!string.IsNullOrEmpty(expression.Parent))
+                {
+                    expression.Result.Text = new JArray(expression.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
+                }
+                else
+                {
+                    if (expression.Result.Text == "#HIDE_CONTENT#")
+                    {
+                        expression.Result.Text = string.Empty;
+                    }
+                    else if (expression.Result.Text == "#SHOW_CONTENT#")
+                    {
+                        expression.Result.Text = expression.Content;
+                    }
+                }
+            }
+        }
     }
 }

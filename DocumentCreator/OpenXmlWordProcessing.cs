@@ -132,23 +132,26 @@ namespace DocumentCreator
             textElem.Text = text;
         }
 
-        public static string SetContentControlContent(WordprocessingDocument doc, string name, string text)
+        public static bool SetContentControlContent(WordprocessingDocument doc, string name, string text, out string updatedText)
         {
             if (text == "#HIDE_CONTENT#")
             {
                 RemoveContentControlContent(doc, name);
-                return string.Empty;
+                updatedText = string.Empty;
+                return true;
             }
             else if (text == "#SHOW_CONTENT#")
             {
-                return ShowContentControlContent(doc, name);
+                updatedText =ShowContentControlContent(doc, name);
+                return true;
             }
             else
             {
                 var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
                 var sdtContent = FindSdtContent(sdt, name);
                 SetTextElement(sdtContent, name, text);
-                return text;
+                updatedText = null;
+                return false;
             }
         }
     }

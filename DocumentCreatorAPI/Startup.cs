@@ -34,7 +34,11 @@ namespace DocumentCreatorAPI
                         ;
                 });
             });
-            services.AddControllers().AddNewtonsoftJson();
+            services
+                .AddControllers()
+                .AddNewtonsoftJson(options => {
+                    options.UseCamelCasing(true);
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -47,7 +47,7 @@ namespace DocumentCreator
             var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
 
             var processor = new TemplateProcessor();
-            var bytes = processor.CreateMappingForTemplate(emptyMapping, "M01", "http://localhost/api", templateBytes);
+            var bytes = processor.CreateMappingForTemplate(emptyMapping, "T01", "M01", "http://localhost/api", templateBytes);
 
             Assert.NotEmpty(bytes);
         }
@@ -79,7 +79,7 @@ namespace DocumentCreator
             Assert.NotEmpty(templateFieldExpressions);
             Assert.True(templateFieldExpressions.All(o => o.Result.Error == null));
             var fields = new Dictionary<string, string>();
-            templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Value));
+            templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Text));
             Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
             Assert.Equal("ΠΡΟΘΕΣΜΙΑΚΗ ΜΕ BONUS 3 ΜΗΝΩΝ - ΑΠΟ ΕΥΡΩ 10.000", fields["F02"]);
             Assert.Equal("923456789012345", fields["F03"]);

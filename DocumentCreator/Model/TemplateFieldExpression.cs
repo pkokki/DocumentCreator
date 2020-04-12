@@ -7,6 +7,7 @@
         public string Expression { get; set; }
         public string Parent { get; set; }
         public bool IsCollection { get; set; }
+        public string Content { get; set; }
         // TODO: Remove from here - make it standalone
         public ExpressionResult Result { get; set; } 
     }

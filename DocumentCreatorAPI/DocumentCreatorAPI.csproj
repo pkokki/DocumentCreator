@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Contracts\**" />
+    <Content Remove="Contracts\**" />
+    <EmbeddedResource Remove="Contracts\**" />
+    <None Remove="Contracts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Dictionary.cls" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DocumentCreator\DocumentCreator.csproj" />
   </ItemGroup>
 
