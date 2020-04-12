@@ -1,4 +1,5 @@
-Option Explicit On
+Attribute VB_Name = "DocumentCreator"
+Option Explicit
 Private Const FIELD_PARENT_COLUMN As Integer = 3
 Private Const FIELD_CONTENT_COLUMN As Integer = 6
 Private Const MAPPINGS_RANGE As String = "B3:J200"
@@ -18,15 +19,15 @@ Private m_parent_sources(100) As Collection
 ' ----
 
 Public Sub OnTestMapping()
-    Dim test_mapping_url As String, obj_http As Object, test_mapping_req As String, row_index As Integer,
-        response_json As Object, results_collection As Collection, json_result As Object,
+    Dim test_mapping_url As String, obj_http As Object, test_mapping_req As String, row_index As Integer, _
+        response_json As Object, results_collection As Collection, json_result As Object, _
         expression_addr As String, result_addr As String
-
+            
     test_mapping_url = Range(TEST_MAPPING_URL_CELL).Text
     test_mapping_req = PrepareTestJson()
     Debug.Print "--------- REQUEST -------------------------"
     Debug.Print test_mapping_req
-    Debug.Print("--------------------------------------------")
+    Debug.Print ("--------------------------------------------")
     Set obj_http = CreateObject("MSXML2.XMLHTTP.6.0")
     
     On Error GoTo err_handler
@@ -38,7 +39,7 @@ Public Sub OnTestMapping()
 
         If .Status = "200" Then
             Debug.Print "--------- RESPONSE -------------------------"
-            Debug.Print.ResponseText
+            Debug.Print .ResponseText
             Debug.Print "--------------------------------------------"
             Set response_json = JsonConverter.ParseJson(.ResponseText)
             If TypeName(response_json("results")) = "Collection" Then
@@ -60,17 +61,17 @@ Public Sub OnTestMapping()
                     ' =IF(ISNA(FORMULATEXT(J3));"";IF(J3=M3;1;IF(J3=IFNA(VALUE(M3);M3);1;2)))
                     Range(TEST_CHECK_COLUMN & row_index).NumberFormat = "General"
                     Range(TEST_CHECK_COLUMN & row_index).Value = ""
-                    Range(TEST_CHECK_COLUMN & row_index).Formula =
-                        "=IF(" &
-                            "ISNA(FORMULATEXT(" & expression_addr & "))," &
-                            """""," &
-                            "IF(" &
-                                expression_addr & "=" & result_addr & "," &
-                                "1," &
-                                "IF(" & expression_addr & "=IFNA(VALUE(" & result_addr & ")," & result_addr & ")," &
-                                    "1," &
-                                    "2)" &
-                            ")" &
+                    Range(TEST_CHECK_COLUMN & row_index).Formula = _
+                        "=IF(" & _
+                            "ISNA(FORMULATEXT(" & expression_addr & "))," & _
+                            """""," & _
+                            "IF(" & _
+                                expression_addr & "=" & result_addr & "," & _
+                                "1," & _
+                                "IF(" & expression_addr & "=IFNA(VALUE(" & result_addr & ")," & result_addr & ")," & _
+                                    "1," & _
+                                    "2)" & _
+                            ")" & _
                         ")"
                     row_index = row_index + 1
                 Next json_result
@@ -140,15 +141,15 @@ Private Function PrepareTestJson()
     PrepareTestJson = JsonConverter.ConvertToJson(json_payload)
 End Function
 
-Private Function GetSourceJson(name As String) As Dictionary
+Private Function GetSourceJson(source_name As String) As Dictionary
     Dim json_cache_item As Dictionary, source_row As Long, source_value As String
     
     Set json_cache_item = Nothing
-    If m_source_cache.Exists(name) Then
-        Set json_cache_item = m_source_cache.Item(name)
+    If m_source_cache.Exists(source_name) Then
+        Set json_cache_item = m_source_cache.Item(source_name)
     Else
         On Error Resume Next
-        source_row = Application.WorksheetFunction.Match(name, Range(SOURCE_NAMES_RANGE), 0)
+        source_row = Application.WorksheetFunction.Match(source_name, Range(SOURCE_NAMES_RANGE), 0)
         On Error GoTo 0
         If source_row > 0 Then
             source_value = Range(SOURCE_VALUES_RANGE).Cells(source_row, 1).Text
@@ -156,10 +157,10 @@ Private Function GetSourceJson(name As String) As Dictionary
             Set json_cache_item = JsonConverter.ParseJson(source_value)
             On Error GoTo 0
             If json_cache_item Is Nothing Or TypeName(json_cache_item) <> "Dictionary" Then
-                MsgBox "Error parsing json for source " & name
-                Debug.Print "Error parsing json for source " & name
+                MsgBox "Error parsing json for source " & source_name
+                Debug.Print "Error parsing json for source " & source_name
             Else
-                Set m_source_cache(name) = json_cache_item
+                Set m_source_cache(source_name) = json_cache_item
             End If
         End If
     End If
@@ -191,9 +192,9 @@ Public Function RQD(source_path As String) As Variant
 End Function
 
 Public Function RQR(source_path As String) As Variant
-    Dim parent_id As Variant, parent_row As Long, result_buffer As String, child_value As Variant,
+    Dim parent_id As Variant, parent_row As Long, result_buffer As String, child_value As Variant, _
         source_collection As VBA.Collection, source_obj As Object, path_tokens() As String
-
+                        
     If TypeName(Application.Caller) = "Range" Then
         parent_id = Application.Caller.Worksheet.Cells(Application.Caller.Row, FIELD_PARENT_COLUMN).Value
         On Error Resume Next
@@ -238,7 +239,7 @@ Public Function RQR(source_path As String) As Variant
 End Function
 
 Public Function SOURCE(source_name As String, source_path As String) As Variant
-    Dim parent_node As Dictionary, source_tokens() As String, node_name As String,
+    Dim parent_node As Dictionary, source_tokens() As String, node_name As String, _
         cell_value As Variant, source_json As Dictionary
     
     Set source_json = GetSourceJson(source_name)
@@ -306,4 +307,8 @@ Private Function GetJsonCellValue(parent_node As Dictionary, node_name As String
     End If
     GetJsonCellValue = cell_value
 End Function
+
+
+
+
 

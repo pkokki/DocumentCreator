@@ -88,7 +88,12 @@ namespace DocumentCreator.Repository
 
         public ContentItem GetEmptyMapping()
         {
-            var emptyMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
+            var emptyMappingPath = Path.Combine(rootPath, "temp", "empty_mappings_prod.xlsm");
+            if (!File.Exists(emptyMappingPath))
+            {
+                var masterMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
+                File.Copy(masterMappingPath, emptyMappingPath);
+            }
             return new ContentItem()
             {
                 Name = null,

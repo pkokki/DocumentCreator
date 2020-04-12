@@ -1,7 +1,9 @@
 ﻿using DocumentCreator.Model;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.CustomProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,30 +27,37 @@ namespace DocumentCreator
             var fieldId = 1;
             foreach (var field in templateFields)
             {
-                UpdateCellValue(worksheet, rowIndex, "A", fieldId.ToString(), CellValues.Number);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "B", field.Name);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "C", field.Parent);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "A", field.Name);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "B", field.Parent);
                 if (field.IsCollection)
-                    UpdateCellValue(worksheet, rowIndex, "D", "1", CellValues.Boolean);
+                    UpdateCellValue(worksheet, rowIndex, "C", "1", CellValues.Boolean);
                 else
-                    UpdateCellText(stringTablePart, worksheet, rowIndex, "D", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "E", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "F", field.Content);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "G", string.Empty);
+                    UpdateCellText(stringTablePart, worksheet, rowIndex, "C", string.Empty);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "D", field.Content);
 
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "H", mappingName);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "I", field.Name);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "F", string.Empty);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "G", string.Empty);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "H", string.Empty);
+                UpdateCellText(stringTablePart, worksheet, rowIndex, "I", string.Empty);
+                //UpdateCellFormula(worksheet, rowIndex, "I", $"IFNA(FORMULATEXT(F{rowIndex}),\"\")");
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "J", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "K", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "L", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "M", string.Empty);
-                UpdateCellText(stringTablePart, worksheet, rowIndex, "N", string.Empty);
-                //UpdateCellFormula(worksheet, rowIndex, "N", $"=IF(AND(J{rowIndex}=\"\";M{rowIndex}=\"\");\"\";IF(J{rowIndex}=M{rowIndex};1;2))");
+                //UpdateCellFormula(worksheet, rowIndex, "K", $"IF(ISNA(FORMULATEXT(F{rowIndex})),\"\",IF(F{rowIndex}=J{rowIndex},1,IF(F{rowIndex}=IFNA(VALUE(J{rowIndex}),J{rowIndex}),1,2)))");
                 ++rowIndex;
                 ++fieldId;
             }
-            UpdateCellText(stringTablePart, worksheet, 15, "Q", templateName);
-            UpdateCellText(stringTablePart, worksheet, 17, "Q", testUrl);
+            UpdateCellText(stringTablePart, worksheet, 14, "N", GetCustomDocumentProperty(mappingsDoc, "DocumentCreatorVersion") ?? "?");
+            UpdateCellText(stringTablePart, worksheet, 15, "N", templateName);
+            UpdateCellText(stringTablePart, worksheet, 16, "N", mappingName);
+            UpdateCellText(stringTablePart, worksheet, 17, "N", testUrl);
+        }
+
+        private static string GetCustomDocumentProperty(SpreadsheetDocument doc, string propName)
+        {
+            return doc.CustomFilePropertiesPart?
+                .Properties?
+                .ChildElements?.OfType<CustomDocumentProperty>()
+                .FirstOrDefault(o => o.Name == propName)?
+                .InnerText;
         }
 
         private static SharedStringTablePart GetSharedStringTablePart(SpreadsheetDocument doc)
@@ -60,18 +69,7 @@ namespace DocumentCreator
             return stringTablePart;
         }
 
-        public static void UpdateCellText(SharedStringTablePart stringTablePart, Worksheet worksheet, uint rowIndex, string column, string text)
-        {
-            text ??= string.Empty;
-            // Insert the text into the SharedStringTablePart.
-            int index = InsertSharedStringItem(stringTablePart, text);
-
-            var cell = GetCell(GetRow(worksheet, rowIndex), $"{column}{rowIndex}");
-            // Set the value of cell A1.
-            cell.CellValue = new CellValue(index.ToString());
-            cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-        }
-
+        
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
         private static int InsertSharedStringItem(SharedStringTablePart stringTablePart, string text)
@@ -97,18 +95,42 @@ namespace DocumentCreator
             return index;
         }
 
-        public static void UpdateCellValue(Worksheet worksheet, uint rowIndex, string columnName, string value, CellValues valueType)
+        public static void UpdateCellValue(Worksheet worksheet, uint rowIndex, string columnName, string value, CellValues? valueType = null, uint? styleIndex = null)
         {
             var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
-            cell.CellValue = new CellValue(value);
-            cell.DataType = new EnumValue<CellValues>(valueType);
+            if (string.IsNullOrEmpty(value))
+            {
+                cell.CellValue = new CellValue();
+            }
+            else
+            {
+                cell.CellValue = new CellValue(value);
+                if (valueType.HasValue)
+                    cell.DataType = new EnumValue<CellValues>(valueType.Value);
+            }
+            if (styleIndex.HasValue)
+                cell.StyleIndex = styleIndex;
         }
 
-        public static void UpdateCellFormula(Worksheet worksheet, uint rowIndex, string columnName, string text)
+        public static void UpdateCellText(SharedStringTablePart stringTablePart, Worksheet worksheet, uint rowIndex, string column, string text, uint? styleIndex = null)
+        {
+            text = InsertSharedStringItem(stringTablePart, text).ToString();
+            UpdateCellValue(worksheet, rowIndex, column, text, CellValues.SharedString, styleIndex);
+        }
+
+
+        public static void UpdateCellFormula(Worksheet worksheet, uint rowIndex, string columnName, string text, CellValues? dataType = null)
         {
             var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
-            cell.CellValue = new CellValue(string.Empty);
-            cell.CellFormula = new CellFormula(text);
+            var cellFormula = new CellFormula(text)
+            {
+                CalculateCell = true
+            };
+
+            if (dataType.HasValue)
+                cell.DataType = dataType.Value;
+            cell.CellValue = new CellValue();
+            cell.CellFormula = cellFormula;
         }
 
         public static Row GetRow(Worksheet worksheet, uint rowIndex)
