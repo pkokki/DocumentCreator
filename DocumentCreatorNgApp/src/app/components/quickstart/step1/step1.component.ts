@@ -1,14 +1,14 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { UploadService } from '../services/upload/upload.service'
-import { State } from '../services/state/state.service';
+import { Component, OnInit, ViewChild, Input, Output, EventEmitter, ElementRef } from '@angular/core';
+import { UploadService } from '../../../services/upload/upload.service'
+import { State } from '../../../services/state/state.service';
 
 @Component({
-  selector: 'app-step3',
-  templateUrl: './step3.component.html',
-  styleUrls: ['./step3.component.css']
+  selector: 'app-step1',
+  templateUrl: './step1.component.html',
+  styleUrls: ['./step1.component.css']
 })
-export class Step3Component implements OnInit {
-  @ViewChild('file', { static: false }) file: ElementRef;
+export class Step1Component implements OnInit {
+  @ViewChild('file', { static: false }) private file: ElementRef;
   
   uploading = false;
   errorMessage: string;
@@ -20,14 +20,14 @@ export class Step3Component implements OnInit {
   }
 
   onFileAdd() {
+    console.log(this.file);
     const files: FileList = this.file.nativeElement.files;
     if (files.length > 0) {
       const file = files[0];
       this.uploading = true;
       this.errorMessage = null;
       this.fileName = file.name;
-      const uploadUrl = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName;
-      const progress = this.uploadService.upload(uploadUrl, null, file);
+      const progress = this.uploadService.upload(this.state.apiBaseUrl + '/templates', { name: this.state.templateName }, file);
       progress.subscribe(end => {
         this.uploading = false;
       }, err => {
@@ -40,5 +40,4 @@ export class Step3Component implements OnInit {
   addFile() {
     this.file.nativeElement.click();
   }
-
 }

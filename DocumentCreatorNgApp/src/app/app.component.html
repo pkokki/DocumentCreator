@@ -16,28 +16,9 @@
 </div>
 
 <div class="content" role="main">
-  <div>
-    <h3>Parameters</h3>
-    <p><label>API base url:</label> <input [(ngModel)]="state.apiBaseUrl" placeholder="name"/></p>
-    <p><label>Template name:</label> <input [(ngModel)]="state.templateName" placeholder="name"/></p>
-    <p><label>Mappings name:</label> <input [(ngModel)]="state.mappingName" placeholder="name"/></p>
 
-    <!-- Step 1 -->
-    <h3>Step 1: Create template</h3>
-    <app-step1></app-step1>
-
-    <!-- Step 2 -->
-    <h3>Step 2: Download an empty mapping sheet</h3>
-    <app-step2></app-step2>
-
-    <!-- Step 3 -->
-    <h3>Step 3: Upload a complete mapping sheet</h3>
-    <app-step3></app-step3>
-
-    <!-- Step 4 -->
-    <h3>Step 4: Create a document</h3>
-    <app-step4></app-step4>
-  </div>
+  <app-quickstart></app-quickstart>
+  
   <!-- Footer -->
   <footer>
       Love DocumentCreator?&nbsp;

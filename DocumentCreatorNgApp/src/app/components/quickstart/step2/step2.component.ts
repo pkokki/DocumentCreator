@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { State } from '../services/state/state.service';
+import { State } from '../../../services/state/state.service';
 
 @Component({
   selector: 'app-step2',
