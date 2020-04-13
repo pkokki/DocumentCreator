@@ -76,10 +76,12 @@
   }
 
   footer {
-    margin-top: 8px;
+    margin-top: 18px;
     display: flex;
     align-items: center;
     line-height: 20px;
+    font-size: smaller;
+    color: #808080;
   }
 
   footer a {
@@ -91,7 +93,7 @@
     color: #24292e;
     display: flex;
     align-items: center;
-    font-size: 12px;
+    font-size: smaller;
     padding: 3px 10px;
     border: 1px solid rgba(27,31,35,.2);
     border-radius: 3px;
@@ -108,9 +110,9 @@
   }
 
   .github-star-badge .material-icons {
-    height: 16px;
-    width: 16px;
-    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    margin-right: 2px;
   }
 
   svg#clouds {
@@ -213,3 +215,15 @@
 
   }
 
+  .table-row {
+    width: 100%;
+    min-width: 400px;
+    max-width: 450px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 6px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    background-color: #EEEEEE;
+  }

@@ -1,1 +1,14 @@
-<p>template-list works!</p>
+<h3>Templates</h3>
+
+<div class="table-row">
+    <span>name</span>
+    <span>version</span>
+    <span>date</span>
+    <span>&nbsp;</span>
+</div>
+<div class="table-row" *ngFor="let item of items | async">
+    <span><a href="#" [routerLink]="['./', item.name]">{{ item.name }}</a></span>
+    <span>{{ item.version }}</span>
+    <span>{{ item.timestamp }}</span>
+    <span><a [routerLink]="['./']">versions</a></span>
+</div>

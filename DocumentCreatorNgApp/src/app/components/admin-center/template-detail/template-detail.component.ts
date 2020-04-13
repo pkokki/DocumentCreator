@@ -1,14 +1,29 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { switchMap } from 'rxjs/operators';
+import { TemplateService, Template, TemplateField } from 'src/app/services/template/template.service';
 
 @Component({
   selector: 'app-template-detail',
   templateUrl: './template-detail.component.html'
 })
 export class TemplateDetailComponent implements OnInit {
+  
+  templateFields: TemplateField[] = [];
+  template: Template = <Template>{};
 
-  constructor() { }
+  constructor(
+    private route: ActivatedRoute,
+    private templateService: TemplateService
+  ) { }
 
   ngOnInit(): void {
+    this.route.paramMap.pipe(
+      switchMap((params: ParamMap) => this.templateService.getTemplate(params.get('id')))
+    ).subscribe(data => {
+      Object.assign(this.template, data);
+      this.templateFields.push(...data.fields);
+    });
   }
 
 }

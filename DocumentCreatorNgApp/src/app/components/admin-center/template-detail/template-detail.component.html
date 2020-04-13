@@ -1,1 +1,20 @@
-<p>template-detail works!</p>
+<h3>Template {{template.name}}</h3>
+
+<p>Version: {{template.version}}</p>
+<p>Date: {{template.timestamp}}</p>
+
+<div class="table-row">
+    <span>name</span>
+    <span>parent</span>
+    <span>coll</span>
+    <span>content</span>
+</div>
+<div class="table-row" *ngFor="let fld of template.fields">
+    <span><a href="#" [routerLink]="['./', fld.name]">{{ fld.name }}</a></span>
+    <span>{{ fld.name }}</span>
+    <span>{{ fld.parent }}</span>
+    <span>{{ fld.isCollection }}</span>
+    <span>{{ fld.content }}</span>
+</div>
+
+<a href="#" [routerLink]="['..']">Back</a>

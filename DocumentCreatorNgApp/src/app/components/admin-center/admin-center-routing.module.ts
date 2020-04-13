@@ -12,14 +12,12 @@ const adminCenterRoutes: Routes = [
     {
         path: 'admin',
         component: AdminCenterComponent,
-        children: [{
-            path: '',
-            component: AdminCenterHomeComponent,
-            children: [
+        children: [
+            
+                { path: '', component: AdminCenterHomeComponent },
                 { path: 'templates', component: TemplateListComponent },
                 { path: 'templates/:id', component: TemplateDetailComponent }
-            ]
-        }]
+        ]
     }
 ];
 
