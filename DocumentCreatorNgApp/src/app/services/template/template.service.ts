@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EnvService } from '../env/env.service';
 import { switchMap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,13 @@ export class TemplateService {
   ) { }
 
   getTemplates(): Observable<Template[]> {
-    return this.http.get<Template[]>('/assets/templates.json');
+    return this.envService.get().pipe(
+      switchMap(env => {
+        return this.http.get<Template[]>(`${env.baseUrl}/templates`).pipe(
+          tap(ev => console.log(ev))
+        );
+      })
+    );
   }
 
   getTemplate(name: string): Observable<Template> {

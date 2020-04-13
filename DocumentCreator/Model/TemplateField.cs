@@ -1,4 +1,6 @@
-﻿namespace DocumentCreator.Model
+﻿using Newtonsoft.Json;
+
+namespace DocumentCreator.Model
 {
     public class TemplateField
     {
@@ -10,6 +12,8 @@
         public string Content { get; set; }
         public bool IsCollection { get; set; }
         public string Parent { get; set; }
+
+        [JsonIgnore]
         public string Type { get; set; }
 
         public override string ToString()

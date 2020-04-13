@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DocumentCreator.Model;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -120,6 +122,7 @@ namespace DocumentCreator.Repository
                 .FirstOrDefault();
         }
 
+        
         private string TemplatesFolder
         {
             get
@@ -158,6 +161,24 @@ namespace DocumentCreator.Repository
                 }
                 return documentsFolder;
             }
+        }
+
+        public IEnumerable<Template> GetTemplates()
+        {
+            var templates = Directory.GetFiles(TemplatesFolder)
+                .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
+                .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
+                .GroupBy(a => a.Name)
+                .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
+                .Select(a => new { a.Name, a.Data.Version, Info = new FileInfo(a.Data.FullName) })
+                .Select(a => new Template()
+                {
+                    Name = a.Name,
+                    Version = a.Version,
+                    Timestamp = a.Info.CreationTime,
+                    Size = a.Info.Length,
+                });
+            return templates;
         }
     }
 }

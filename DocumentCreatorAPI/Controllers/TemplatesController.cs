@@ -22,9 +22,9 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        public string Get()
+        public IActionResult Get()
         {
-            return "Hello, Templates!";
+            return Ok(repository.GetTemplates());
         }
 
         [HttpPost, DisableRequestSizeLimit]
