@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-admin-center',
-  templateUrl: './admin-center.component.html',
-  styleUrls: ['./admin-center.component.css']
+  templateUrl: './admin-center.component.html'
 })
 export class AdminCenterComponent implements OnInit {
 

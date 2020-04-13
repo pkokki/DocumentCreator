@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule }   from '@angular/common';
 import { NgModule } from '@angular/core';
-
 import { AppRoutingModule } from './app-routing.module';
 import { QuickstartModule } from './components/quickstart/quickstart.module';
 import { AdminCenterRoutingModule } from './components/admin-center/admin-center-routing.module'
