@@ -27,6 +27,16 @@ namespace DocumentCreatorAPI.Controllers
             return Ok(repository.GetTemplates());
         }
 
+        [HttpGet]
+        [Route("{templateName}")]
+        public IActionResult GetTemplate([FromRoute]string templateName)
+        {
+            var template = repository.GetTemplate(templateName);
+            var processor = new TemplateProcessor();
+            template.Fields = processor.FindTemplateFields(template.Buffer);
+            return Ok(template);
+        }
+
         [HttpPost, DisableRequestSizeLimit]
         public IActionResult CreateTemplate()
         {
@@ -85,8 +95,8 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost]
-        [Route("{templateName}/mappings/{mappingName}/{document}")]
-        public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
+        [Route("{templateName}/mappings/{mappingName}/document")]
+        public IActionResult CreateDocument([FromRoute]string templateName,
             [FromRoute]string mappingName,
             [FromBody] JObject payload)
         {

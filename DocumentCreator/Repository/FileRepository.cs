@@ -25,6 +25,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = templateName,
+                FullName = templateFilename,
                 FileName = Path.GetFileNameWithoutExtension(templateFilename),
                 Buffer = contents
             };
@@ -38,6 +39,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = Path.GetFileNameWithoutExtension(mappingFileName),
+                FullName = mappingFileName,
                 FileName = Path.GetFileName(mappingFileName),
                 Buffer = contents
             };
@@ -52,6 +54,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = Path.GetFileNameWithoutExtension(documentFileName),
+                FullName = documentFileName,
                 FileName = Path.GetFileName(documentFileName),
                 Buffer = contents
             };
@@ -67,7 +70,8 @@ namespace DocumentCreator.Repository
                 return null;
             return new ContentItem()
             {
-                Name = Path.GetFileNameWithoutExtension(templateName),
+                Name = Path.GetFileNameWithoutExtension(templateFileName),
+                FullName = templateFileName,
                 FileName = Path.GetFileName(templateFileName),
                 Buffer = File.ReadAllBytes(templateFileName)
             };
@@ -83,6 +87,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = mappingVersionName,
+                FullName = mappingFileName,
                 FileName = Path.GetFileName(mappingFileName),
                 Buffer = File.ReadAllBytes(mappingFileName)
             };
@@ -98,8 +103,6 @@ namespace DocumentCreator.Repository
             }
             return new ContentItem()
             {
-                Name = null,
-                FileName = null,
                 Buffer = File.ReadAllBytes(emptyMappingPath)
             };
         }
@@ -179,6 +182,22 @@ namespace DocumentCreator.Repository
                     Size = a.Info.Length,
                 });
             return templates;
+        }
+
+        public Template GetTemplate(string templateName)
+        {
+            var latest = GetLatestTemplate(templateName);
+            if (latest == null)
+                return null;
+            var info = new FileInfo(latest.FullName);
+            return new Template()
+            {
+                Name = templateName,
+                Version = latest.Name.Substring(templateName.Length + 1),
+                Timestamp = info.CreationTime,
+                Size = info.Length,
+                Buffer = latest.Buffer
+            };
         }
     }
 }

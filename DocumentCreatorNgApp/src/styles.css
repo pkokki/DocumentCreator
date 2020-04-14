@@ -227,3 +227,42 @@
     border-radius: 2px;
     background-color: #EEEEEE;
   }
+
+  /* https://stackoverflow.com/questions/48570109/layout-a-flex-box-similar-to-a-table */
+  .tbl {
+    display: flex;
+    flex-direction: column;
+  }
+  .row {
+    display: flex;
+    min-height: 14px;
+  }
+  .row div {
+    /* border: 1px solid red; */
+    padding: 2px 4px;
+  }
+  .cell1 {
+    flex: 1;
+  }
+  .cell2 {
+    flex: 2;
+  }
+  .cell3 {
+    flex: 3;
+  }
+  .cell4 {
+    flex: 4;
+  }
+  .cell8 {
+    flex: 8;
+  }
+  .row:first-child div {
+    display: flex;
+    background-color: #eeeeee;
+    /*justify-content: center;         /*  center horiz. */
+    /*align-items: center;             /*  center vert. */
+  }
+  .row .cell {
+    box-sizing: border-box;
+  }
+

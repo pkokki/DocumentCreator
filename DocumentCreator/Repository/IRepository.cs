@@ -17,5 +17,6 @@ namespace DocumentCreator.Repository
         ContentItem CreateDocument(string templateName, string mappingName, byte[] contents);
 
         IEnumerable<Template> GetTemplates();
+        Template GetTemplate(string templateName);
     }
 }
