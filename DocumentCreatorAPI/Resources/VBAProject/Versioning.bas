@@ -2,10 +2,10 @@ Attribute VB_Name = "Versioning"
 Option Explicit
 
 Private Const VERSION_MAJOR As String = "0"
-Private Const VERSION_MINOR As String = "1"
+Private Const VERSION_MINOR As String = "2"
 Private Const VERSION_YEAR As Integer = 2020
 Private Const VERSION_MONTH As Integer = 4
-Private Const VERSION_DAY As Integer = 12
+Private Const VERSION_DAY As Integer = 14
 
 Private Const VERSION_PROPERTY As String = "DocumentCreatorVersion"
 
