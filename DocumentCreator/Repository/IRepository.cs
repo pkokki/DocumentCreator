@@ -18,5 +18,8 @@ namespace DocumentCreator.Repository
 
         IEnumerable<Template> GetTemplates();
         Template GetTemplate(string templateName);
+        IEnumerable<Template> GetTemplateVersions(string templateName);
+        IEnumerable<TemplateMapping> GetTemplateMappings(string templateName);
+        TemplateMapping GetTemplateMapping(string templateName, string mappingName, string mappingVersion);
     }
 }

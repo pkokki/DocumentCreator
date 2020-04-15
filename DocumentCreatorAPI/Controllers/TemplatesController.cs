@@ -27,16 +27,6 @@ namespace DocumentCreatorAPI.Controllers
             return Ok(repository.GetTemplates());
         }
 
-        [HttpGet]
-        [Route("{templateName}")]
-        public IActionResult GetTemplate([FromRoute]string templateName)
-        {
-            var template = repository.GetTemplate(templateName);
-            var processor = new TemplateProcessor();
-            template.Fields = processor.FindTemplateFields(template.Buffer);
-            return Ok(template);
-        }
-
         [HttpPost, DisableRequestSizeLimit]
         public IActionResult CreateTemplate()
         {
@@ -51,6 +41,32 @@ namespace DocumentCreatorAPI.Controllers
             }
             else
                 return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("{templateName}")]
+        public IActionResult GetTemplate([FromRoute]string templateName)
+        {
+            var template = repository.GetTemplate(templateName);
+            var processor = new TemplateProcessor();
+            template.Fields = processor.FindTemplateFields(template.Buffer);
+            return Ok(template);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/v")]
+        public IActionResult GetTemplateVersions([FromRoute]string templateName)
+        {
+            var versions = repository.GetTemplateVersions(templateName);
+            return Ok(versions);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings")]
+        public IActionResult GetTemplateMappings([FromRoute]string templateName)
+        {
+            var mappings = repository.GetTemplateMappings(templateName);
+            return Ok(mappings);
         }
 
         [HttpGet]
@@ -76,6 +92,18 @@ namespace DocumentCreatorAPI.Controllers
             {
                 FileDownloadName = mapping.FileName
             };
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/v/{mappingVersion}")]
+        public IActionResult GetTemplateMappingInfo([FromRoute]string templateName, [FromRoute]string mappingName, [FromRoute]string mappingVersion)
+        {
+            var mapping = repository.GetTemplateMapping(templateName, mappingName, mappingVersion);
+            if (mapping == null)
+                return NotFound();
+            var processor = new TemplateProcessor();
+            mapping.Expressions = processor.GetTemplateFieldExpressions(mapping.Buffer);
+            return Ok(mapping);
         }
 
         [HttpPost, DisableRequestSizeLimit]
@@ -113,6 +141,20 @@ namespace DocumentCreatorAPI.Controllers
             {
                 FileDownloadName = document.FileName
             };
+        }
+
+        [HttpGet]
+        [Route("{templateName}/documents")]
+        public IActionResult GetDocuments([FromRoute]string templateName)
+        {
+            return Ok($"{templateName}/documents");
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/documents")]
+        public IActionResult GetDocuments([FromRoute]string templateName, [FromRoute]string mappingName)
+        {
+            return Ok($"{templateName}/mappings/{mappingName}/documents");
         }
     }
 }

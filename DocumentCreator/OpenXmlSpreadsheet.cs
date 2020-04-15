@@ -181,17 +181,17 @@ namespace DocumentCreator
             string name;
             do
             {
-                name = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}");
+                name = GetCellValue(worksheet, stringTablePart, $"A{rowIndex}");
                 if (!string.IsNullOrEmpty(name))
                 {
                     var templateFieldExpression = new TemplateFieldExpression()
                     {
                         Name = name,
-                        Parent = GetCellValue(worksheet, stringTablePart, $"C{rowIndex}"),
-                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"D{rowIndex}"),
-                        Content = GetCellValue(worksheet, stringTablePart, $"E{rowIndex}"),
-                        Expression = GetCellFormula(worksheet, $"J{rowIndex}"),
-                        Cell = $"J{rowIndex}"
+                        Parent = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}"),
+                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"C{rowIndex}"),
+                        Content = GetCellValue(worksheet, stringTablePart, $"D{rowIndex}"),
+                        Expression = GetCellFormula(worksheet, $"F{rowIndex}"),
+                        Cell = $"F{rowIndex}"
                     };
                     templateFieldExpressions.Add(templateFieldExpression);
                     ++rowIndex;

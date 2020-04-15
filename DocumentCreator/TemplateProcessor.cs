@@ -93,6 +93,14 @@ namespace DocumentCreator
             return documentBytes;
         }
 
+        public IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(byte[] mappingBytes)
+        {
+            using var mappingsStream = new MemoryStream(mappingBytes);
+            using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
+            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingsDoc);
+            return templateFieldExpressions;
+        }
+
         private IEnumerable<TemplateFieldExpression> CreateDocumentInternal(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
             var sources = new Dictionary<string, JToken>
@@ -100,9 +108,7 @@ namespace DocumentCreator
                 { "RQ", payload }
             };
 
-            using var mappingsStream = new MemoryStream(mappingBytes);
-            using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingsDoc);
+            var templateFieldExpressions = GetTemplateFieldExpressions(mappingBytes);
 
             using var ms = new MemoryStream(templateBytes);
             using var doc = WordprocessingDocument.Open(ms, false);

@@ -81,6 +81,10 @@ namespace DocumentCreator.Repository
         {
             var templateVersionName = GetLatestTemplateVersionName(templateName);
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
+            return GetTemplateMapping(mappingVersionName);
+        }
+        public ContentItem GetTemplateMapping(string mappingVersionName)
+        {
             if (mappingVersionName == null)
                 return null;
             var mappingFileName = Path.Combine(MappingsFolder, $"{mappingVersionName}.xlsm");
@@ -197,6 +201,63 @@ namespace DocumentCreator.Repository
                 Timestamp = info.CreationTime,
                 Size = info.Length,
                 Buffer = latest.Buffer
+            };
+        }
+
+        public IEnumerable<Template> GetTemplateVersions(string templateName)
+        {
+            var templates = Directory.GetFiles(TemplatesFolder)
+                .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
+                .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
+                .Where(a => a.Name.Equals(templateName, StringComparison.CurrentCultureIgnoreCase))
+                .Select(a => new { a.Name, a.Version, Info = new FileInfo(a.FullName) })
+                .Select(a => new Template()
+                {
+                    Name = a.Name,
+                    Version = a.Version,
+                    Timestamp = a.Info.CreationTime,
+                    Size = a.Info.Length,
+                });
+            return templates;
+        }
+
+        public IEnumerable<TemplateMapping> GetTemplateMappings(string templateName)
+        {
+            var mappings = Directory.GetFiles(MappingsFolder)
+                .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
+                .Select(a => new { FullName = a.Path, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] })
+                .Where(a => a.TemplateName.Equals(templateName, StringComparison.CurrentCultureIgnoreCase))
+                .GroupBy(a => a.Name)
+                .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
+                .OrderBy(a => new { a.Name, a.Data.Version })
+                .Select(a => new { a.Name, a.Data.Version, a.Data.TemplateVersion, Info = new FileInfo(a.Data.FullName) })
+                .Select(a => new TemplateMapping()
+                {
+                    MappingName = a.Name,
+                    MappingVersion = a.Version,
+                    TemplateName = templateName,
+                    TemplateVersion = a.TemplateVersion,
+                    Timestamp = a.Info.CreationTime,
+                    Size = a.Info.Length,
+                });
+            return mappings;
+        }
+
+        public TemplateMapping GetTemplateMapping(string templateName, string mappingName, string mappingVersion)
+        {
+            var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_*_{mappingName}_{mappingVersion}.xlsm").FirstOrDefault();
+            if (fullName == null)
+                return null;
+            var info = new FileInfo(fullName);
+            return new TemplateMapping()
+            {
+                MappingName = templateName,
+                MappingVersion = mappingVersion,
+                Timestamp = info.CreationTime,
+                Size = info.Length,
+                TemplateName = templateName,
+                TemplateVersion = Path.GetFileNameWithoutExtension(fullName).Split('_')[1],
+                Buffer = File.ReadAllBytes(fullName)
             };
         }
     }
