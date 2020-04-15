@@ -240,14 +240,14 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<TemplateMapping> GetTemplateMappings(string templateName)
         {
-            var mappings = Directory.GetFiles(MappingsFolder)
-                .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { FullName = a.Path, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] })
-                .Where(a => a.TemplateName.Equals(templateName, StringComparison.CurrentCultureIgnoreCase))
+            var mappings = Directory.GetFiles(MappingsFolder, $"{templateName}_*.*")
+                .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] })
                 .GroupBy(a => a.Name)
                 .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
-                .OrderBy(a => new { a.Name, a.Data.Version })
+                .OrderBy(a => a.Name).ThenBy(a => a.Data.Version)
                 .Select(a => new { a.Name, a.Data.Version, a.Data.TemplateVersion, Info = new FileInfo(a.Data.FullName) })
+                .ToList()
                 .Select(a => new TemplateMapping()
                 {
                     MappingName = a.Name,

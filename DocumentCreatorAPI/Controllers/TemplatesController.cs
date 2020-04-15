@@ -80,6 +80,13 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/versions")]
+        public IActionResult GetTemplateMappingVersions([FromRoute]string templateName, [FromRoute]string mappingName)
+        {
+            return Ok($"{templateName}/mappings/{mappingName}/versions");
+        }
+
+        [HttpGet]
         [Route("{templateName}/mappings/{mappingName}")]
         public IActionResult GetTemplateMapping([FromRoute]string templateName, [FromRoute]string mappingName)
         {
@@ -105,7 +112,7 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        [Route("{templateName}/mappings/{mappingName}/v/{mappingVersion}")]
+        [Route("{templateName}/mappings/{mappingName}/versions/{mappingVersion}")]
         public IActionResult GetTemplateMappingInfo([FromRoute]string templateName, [FromRoute]string mappingName, [FromRoute]string mappingVersion)
         {
             var mapping = repository.GetTemplateMapping(templateName, mappingName, mappingVersion);

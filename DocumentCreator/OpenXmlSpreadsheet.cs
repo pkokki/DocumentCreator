@@ -204,9 +204,7 @@ namespace DocumentCreator
         {
             var cell = worksheet.Descendants<Cell>().
                         Where(c => c.CellReference == cellAddress).FirstOrDefault();
-            if (cell != null)
-                return cell.CellFormula.InnerText;
-            return null;
+            return cell?.CellFormula?.InnerText;
         }
 
         private static string GetCellValue(Worksheet worksheet, SharedStringTablePart stringTablePart, string cellAddress)
