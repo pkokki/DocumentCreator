@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { of, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class EnvService {
     private http: HttpClient
   ) { }
 
-  get(): Observable<Env> {
+  active(): Observable<Env> {
     if (this.env)
       return of(this.env);
     return this.http.get<Env>('/assets/env.json')
@@ -28,8 +28,18 @@ export class EnvService {
       )
   }
 
+  get<T>(url: string): Observable<T> {
+    return this.active().pipe(
+      switchMap(env => {
+        if (!url.startsWith('/'))
+          url = '/' + url;
+        return this.http.get<T>(`${env.baseUrl}${url}`);
+      })
+    );
+  }
+
   activate(endpointName: string): Observable<Env> {
-    return this.get()
+    return this.active()
       .pipe(
         map(env => {
           var endpoint = env.endpoints.find(x => x.name === endpointName);

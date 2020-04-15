@@ -54,11 +54,21 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        [Route("{templateName}/v")]
+        [Route("{templateName}/versions")]
         public IActionResult GetTemplateVersions([FromRoute]string templateName)
         {
             var versions = repository.GetTemplateVersions(templateName);
             return Ok(versions);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/versions/{version}")]
+        public IActionResult GetTemplateVersion([FromRoute]string templateName, [FromRoute]string version)
+        {
+            var template = repository.GetTemplate(templateName, version);
+            var processor = new TemplateProcessor();
+            template.Fields = processor.FindTemplateFields(template.Buffer);
+            return Ok(template);
         }
 
         [HttpGet]

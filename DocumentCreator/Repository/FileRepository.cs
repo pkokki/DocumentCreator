@@ -25,8 +25,8 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = templateName,
-                FullName = templateFilename,
-                FileName = Path.GetFileNameWithoutExtension(templateFilename),
+                Path = templateFilename,
+                FileName = Path.GetFileName(templateFilename),
                 Buffer = contents
             };
         }
@@ -39,7 +39,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = Path.GetFileNameWithoutExtension(mappingFileName),
-                FullName = mappingFileName,
+                Path = mappingFileName,
                 FileName = Path.GetFileName(mappingFileName),
                 Buffer = contents
             };
@@ -54,7 +54,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = Path.GetFileNameWithoutExtension(documentFileName),
-                FullName = documentFileName,
+                Path = documentFileName,
                 FileName = Path.GetFileName(documentFileName),
                 Buffer = contents
             };
@@ -71,7 +71,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = Path.GetFileNameWithoutExtension(templateFileName),
-                FullName = templateFileName,
+                Path = templateFileName,
                 FileName = Path.GetFileName(templateFileName),
                 Buffer = File.ReadAllBytes(templateFileName)
             };
@@ -91,7 +91,7 @@ namespace DocumentCreator.Repository
             return new ContentItem()
             {
                 Name = mappingVersionName,
-                FullName = mappingFileName,
+                Path = mappingFileName,
                 FileName = Path.GetFileName(mappingFileName),
                 Buffer = File.ReadAllBytes(mappingFileName)
             };
@@ -188,19 +188,36 @@ namespace DocumentCreator.Repository
             return templates;
         }
 
-        public Template GetTemplate(string templateName)
+        public Template GetTemplate(string templateName, string version = null)
         {
-            var latest = GetLatestTemplate(templateName);
-            if (latest == null)
+            var contentItem = string.IsNullOrEmpty(version) 
+                ? GetLatestTemplate(templateName) 
+                : ReadContentitem(TemplatesFolder, $"{templateName}_{version}.docx");
+            
+            if (contentItem == null)
                 return null;
-            var info = new FileInfo(latest.FullName);
+            var info = new FileInfo(contentItem.Path);
             return new Template()
             {
                 Name = templateName,
-                Version = latest.Name.Substring(templateName.Length + 1),
+                Version = contentItem.Name.Substring(templateName.Length + 1),
                 Timestamp = info.CreationTime,
                 Size = info.Length,
-                Buffer = latest.Buffer
+                Buffer = contentItem.Buffer
+            };
+        }
+
+        private ContentItem ReadContentitem(string folderPath, string fileName)
+        {
+            var path = Path.Combine(folderPath, fileName);
+            if (!File.Exists(path))
+                return null;
+            return new ContentItem()
+            {
+                Name = Path.GetFileNameWithoutExtension(fileName),
+                FileName = fileName,
+                Path = path,
+                Buffer = File.ReadAllBytes(path)
             };
         }
 

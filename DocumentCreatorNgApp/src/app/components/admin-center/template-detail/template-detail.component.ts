@@ -19,7 +19,12 @@ export class TemplateDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => this.templateService.getTemplate(params.get('id')))
+      switchMap((params: ParamMap) => { 
+        var name = params.get('name');
+        var version = params.get('version');
+        console.log(version);
+        return this.templateService.getTemplate(name, version); 
+      })
     ).subscribe(data => {
       Object.assign(this.template, data);
       this.templateFields.push(...data.fields);

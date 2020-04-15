@@ -3,13 +3,15 @@
 <div>Active environment: {{vm.activeEndpoint.name}} [{{vm.activeEndpoint.url}}]</div>
 
 <h4>Available endpoints</h4>
-<div class="table-row">
-    <span>name</span>
-    <span>url</span>
-    <span>&nbsp;</span>
-</div>
-<div class="table-row" *ngFor="let endpoint of vm.endpoints">
-    <span>{{ endpoint.name }}</span>
-    <span>{{ endpoint.url }}</span>
-    <span><a [routerLink]="" (click)="activate(endpoint.name)">activate</a></span>
+<div class="tbl">
+    <div class="row">
+        <span class="cell2">name</span>
+        <span class="cell4">url</span>
+        <span class="cell1">&nbsp;</span>
+    </div>
+    <div class="row" *ngFor="let endpoint of vm.endpoints">
+        <span class="cell2">{{ endpoint.name }}</span>
+        <span class="cell4">{{ endpoint.url }}</span>
+        <span class="cell1"><a [routerLink]="" (click)="activate(endpoint.name)">activate</a></span>
+    </div>
 </div>

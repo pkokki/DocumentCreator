@@ -7,6 +7,7 @@ import { AdminCenterComponent } from './admin-center.component';
 import { AdminCenterHomeComponent } from './admin-center-home/admin-center-home.component';
 import { TemplateListComponent } from './template-list/template-list.component';
 import { TemplateDetailComponent } from './template-detail/template-detail.component';
+import { TemplateVersionsComponent } from './template-versions/template-versions.component';
 
 const adminCenterRoutes: Routes = [
     {
@@ -16,7 +17,9 @@ const adminCenterRoutes: Routes = [
             
                 { path: '', component: AdminCenterHomeComponent },
                 { path: 'templates', component: TemplateListComponent },
-                { path: 'templates/:id', component: TemplateDetailComponent }
+                { path: 'templates/:name', component: TemplateDetailComponent },
+                { path: 'templates/:name/versions', component: TemplateVersionsComponent },
+                { path: 'templates/:name/versions/:version', component: TemplateDetailComponent }
         ]
     }
 ];
@@ -26,7 +29,8 @@ const adminCenterRoutes: Routes = [
       AdminCenterComponent,
       AdminCenterHomeComponent,
       TemplateListComponent,
-      TemplateDetailComponent
+      TemplateDetailComponent,
+      TemplateVersionsComponent
     ],
     imports: [
       CommonModule,

@@ -16,7 +16,7 @@ export class AdminCenterHomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.envService.get().subscribe(env => this.updateVM(env));
+    this.envService.active().subscribe(env => this.updateVM(env));
   }
 
   activate(endpointName: string) {
@@ -24,8 +24,7 @@ export class AdminCenterHomeComponent implements OnInit {
   }
 
   private updateVM(env: Env) {
-    this.vm.endpoints.splice(0, this.vm.endpoints.length);
-    this.vm.endpoints.push(... env.endpoints);
+    this.vm.endpoints.splice(0, this.vm.endpoints.length, ... env.endpoints);
     this.vm.activeEndpoint = env.activeEndpoint;
   }
 
