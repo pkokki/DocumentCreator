@@ -1,6 +1,6 @@
 <h3>Admin Home</h3>
 
-<div>Active environment: {{activeEnv.name}} [{{activeEnv.url}}]</div>
+<div>Active environment: {{vm.activeEndpoint.name}} [{{vm.activeEndpoint.url}}]</div>
 
 <h4>Available endpoints</h4>
 <div class="table-row">
@@ -8,8 +8,8 @@
     <span>url</span>
     <span>&nbsp;</span>
 </div>
-<div class="table-row" *ngFor="let endpoint of endpoints">
+<div class="table-row" *ngFor="let endpoint of vm.endpoints">
     <span>{{ endpoint.name }}</span>
     <span>{{ endpoint.url }}</span>
-    <span><a href="#" [routerLink]="['./', endpoint.name]">activate</a></span>
+    <span><a [routerLink]="" (click)="activate(endpoint.name)">activate</a></span>
 </div>

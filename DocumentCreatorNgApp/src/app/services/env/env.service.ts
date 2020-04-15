@@ -21,15 +21,34 @@ export class EnvService {
         map((data: Env) => {
           this.env = data;
           if (data.endpoints && data.endpoints.length) {
-            this.env.baseUrl = data.endpoints[0].url;
+            this.setActiveEndpoint(data.endpoints[0]);
           }
           return this.env;
         })
       )
   }
+
+  activate(endpointName: string): Observable<Env> {
+    return this.get()
+      .pipe(
+        map(env => {
+          var endpoint = env.endpoints.find(x => x.name === endpointName);
+          this.setActiveEndpoint(endpoint);
+          return this.env;
+        })
+      )
+  }
+
+  private setActiveEndpoint(endpoint: { url: any; name: string; }): void {
+    if (endpoint) {
+      this.env.activeEndpoint = endpoint; 
+      this.env.baseUrl = endpoint.url;
+    }
+  }
 }
 
 export interface Env {
   baseUrl: string;
+  activeEndpoint: {name: string; url: string;};
   endpoints: [{name: string; url: string;}];
 }

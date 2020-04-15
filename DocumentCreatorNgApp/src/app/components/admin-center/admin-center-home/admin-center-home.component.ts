@@ -6,10 +6,9 @@ import { EnvService, Env } from 'src/app/services/env/env.service';
   templateUrl: './admin-center-home.component.html'
 })
 export class AdminCenterHomeComponent implements OnInit {
-  endpoints = [];
-  activeEnv = {
-    name: 'None',
-    url: 'N/A'
+  vm = {
+    activeEndpoint: <{ url: any; name: string; }>{},
+    endpoints: []
   };
 
   constructor(
@@ -17,14 +16,17 @@ export class AdminCenterHomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.envService.get().subscribe(env => this.handleEnv(env));
+    this.envService.get().subscribe(env => this.updateVM(env));
   }
 
-  private handleEnv(env: Env): void {
-    if (env.endpoints && env.endpoints.length) {
-      this.endpoints.push(...env.endpoints);
-      Object.assign(this.activeEnv, env.endpoints[0]);
-    }
+  activate(endpointName: string) {
+    this.envService.activate(endpointName).subscribe(env => this.updateVM(env));
+  }
+
+  private updateVM(env: Env) {
+    this.vm.endpoints.splice(0, this.vm.endpoints.length);
+    this.vm.endpoints.push(... env.endpoints);
+    this.vm.activeEndpoint = env.activeEndpoint;
   }
 
 }
