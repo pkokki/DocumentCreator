@@ -25,6 +25,17 @@
     font-size: smaller;
   }
 
+  a,
+  a:visited,
+  a:hover {
+    color: #1976d2;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: #125699;
+  }
+
   .spacer {
     flex: 1;
   }
@@ -46,12 +57,22 @@
     margin: 0 16px;
   }
 
-  .toolbar #twitter-logo {
+  .toolbar .logo {
     height: 40px;
     margin: 0 16px;
   }
 
-  .toolbar #twitter-logo:hover {
+  .toolbar .logo:hover {
+    opacity: 0.8;
+  }
+
+  nav a,
+  nav a:visited,
+  nav a:hover {
+    color: white;
+    margin-right: 12px;
+  }
+  nav a:hover {
     opacity: 0.8;
   }
 
@@ -64,16 +85,6 @@
     align-items: center;
   }
 
-  a,
-  a:visited,
-  a:hover {
-    color: #1976d2;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: #125699;
-  }
 
   footer {
     margin-top: 18px;

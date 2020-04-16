@@ -6,6 +6,7 @@ import { PageNotFoundComponent } from './components/var/page-not-found/page-not-
 
 const appRoutes: Routes = [
   { path: '', component: QuickstartComponent },
+  { path: 'quickstart', component: QuickstartComponent },
   { path: '**', component: PageNotFoundComponent }
 ];
 
