@@ -10,8 +10,5 @@ namespace DocumentCreator.Model
         public string Parent { get; set; }
         public bool IsCollection { get; set; }
         public string Content { get; set; }
-        [JsonIgnore]
-        // TODO: Remove from here - make it standalone
-        public EvaluationResult Result { get; set; } 
     }
 }

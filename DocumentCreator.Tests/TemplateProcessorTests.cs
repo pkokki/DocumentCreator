@@ -74,12 +74,12 @@ namespace DocumentCreator
             var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
 
             var processor = new TemplateProcessor();
-            var templateFieldExpressions = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
+            var results = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
 
-            Assert.NotEmpty(templateFieldExpressions);
-            Assert.True(templateFieldExpressions.All(o => o.Result.Error == null));
+            Assert.NotEmpty(results);
+            Assert.True(results.All(o => o.Error == null));
             var fields = new Dictionary<string, string>();
-            templateFieldExpressions.ToList().ForEach(o => fields.Add(o.Name, o.Result.Text));
+            results.ToList().ForEach(o => fields.Add(o.Name, o.Text));
             Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
             Assert.Equal("ΠΡΟΘΕΣΜΙΑΚΗ ΜΕ BONUS 3 ΜΗΝΩΝ - ΑΠΟ ΕΥΡΩ 10.000", fields["F02"]);
             Assert.Equal("923456789012345", fields["F03"]);
@@ -99,8 +99,8 @@ namespace DocumentCreator
             Assert.Equal("923456789012345", fields["F22"]);
             Assert.Equal("123", fields["F23"]);
 
-            Assert.Equal("Πρώτος προαιρετικός όρος", fields["F16"]);
-            Assert.Equal("", fields["F18"]);
+            Assert.Equal("#SHOW_CONTENT#", fields["F16"]);
+            Assert.Equal("#HIDE_CONTENT#", fields["F18"]);
 
             Assert.Equal("['1','3']", fields["F11"]);
             Assert.Equal("['0,2','0,25']", fields["F12"]);

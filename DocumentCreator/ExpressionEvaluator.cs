@@ -31,26 +31,26 @@ namespace DocumentCreator
                     sourceDict[source.Name] = source.Payload;
 
             PreEvaluate(expressions, templateFields);
-            Evaluate(expressions, sourceDict);
-            PostEvaluate(expressions);
+            var results = Evaluate(expressions, sourceDict);
+            PostEvaluate(expressions, results);
         
             var response = new EvaluationResponse()
             {
                 Total = expressions.Count(o => !string.IsNullOrEmpty(o.Expression)),
-                Errors = expressions.Count(o => !string.IsNullOrEmpty(o.Result.Error)),
-                Results = expressions.Select(o => o.Result)
+                Errors = results.Count(o => !string.IsNullOrEmpty(o.Error)),
+                Results = results
             };
             return response;
         }
         
-        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, Dictionary<string, JToken> sources)
+        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, IDictionary<string, JToken> sources)
         {
             return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
         }
 
         public EvaluationResult Evaluate(string exprName, string expression, Dictionary<string, JToken> sources)
         {
-            return Evaluate(exprName, expression, new ExpressionScope(inputLang, outputLang, sources));
+            return Evaluate(exprName, exprName, expression, new ExpressionScope(inputLang, outputLang, sources));
         }
 
         private IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, ExpressionScope scope)
@@ -68,16 +68,14 @@ namespace DocumentCreator
                 {
                     if (!expr.StartsWith("="))
                         expr = "=" + expr;
-                    var exprName = templateFieldExpression.Cell ?? templateFieldExpression.Name;
-                    result = Evaluate(exprName, expr, scope);
-                    templateFieldExpression.Result = result;
+                    result = Evaluate(templateFieldExpression.Name, templateFieldExpression.Cell, expr, scope);
                 }
                 results.Add(result);
             }
             return results;
         }
 
-        private EvaluationResult Evaluate(string exprName, string expression, ExpressionScope scope)
+        private EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
         {
             var excelFormula = new ExcelFormula(expression, scope.InLanguage);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
@@ -91,14 +89,14 @@ namespace DocumentCreator
                 var excelExpression = new ExcelExpression();
                 TraverseExpression(excelExpression, queue, scope);
                 var operand = excelExpression.Evaluate(scope);
-                scope.Set(exprName, operand.Value);
+                scope.Set(cell ?? exprName, operand.Value);
                 result.Value = operand.Value.InnerValue;
                 result.Text = outputLang.ToString(operand.Value);
             }
-            catch (Exception ex)
-            {
-                result.Error = ex.Message;
-            }
+            //catch (Exception ex)
+            //{
+            //    result.Error = ex.Message;
+            //}
             finally { }
             return result;
         }
@@ -181,17 +179,17 @@ namespace DocumentCreator
             }
         }
 
-        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions)
+        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions, IEnumerable<EvaluationResult> results)
         {
-            foreach (var expression in expressions)
+            foreach (var result in results)
             {
-                if (expression.Result.Text == "#HIDE_CONTENT#")
+                if (result.Text == "#HIDE_CONTENT#")
                 {
-                    expression.Result.Text = string.Empty;
+                    result.Text = string.Empty;
                 }
-                else if (expression.Result.Text == "#SHOW_CONTENT#")
+                else if (result.Text == "#SHOW_CONTENT#")
                 {
-                    expression.Result.Text = expression.Content;
+                    result.Text = expressions.First(o => o.Name == result.Name).Content;
                 }
             }
         }

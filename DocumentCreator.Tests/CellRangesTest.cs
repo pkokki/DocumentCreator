@@ -22,12 +22,12 @@ namespace DocumentCreator
             };
 
             var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
-            processor.Evaluate(expressions, null);
-            
-            Assert.NotNull(expressions[2].Result);
-            Assert.Null(expressions[2].Result.Error);
-            Assert.Equal("7", expressions[2].Result.Text);
-            Assert.Equal(7M, expressions[2].Result.Value);
+            var results = processor.Evaluate(expressions, null);
+
+            var result = results.ElementAt(2);
+            Assert.Null(result.Error);
+            Assert.Equal("7", result.Text);
+            Assert.Equal(7M, result.Value);
         }
 
         [Fact]
@@ -65,34 +65,34 @@ namespace DocumentCreator
             };
 
             var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
-            processor.Evaluate(expressions, sources);
+            var results = processor.Evaluate(expressions, sources);
             
             //Assert.Equal("MM", expressions.First(o => o.Name == "F01").Result.Text);
-            Assert.Equal("MM", expressions.First(o => o.Name == "F02").Result.Text);
+            AssertExpression(results, "F02", "MM");
 
-            AssertExpression(expressions, "F03", "MM");
-            AssertExpression(expressions, "F04", "MONTH");
-            AssertExpression(expressions, "F05", "MM");
-            AssertExpression(expressions, "F06", "3.10");
+            AssertExpression(results, "F03", "MM");
+            AssertExpression(results, "F04", "MONTH");
+            AssertExpression(results, "F05", "MM");
+            AssertExpression(results, "F06", "3.10");
 
-            AssertExpression(expressions, "F10", "['{}','{}']");
+            AssertExpression(results, "F10", "['{}','{}']");
 
-            AssertExpression(expressions, "F11", "['1','3']");
-            AssertExpression(expressions, "F12", "100");
-            AssertExpression(expressions, "F14", "Three");
-            AssertExpression(expressions, "F15", "One");
-            AssertExpression(expressions, "F17", "Three");
-            AssertExpression(expressions, "F18", "1");
-            AssertExpression(expressions, "F19", "3");
+            AssertExpression(results, "F11", "['1','3']");
+            AssertExpression(results, "F12", "100");
+            AssertExpression(results, "F14", "Three");
+            AssertExpression(results, "F15", "One");
+            AssertExpression(results, "F17", "Three");
+            AssertExpression(results, "F18", "1");
+            AssertExpression(results, "F19", "3");
             
-            AssertExpression(expressions, "F13", "4");
+            AssertExpression(results, "F13", "4");
         }
 
-        private void AssertExpression(List<TemplateFieldExpression> expressions, string name, string result)
+        private void AssertExpression(IEnumerable<EvaluationResult> results, string name, string expected)
         {
-            var expr = expressions.First(o => o.Name == name);
-            Assert.Null(expr.Result.Error);
-            Assert.Equal(result, expr.Result.Text);
+            var result = results.First(o => o.Name == name);
+            Assert.Null(result.Error);
+            Assert.Equal(expected, result.Text);
         }
     }
 }
