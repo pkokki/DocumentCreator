@@ -1,5 +1,6 @@
 ﻿using DocumentCreator.ExcelFormulaParser;
 using DocumentCreator.ExcelFormulaParser.Languages;
+using DocumentCreator.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,17 +10,17 @@ namespace DocumentCreator
 {
     public class ExpressionScope
     {
-        private readonly IDictionary<string, JToken> sources;
+        private readonly IEnumerable<EvaluationSource> sources;
         private readonly IDictionary<string, ExcelValue> sourceValues;
         private readonly IDictionary<string, ExcelValue> values;
 
-        public ExpressionScope(Language inLanguage, Language outLanguage, IDictionary<string, JToken> sources)
+        public ExpressionScope(Language inLanguage, Language outLanguage, IEnumerable<EvaluationSource> sources)
         {
             sourceValues = new Dictionary<string, ExcelValue>();
             values = new Dictionary<string, ExcelValue>();
             OutLanguage = outLanguage;
             InLanguage = inLanguage;
-            this.sources = sources ?? new Dictionary<string, JToken>();
+            this.sources = sources ?? new List<EvaluationSource>();
         }
 
         public Language OutLanguage{ get; }
@@ -35,8 +36,8 @@ namespace DocumentCreator
         {
             if (sourceValues.ContainsKey(key))
                 return sourceValues[key];
-            if (sources.ContainsKey(key))
-                return ExcelValue.Create(sources[key], OutLanguage);
+            if (sources.Any(o => o.Name == key || o.Cell == key))
+                return ExcelValue.Create(sources.First(o => o.Name == key || o.Cell == key).Payload, OutLanguage);
             if (values.ContainsKey(key))
                 return values[key];
             throw new InvalidOperationException();

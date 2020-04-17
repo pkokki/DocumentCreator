@@ -25,13 +25,8 @@ namespace DocumentCreator
         public EvaluationResponse Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
         {
             var expressions = new List<TemplateFieldExpression>(request.Expressions);
-            var sourceDict = new Dictionary<string, JToken>();
-            if (request.Sources != null)
-                foreach (var source in request.Sources)
-                    sourceDict[source.Name] = source.Payload;
-
             PreEvaluate(expressions, templateFields);
-            var results = Evaluate(expressions, sourceDict);
+            var results = Evaluate(expressions, request.Sources);
             PostEvaluate(expressions, results);
         
             var response = new EvaluationResponse()
@@ -43,12 +38,12 @@ namespace DocumentCreator
             return response;
         }
         
-        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, IDictionary<string, JToken> sources)
+        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
         {
             return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
         }
 
-        public EvaluationResult Evaluate(string exprName, string expression, Dictionary<string, JToken> sources)
+        public EvaluationResult Evaluate(string exprName, string expression, IEnumerable<EvaluationSource> sources)
         {
             return Evaluate(exprName, exprName, expression, new ExpressionScope(inputLang, outputLang, sources));
         }

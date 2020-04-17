@@ -21,8 +21,8 @@ Public Function REFSOURCE(ByVal ref_range As Range) As Variant
     Application.EnableEvents = False
     Set source_dict = New Dictionary
     For Each ref_row In ref_range.Rows
-        If ref_row.Cells(1, 1).Value <> "" Then
-            source_dict(ref_row.Cells(1, 1).Value) = ref_row.Cells(1, 2).Value
+        If ref_row.Cells(1, 1).value <> "" Then
+            source_dict(ref_row.Cells(1, 1).value) = ref_row.Cells(1, 2).value
         End If
     Next
     source_text = JsonConverter.ConvertToJson(source_dict)
@@ -34,7 +34,7 @@ Public Function MAPVALUE(ByVal source_cell As Range, ByVal source_path As String
         source_name As String, cell_value As Variant, source_json As Dictionary
     
     source_path = CStr(source_path)
-    source_name = source_cell.Offset(0, -1).Value
+    source_name = source_cell.Offset(0, -1).value
     Set source_json = GetSourceJson(source_name)
     If source_json Is Nothing Then
         cell_value = "#MissingSourceName:" & source_name & "#"
@@ -43,17 +43,15 @@ Public Function MAPVALUE(ByVal source_cell As Range, ByVal source_path As String
         node_name = source_tokens(UBound(source_tokens))
         Set parent_node = GetJsonNode(source_json, source_tokens)
         cell_value = GetJsonCellValue(parent_node, node_name)
-        Set m_parent_sources(Application.Caller.Row) = Nothing
+        Set m_parent_sources(Application.Caller.row) = Nothing
         If cell_value = "[]" And Not parent_node Is Nothing Then
             If parent_node.Exists(node_name) Then
-                Set m_parent_sources(Application.Caller.Row) = parent_node.Item(node_name)
+                Set m_parent_sources(Application.Caller.row) = parent_node.item(node_name)
                 ' Fill values
             End If
         End If
         If Not transform_cell Is Nothing Then
-            If TypeName(cell_value) = "String" Then
-                cell_value = MAPVALUE(transform_cell, cell_value)
-            End If
+            cell_value = MAPVALUE(transform_cell, CStr(cell_value))
         End If
     End If
     MAPVALUE = cell_value
@@ -62,10 +60,10 @@ Public Function MAPITEM(ByVal parent_cell As Range, ByVal source_path As String)
     Dim parent_row As Long, result_buffer As String, child_value As Variant, _
         source_collection As VBA.Collection, source_obj As Object, path_tokens() As String
   
-    parent_row = parent_cell.Row
+    parent_row = parent_cell.row
     If TypeName(m_parent_sources(parent_row)) = "Collection" Then
         Set source_collection = m_parent_sources(parent_row)
-        If source_collection.Count > 0 Then
+        If source_collection.count > 0 Then
             ' build a JArray
             result_buffer = ""
             For Each source_obj In source_collection
@@ -74,7 +72,7 @@ Public Function MAPITEM(ByVal parent_cell As Range, ByVal source_path As String)
                     child_value = GetJsonCellValue(GetJsonNode(source_obj, path_tokens), path_tokens(UBound(path_tokens)))
                 Else
                     If VBA.IsMissing(source_path) Then
-                        child_value = source_collection.Item(1)
+                        child_value = source_collection.item(1)
                     Else
                         MAPITEM = "MAPITEM:ItemNotObject#"
                         Exit For
@@ -98,11 +96,11 @@ Public Function GETLIST(ByVal parent_cell As Range, ByVal source_path As String)
         source_collection As VBA.Collection, source_obj As Object, path_tokens() As String
   
     Dim empty_array(0) As Variant
-    parent_row = parent_cell.Row
+    parent_row = parent_cell.row
     If TypeName(m_parent_sources(parent_row)) = "Collection" Then
         Set source_collection = m_parent_sources(parent_row)
-        If source_collection.Count > 0 Then
-            ReDim result_array(source_collection.Count - 1) As Variant
+        If source_collection.count > 0 Then
+            ReDim result_array(source_collection.count - 1) As Variant
             i = 0
             For Each source_obj In source_collection
                 If TypeName(source_obj) = "Dictionary" Then
@@ -111,7 +109,7 @@ Public Function GETLIST(ByVal parent_cell As Range, ByVal source_path As String)
                     result_array(i) = child_value
                 Else
                     If VBA.IsMissing(source_path) Then
-                        child_value = source_collection.Item(i)
+                        child_value = source_collection.item(i)
                         result_array(i) = child_value
                     Else
                         Debug.Print "WARNING GETLIST: ItemNotObject#"
@@ -137,17 +135,17 @@ Public Function GETITEM(ByVal parent_cell As Range, ByVal source_path As String,
         source_collection As VBA.Collection, source_obj As Object, path_tokens() As String
   
     child_value = Null
-    parent_row = parent_cell.Row
+    parent_row = parent_cell.row
     If TypeName(m_parent_sources(parent_row)) = "Collection" Then
         Set source_collection = m_parent_sources(parent_row)
-        If source_collection.Count > 0 Then
-            If target_index > 0 And target_index <= source_collection.Count Then
-                If TypeName(source_collection.Item(target_index)) = "Dictionary" Then
+        If source_collection.count > 0 Then
+            If target_index > 0 And target_index <= source_collection.count Then
+                If TypeName(source_collection.item(target_index)) = "Dictionary" Then
                     path_tokens = Split(source_path, ".")
-                    child_value = GetJsonCellValue(GetJsonNode(source_collection.Item(target_index), path_tokens), path_tokens(UBound(path_tokens)))
+                    child_value = GetJsonCellValue(GetJsonNode(source_collection.item(target_index), path_tokens), path_tokens(UBound(path_tokens)))
                 Else
                     If VBA.IsMissing(source_path) Then
-                        child_value = source_collection.Item(target_index)
+                        child_value = source_collection.item(target_index)
                     Else
                         GETITEM = "GETITEM:ItemNotObject#"
                     End If
@@ -175,7 +173,7 @@ Public Sub OnWorksheetActivated()
     Set rng = Range(MAPPINGS_RANGE)
     ' A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11
     For Each rng_row In rng.Rows
-        If rng_row.Cells(1, 1).Value <> "" Then
+        If rng_row.Cells(1, 1).value <> "" Then
             ' Update check column
             expression_addr = rng_row.Cells(1, 6).Address(0, 0)
             result_addr = rng_row.Cells(1, 10).Address(0, 0)
@@ -183,7 +181,7 @@ Public Sub OnWorksheetActivated()
             If rng_row.Cells(1, 9).Formula = "" Then
                 With rng_row.Cells(1, 9)
                     .NumberFormat = "General"
-                    .Value = ""
+                    .value = ""
                     .Formula = "=IFNA(FORMULATEXT(" & expression_addr & "),"""")"
                 End With
             End If
@@ -191,7 +189,7 @@ Public Sub OnWorksheetActivated()
             If rng_row.Cells(1, 11).Formula = "" Then
                 With rng_row.Cells(1, 11)
                     .NumberFormat = "General"
-                    .Value = ""
+                    .value = ""
                     .Formula = "=IF(" & _
                                     "ISNA(FORMULATEXT(" & expression_addr & "))," & _
                                     """""," & _
@@ -241,15 +239,15 @@ Public Sub OnTestMapping()
                     ' Update result column
                     Range(TEST_RESULTS_COLUMN & row_index).NumberFormat = "@"
                     If VBA.IsNull(json_result("error")) Then
-                        Range(TEST_RESULTS_COLUMN & row_index).Value = json_result("text")
+                        Range(TEST_RESULTS_COLUMN & row_index).value = json_result("text")
                     Else
-                        Range(TEST_RESULTS_COLUMN & row_index).Value = json_result("error")
+                        Range(TEST_RESULTS_COLUMN & row_index).value = json_result("error")
                     End If
                     row_index = row_index + 1
                 Next json_result
             End If
-            Range(TEST_EXPR_TOTAL).Value = response_json("total")
-            Range(TEST_EXPR_ERRORS).Value = response_json("errors")
+            Range(TEST_EXPR_TOTAL).value = response_json("total")
+            Range(TEST_EXPR_ERRORS).value = response_json("errors")
         Else
             Debug.Print "--------- ERROR -------------------------"
             Debug.Print "ERROR: " & .Status & vbCrLf & .ResponseText
@@ -261,9 +259,9 @@ Public Sub OnTestMapping()
 
 err_handler:
     Debug.Print "--------- ERROR @ err_handler -------------------------"
-    Debug.Print test_mapping_url & " " & CStr(Err.Number) & ": " & Err.Description
+    Debug.Print test_mapping_url & " " & CStr(Err.number) & ": " & Err.Description
     Debug.Print "--------------------------------------------"
-    MsgBox test_mapping_url & vbCrLf & Err.Description, vbCritical, CStr(Err.Number)
+    MsgBox test_mapping_url & vbCrLf & Err.Description, vbCritical, CStr(Err.number)
 End Sub
 
 Public Sub OnCellChanged(ByVal target_cell As Range)
@@ -283,18 +281,18 @@ Private Function PrepareTestJson()
     ' Add mappings A=1, B=2, C=3, D=4, E=5, F=6
     Set rng = Range(MAPPINGS_RANGE)
     For Each rng_row In rng.Rows
-        If rng_row.Cells(1, 1).Value <> "" Then
+        If rng_row.Cells(1, 1).value <> "" Then
             Set json_object = New Dictionary
-            json_object("name") = rng_row.Cells(1, 1).Value
+            json_object("name") = rng_row.Cells(1, 1).value
             json_object("cell") = rng_row.Cells(1, 6).Address(0, 0)
             json_object("expression") = rng_row.Cells(1, 6).Formula
-            If rng_row.Cells(1, 3).Value = "" Or VBA.IsNull(rng_row.Cells(1, 3).Value) Then
+            If rng_row.Cells(1, 3).value = "" Or VBA.IsNull(rng_row.Cells(1, 3).value) Then
                 json_object("isCollection") = False
             Else
-                json_object("isCollection") = rng_row.Cells(1, 3).Value
+                json_object("isCollection") = rng_row.Cells(1, 3).value
             End If
-            json_object("parent") = rng_row.Cells(1, 2).Value
-            json_object("content") = rng_row.Cells(1, 4).Value
+            json_object("parent") = rng_row.Cells(1, 2).value
+            json_object("content") = rng_row.Cells(1, 4).value
             Call json_payload("expressions").Add(json_object)
         End If
     Next rng_row
@@ -303,9 +301,10 @@ Private Function PrepareTestJson()
     Set rng = Range(SOURCES_RANGE)
     For Each rng_row In rng.Rows
         Set json_object = New Dictionary
-        If rng_row.Cells(1, 1).Value <> "" Then
-            json_object("name") = rng_row.Cells(1, 1).Value
-            Set json_object("payload") = JsonConverter.ParseJson(rng_row.Cells(1, 2).Value)
+        If rng_row.Cells(1, 1).value <> "" Then
+            json_object("name") = rng_row.Cells(1, 1).value
+            json_object("cell") = rng_row.Cells(1, 2).Address(0, 0)
+            Set json_object("payload") = JsonConverter.ParseJson(rng_row.Cells(1, 2).value)
             Call json_payload("sources").Add(json_object)
         End If
     Next rng_row
@@ -318,7 +317,7 @@ Private Function GetSourceJson(ByVal source_name As String) As Dictionary
     
     Set json_cache_item = Nothing
     If m_source_cache.Exists(source_name) Then
-        Set json_cache_item = m_source_cache.Item(source_name)
+        Set json_cache_item = m_source_cache.item(source_name)
     Else
         On Error Resume Next
         source_row = Application.WorksheetFunction.Match(source_name, Range(SOURCE_NAMES_RANGE), 0)
@@ -342,7 +341,7 @@ End Function
 Public Function CONTENT(ByVal is_visible As Boolean) As String
     If is_visible Then
         If TypeName(Application.Caller) = "Range" Then
-            CONTENT = Application.Caller.Worksheet.Cells(Application.Caller.Row, FIELD_CONTENT_COLUMN).Text
+            CONTENT = Application.Caller.Worksheet.Cells(Application.Caller.row, FIELD_CONTENT_COLUMN).Text
         Else
             CONTENT = "#CONTENT:UnsupportedCaller#"
         End If
@@ -368,14 +367,14 @@ Public Function RQR(ByVal source_path As String) As Variant
         source_collection As VBA.Collection, source_obj As Object, path_tokens() As String
                         
     If TypeName(Application.Caller) = "Range" Then
-        parent_id = Application.Caller.Worksheet.Cells(Application.Caller.Row, FIELD_PARENT_COLUMN).Value
+        parent_id = Application.Caller.Worksheet.Cells(Application.Caller.row, FIELD_PARENT_COLUMN).value
         On Error Resume Next
         parent_row = Application.WorksheetFunction.Match(parent_id, Range(FIELD_ID_RANGE), 0) + ROW_OFFSET
         On Error GoTo 0
         If parent_row > 0 Then
             If TypeName(m_parent_sources(parent_row)) = "Collection" Then
                 Set source_collection = m_parent_sources(parent_row)
-                If source_collection.Count > 0 Then
+                If source_collection.count > 0 Then
                     ' build a JArray
                     result_buffer = ""
                     For Each source_obj In source_collection
@@ -384,7 +383,7 @@ Public Function RQR(ByVal source_path As String) As Variant
                             child_value = GetJsonCellValue(GetJsonNode(source_obj, path_tokens), path_tokens(UBound(path_tokens)))
                         Else
                             If VBA.IsMissing(source_path) Then
-                                child_value = source_collection.Item(1)
+                                child_value = source_collection.item(1)
                             Else
                                 RQR = "#RQR:ItemNotObject#"
                                 Exit For
@@ -422,9 +421,9 @@ Public Function SOURCE(ByVal source_name As String, ByVal source_path As String)
         node_name = source_tokens(UBound(source_tokens))
         Set parent_node = GetJsonNode(source_json, source_tokens)
         cell_value = GetJsonCellValue(parent_node, node_name)
-        Set m_parent_sources(Application.Caller.Row) = Nothing
+        Set m_parent_sources(Application.Caller.row) = Nothing
         If cell_value = "[]" And Not parent_node Is Nothing Then
-            If parent_node.Exists(node_name) Then Set m_parent_sources(Application.Caller.Row) = parent_node.Item(node_name)
+            If parent_node.Exists(node_name) Then Set m_parent_sources(Application.Caller.row) = parent_node.item(node_name)
         End If
     End If
     SOURCE = cell_value
@@ -441,7 +440,7 @@ Private Function GetJsonNode(ByVal json_object As Dictionary, ByRef path_tokens(
             If current_node.Exists(node_name) Then
                 Set child_node = Nothing
                 On Error Resume Next
-                Set child_node = current_node.Item(node_name)
+                Set child_node = current_node.item(node_name)
                 On Error GoTo 0
                 Set current_node = child_node
                 If child_node Is Nothing Then
@@ -464,21 +463,23 @@ Private Function GetJsonCellValue(ByVal parent_node As Dictionary, ByVal node_na
     ElseIf Not parent_node.Exists(node_name) Then
         cell_value = "#MissingNode:" & node_name & "#"
     Else
-        value_type = TypeName(parent_node.Item(node_name))
-        If VBA.IsNull(parent_node.Item(node_name)) Then
+        value_type = TypeName(parent_node.item(node_name))
+        If VBA.IsNull(parent_node.item(node_name)) Then
             cell_value = ""
         ElseIf value_type = "Collection" Then
             cell_value = "[]"
         ElseIf value_type = "Dictionary" Then
             cell_value = "{}"
-        ElseIf VBA.IsError(parent_node.Item(node_name)) Then
+        ElseIf VBA.IsError(parent_node.item(node_name)) Then
             cell_value = "VBA.Error"
         Else
-            cell_value = parent_node.Item(node_name)
+            cell_value = parent_node.item(node_name)
         End If
     End If
     GetJsonCellValue = cell_value
 End Function
+
+
 
 
 

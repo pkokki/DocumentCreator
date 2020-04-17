@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Packaging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -38,12 +39,12 @@ namespace DocumentCreator
 
         public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
-            var sources = new Dictionary<string, JToken>
+            var sources = new List<EvaluationSource>
             {
-                { "RQ", payload }
+                new EvaluationSource { Name = "RQ", Payload = payload }
             };
             var templateFields = FindTemplateFields(templateBytes);
-            var templateFieldExpressions = GetTemplateFieldExpressions(mappingBytes);
+            var templateFieldExpressions = GetTemplateFieldExpressions(mappingBytes, sources);
             var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
             var contentControlData = BuildContentControlData(templateFields, results);
             return MergeTemplateWithMappings(contentControlData, templateBytes);
@@ -51,12 +52,12 @@ namespace DocumentCreator
 
         public IEnumerable<EvaluationResult> CreateDocumentInMem(byte[] templateBytes, byte[] mappingBytes, JObject payload)
         {
-            var sources = new Dictionary<string, JToken>
+            var sources = new List<EvaluationSource>
             {
-                { "RQ", payload }
+                new EvaluationSource { Name = "RQ", Payload = payload }
             };
             var templateFields = FindTemplateFields(templateBytes);
-            var templateFieldExpressions = GetTemplateFieldExpressions(mappingBytes);
+            var templateFieldExpressions = GetTemplateFieldExpressions(mappingBytes, sources);
             var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
             var contentControlData = BuildContentControlData(templateFields, results);
             MergeTemplateWithMappings(contentControlData, templateBytes);
@@ -81,17 +82,17 @@ namespace DocumentCreator
             return documentBytes;
         }
 
-        public IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(byte[] mappingBytes)
+        public IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(byte[] mappingBytes, ICollection<EvaluationSource> sources)
         {
             using var mappingsStream = new MemoryStream(mappingBytes);
             using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingsDoc);
+            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingsDoc, sources);
             return templateFieldExpressions;
         }
 
         private IEnumerable<EvaluationResult> CreateDocumentInternal(IEnumerable<TemplateField> templateFields, 
-            IEnumerable<TemplateFieldExpression> templateFieldExpressions, 
-            IDictionary<string, JToken> sources)
+            IEnumerable<TemplateFieldExpression> templateFieldExpressions,
+            IEnumerable<EvaluationSource> sources)
         {
 
             var expressions = new List<TemplateFieldExpression>();

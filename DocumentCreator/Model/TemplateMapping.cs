@@ -16,5 +16,6 @@ namespace DocumentCreator.Model
         [JsonIgnore]
         public byte[] Buffer { get; set; }
         public IEnumerable<TemplateFieldExpression> Expressions { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 }

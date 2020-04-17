@@ -34,11 +34,11 @@ namespace DocumentCreator
         public void CanEvaluateMapAndGetUDF()
         {
             var json = JObject.Parse(File.ReadAllText("./Resources/CanEvaluateMapAndGetUDF.json"));
-            var sources = new Dictionary<string, JToken>
+            var sources = new List<EvaluationSource>
             {
-                ["N3"] = json["sources"][0]["payload"],
-                ["N4"] = json["sources"][1]["payload"],
-                ["N5"] = json["sources"][2]["payload"],
+                new EvaluationSource { Name = "N3", Payload = (JObject)json["sources"][0]["payload"] },
+                new EvaluationSource { Name = "N4", Payload = (JObject)json["sources"][1]["payload"] },
+                new EvaluationSource { Name = "N5", Payload = (JObject)json["sources"][2]["payload"] },
             };
 
             var expressions = new List<TemplateFieldExpression>

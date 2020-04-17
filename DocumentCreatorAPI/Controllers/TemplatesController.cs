@@ -119,7 +119,9 @@ namespace DocumentCreatorAPI.Controllers
             if (mapping == null)
                 return NotFound();
             var processor = new TemplateProcessor();
-            mapping.Expressions = processor.GetTemplateFieldExpressions(mapping.Buffer);
+            var sources = new List<EvaluationSource>();
+            mapping.Expressions = processor.GetTemplateFieldExpressions(mapping.Buffer, sources);
+            mapping.Sources = sources;
             return Ok(mapping);
         }
 

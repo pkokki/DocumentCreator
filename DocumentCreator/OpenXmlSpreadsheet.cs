@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.CustomProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -172,7 +173,7 @@ namespace DocumentCreator
             }
         }
 
-        public static IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc)
+        public static IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc, ICollection<EvaluationSource> sources)
         {
             var templateFieldExpressions = new List<TemplateFieldExpression>();
             var worksheet = GetFirstWorkSheet(doc);
@@ -197,6 +198,31 @@ namespace DocumentCreator
                     ++rowIndex;
                 }
             } while (!string.IsNullOrEmpty(name));
+
+            rowIndex = 3U;
+            do
+            {
+                name = GetCellValue(worksheet, stringTablePart, $"M{rowIndex}");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    var payload = GetCellValue(worksheet, stringTablePart, $"N{rowIndex}");
+                    var source = sources.FirstOrDefault(o => o.Name == name);
+                    if (source != null)
+                    {
+                        source.Cell = $"N{rowIndex}";
+                    }
+                    else
+                    {
+                        sources.Add(new EvaluationSource() 
+                        {
+                            Name = name,
+                            Cell = $"N{rowIndex}",
+                            Payload = JObject.Parse(payload)
+                        });
+                    }
+                    ++rowIndex;
+                }
+            } while (!string.IsNullOrEmpty(name));
             return templateFieldExpressions;
         }
 
@@ -214,7 +240,7 @@ namespace DocumentCreator
                     Where(c => c.CellReference == cellAddress).FirstOrDefault();
             if (cell != null)
             {
-                cellValue = cell.InnerText;
+                cellValue = cell.CellValue?.InnerText ?? cell.InnerText;
                 if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
                     cellValue = stringTablePart.SharedStringTable.ElementAt(int.Parse(cellValue)).InnerText;
             }

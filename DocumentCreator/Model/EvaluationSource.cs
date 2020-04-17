@@ -8,6 +8,7 @@ namespace DocumentCreator.Model
     public class EvaluationSource
     {
         public string Name { get; set; }
+        public string Cell { get; set; }
         public JObject Payload { get; set; }
     }
 }
