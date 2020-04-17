@@ -10,6 +10,7 @@ namespace DocumentCreator.ExcelFormulaParser
     {
         public ExcelValue SUM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
         {
+            if (args.ContainErrorValues()) return ExcelValue.NA;
             var result = 0M;
             foreach (var arg in args)
             {
@@ -19,6 +20,8 @@ namespace DocumentCreator.ExcelFormulaParser
                 }
                 else
                 {
+                    if (!arg.AsDecimal().HasValue)
+                        return ExcelValue.VALUE;
                     result += arg.AsDecimal().Value;
                 }
             }
