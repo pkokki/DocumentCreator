@@ -23,6 +23,7 @@
     <None Remove="Resources\FindTemplateFields001.docx" />
     <None Remove="Resources\FindTemplateFields002.docx" />
     <None Remove="Resources\OpenXmlSpreadsheetTests001.xlsm" />
+    <None Remove="Resources\UseForwardOwnCellValues.xlsm" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,6 +61,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\FindTemplateFields002.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\UseForwardOwnCellValues.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

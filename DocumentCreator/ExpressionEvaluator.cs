@@ -38,17 +38,18 @@ namespace DocumentCreator
             return response;
         }
         
-        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
+        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<TemplateFieldExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
         {
             return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
         }
 
-        public EvaluationResult Evaluate(string exprName, string expression, IEnumerable<EvaluationSource> sources)
+
+        public EvaluationResult Evaluate(string exprName, string cell, string expression, IEnumerable<EvaluationSource> sources)
         {
-            return Evaluate(exprName, exprName, expression, new ExpressionScope(inputLang, outputLang, sources));
+            return Evaluate(exprName, cell, expression, new ExpressionScope(inputLang, outputLang, sources));
         }
 
-        private IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, ExpressionScope scope)
+        private IEnumerable<EvaluationResult> Evaluate(IEnumerable<TemplateFieldExpression> templateFieldExpressions, ExpressionScope scope)
         {
             var results = new List<EvaluationResult>();
             foreach (var templateFieldExpression in templateFieldExpressions)
@@ -60,11 +61,7 @@ namespace DocumentCreator
                 scope.ParentName = templateFieldExpressions.FirstOrDefault(o => o.Name == templateFieldExpression.Parent)?.Cell;
                 var expr = templateFieldExpression.Expression;
                 if (!string.IsNullOrWhiteSpace(expr) && expr != "=")
-                {
-                    if (!expr.StartsWith("="))
-                        expr = "=" + expr;
                     result = Evaluate(templateFieldExpression.Name, templateFieldExpression.Cell, expr, scope);
-                }
                 results.Add(result);
             }
             return results;
@@ -72,6 +69,8 @@ namespace DocumentCreator
 
         private EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
         {
+            if (!expression.StartsWith("="))
+                expression = "=" + expression;
             var excelFormula = new ExcelFormula(expression, scope.InLanguage);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
             var result = new EvaluationResult()
