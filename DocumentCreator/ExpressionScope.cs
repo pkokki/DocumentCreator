@@ -40,7 +40,7 @@ namespace DocumentCreator
                 return ExcelValue.Create(sources.First(o => o.Name == key || o.Cell == key).Payload, OutLanguage);
             if (values.ContainsKey(key))
                 return values[key];
-            throw new InvalidOperationException();
+            throw new InvalidOperationException($"Name or cell {key} not found in scope.");
         }
         public ExcelValue Get(ExcelValue key, ExcelValue path)
         {

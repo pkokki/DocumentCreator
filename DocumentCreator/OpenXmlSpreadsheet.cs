@@ -199,6 +199,8 @@ namespace DocumentCreator
                 }
             } while (!string.IsNullOrEmpty(name));
 
+            templateFieldExpressions = ReorderExpressionsWithCalcChain(doc.WorkbookPart, templateFieldExpressions);
+
             rowIndex = 3U;
             do
             {
@@ -224,6 +226,19 @@ namespace DocumentCreator
                 }
             } while (!string.IsNullOrEmpty(name));
             return templateFieldExpressions;
+        }
+
+        private static List<TemplateFieldExpression> ReorderExpressionsWithCalcChain(WorkbookPart workbookPart,
+            List<TemplateFieldExpression> expressions)
+        {
+            var calculationChainPart = workbookPart.CalculationChainPart;
+            var calculationChain = calculationChainPart.CalculationChain;
+            var cells = expressions.Select(o => o.Cell);
+            var orderedExpressions = calculationChain.Elements<CalculationCell>()
+                .Where(o => cells.Contains(o.CellReference.ToString()))
+                .Select(o => expressions.First(e => e.Cell.Equals(o.CellReference.ToString())))
+                .ToList();
+            return orderedExpressions;
         }
 
         private static string GetCellFormula(Worksheet worksheet, string cellAddress)
