@@ -7,7 +7,7 @@ import { State } from './services/state/state.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'DocumentCreatorNgApp';
+  title = 'Document Creator';
   
   constructor(public state: State) { }
 

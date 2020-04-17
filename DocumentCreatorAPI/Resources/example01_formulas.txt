@@ -21,3 +21,35 @@
 =RQD("ProductDescription")
 =RQD("AccountNumber")
 =RQL("Unit")
+
+1	μηνιαία
+2	διμηνιαία
+3	τριμηνιαία
+6	εξαμηνιαία
+12	ετήσια
+
+RF1	{"1":"\u03BC\u03B7\u03BD\u03B9\u03B1\u03AF\u03B1","2":"\u03B4\u03B9\u03BC\u03B7\u03BD\u03B9\u03B1\u03AF\u03B1","3":"\u03C4\u03C1\u03B9\u03BC\u03B7\u03BD\u03B9\u03B1\u03AF\u03B1","6":"\u03B5\u03BE\u03B1\u03BC\u03B7\u03BD\u03B9\u03B1\u03AF\u03B1","12":"\u03B5\u03C4\u03AE\u03C3\u03B9\u03B1"}
+
+=SYSDATE()
+=UPPER(RQD("ProductDescription"))
+=RQD("AccountNumber")
+=LOWER(RQD("PS1014"))
+=RQD("PS1016")
+=IF(RQD("PS1014")/RQD("PS1015")>2;"έκαστης";"της πρώτης")
+=RQD("PS1056")
+=PROPER(MAPVALUE(N3;"RequestData.PS1014";N4))
+=PROPER(MAPVALUE(N3;"RequestData.PS1015";N4))
+=RQD("InterestTable")
+=RQR("Period")
+=RQR("Interest")
+=RQR("Points")
+=RQD("SEPA")
+=MAPVALUE(N3;"RequestData.PS1015";N4)
+=CONTENT(RQD("PS1053")="START")
+=RQD("PS1015")
+=CONTENT(RQD("PS1014")-RQD("PS1015")>2)
+=RQD("F1041")
+=RQD("F1042")
+=RQD("ProductDescription")
+=RQD("AccountNumber")
+=RQL("Unit")

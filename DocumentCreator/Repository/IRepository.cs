@@ -1,4 +1,7 @@
-﻿namespace DocumentCreator.Repository
+﻿using DocumentCreator.Model;
+using System.Collections.Generic;
+
+namespace DocumentCreator.Repository
 {
     public interface IRepository
     {
@@ -12,5 +15,11 @@
 
 
         ContentItem CreateDocument(string templateName, string mappingName, byte[] contents);
+
+        IEnumerable<Template> GetTemplates();
+        Template GetTemplate(string templateName, string version = null);
+        IEnumerable<Template> GetTemplateVersions(string templateName);
+        IEnumerable<TemplateMapping> GetTemplateMappings(string templateName);
+        TemplateMapping GetTemplateMapping(string templateName, string mappingName, string mappingVersion);
     }
 }

@@ -1,0 +1,19 @@
+<h3>Templates</h3>
+
+<div class="tbl">
+    <div class="row">
+        <div class="cell2">name</div>
+        <div class="cell4">version</div>
+        <div class="cell4">date</div>
+        <div class="cell2">size</div>
+        <div class="cell3">&nbsp;</div>
+    </div>
+
+    <div class="row" *ngFor="let item of items | async">
+        <div class="cell2"><a href="#" [routerLink]="['./', item.name]">{{ item.name }}</a></div>
+        <div class="cell4">{{ item.version }}</div>
+        <div class="cell4">{{ item.timestamp | date:'dd/MM/yyyy' }} {{ item.timestamp | date:'HH:mm:ss' }}</div>
+        <div class="cell2">{{ item.size }}</div>
+        <div class="cell3"><a [routerLink]="['./', item.name, 'versions']">versions</a></div>
+    </div>
+</div>

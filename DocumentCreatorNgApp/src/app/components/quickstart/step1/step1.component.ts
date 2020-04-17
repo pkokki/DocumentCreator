@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild, Input, Output, EventEmitter, ElementRef } from '@angular/core';
-import { UploadService } from '../services/upload/upload.service'
-import { State } from '../services/state/state.service';
+import { UploadService } from '../../../services/upload/upload.service'
+import { State } from '../../../services/state/state.service';
 
 @Component({
   selector: 'app-step1',
-  templateUrl: './step1.component.html',
-  styleUrls: ['./step1.component.css']
+  templateUrl: './step1.component.html'
 })
 export class Step1Component implements OnInit {
   @ViewChild('file', { static: false }) private file: ElementRef;

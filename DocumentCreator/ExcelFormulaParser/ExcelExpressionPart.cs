@@ -7,14 +7,14 @@ namespace DocumentCreator.ExcelFormulaParser
     public class ExcelExpressionPart
     {
         private readonly ExcelFormulaToken originalToken;
-        private readonly ExpressionContext context;
+        private readonly ExpressionScope scope;
         private ExcelValue value;
 
-        public ExcelExpressionPart(ExcelFormulaToken token, ExpressionContext context)
+        public ExcelExpressionPart(ExcelFormulaToken token, ExpressionScope scope)
         {
             this.originalToken = token;
             this.TokenType = token.Type;
-            this.context = context;
+            this.scope = scope;
             if (token.Type == ExcelFormulaTokenType.OperatorInfix
                 || token.Type == ExcelFormulaTokenType.OperatorPrefix
                 || token.Type == ExcelFormulaTokenType.OperatorPostfix
@@ -59,7 +59,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 {
                     if (originalToken != null && originalToken.Type != ExcelFormulaTokenType.Operand)
                         throw new InvalidOperationException($"Token of type {originalToken.Type} do not have Value");
-                    value = ExcelValue.Create(originalToken, context);
+                    value = ExcelValue.Create(originalToken, scope);
                 }
                 return value;
             }

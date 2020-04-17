@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { State } from '../services/state/state.service';
+import { State } from '../../../services/state/state.service';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-step4',
-  templateUrl: './step4.component.html',
-  styleUrls: ['./step4.component.css']
+  templateUrl: './step4.component.html'
 })
 export class Step4Component implements OnInit {
   

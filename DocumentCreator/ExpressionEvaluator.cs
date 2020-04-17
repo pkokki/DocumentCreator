@@ -10,7 +10,7 @@ namespace DocumentCreator
 {
     public class ExpressionEvaluator
     {
-        private readonly ExpressionContext context;
+        private readonly Language inputLang, outputLang;
 
         public ExpressionEvaluator() : this(Language.Invariant, Language.ElGr)
         {
@@ -18,106 +18,85 @@ namespace DocumentCreator
 
         public ExpressionEvaluator(Language inputLang, Language outputLang)
         {
-            context = new ExpressionContext(inputLang, outputLang);
+            this.inputLang = inputLang;
+            this.outputLang = outputLang;
         }
 
         public EvaluationResponse Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
         {
             var expressions = new List<TemplateFieldExpression>(request.Expressions);
-            var sourceDict = new Dictionary<string, JToken>();
-            if (request.Sources != null)
-                foreach (var source in request.Sources)
-                    sourceDict[source.Name] = source.Payload;
-
             PreEvaluate(expressions, templateFields);
-            Evaluate(expressions, sourceDict);
-            PostEvaluate(expressions);
+            var results = Evaluate(expressions, request.Sources);
+            PostEvaluate(expressions, results);
         
             var response = new EvaluationResponse()
             {
                 Total = expressions.Count(o => !string.IsNullOrEmpty(o.Expression)),
-                Errors = expressions.Count(o => !string.IsNullOrEmpty(o.Result.Error)),
-                Results = expressions.Select(o => o.Result)
+                Errors = results.Count(o => !string.IsNullOrEmpty(o.Error)),
+                Results = results
             };
             return response;
         }
-
         
-        // TODO: Refactor to return IEnumerable<ExpressionResult>
-        public void Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, Dictionary<string, JToken> sources)
+        public IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
         {
-            sources ??= new Dictionary<string, JToken>();
-            sources["#OWN#"] = new JObject();
+            return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
+        }
+
+        public EvaluationResult Evaluate(string exprName, string expression, IEnumerable<EvaluationSource> sources)
+        {
+            return Evaluate(exprName, exprName, expression, new ExpressionScope(inputLang, outputLang, sources));
+        }
+
+        private IEnumerable<EvaluationResult> Evaluate(ICollection<TemplateFieldExpression> templateFieldExpressions, ExpressionScope scope)
+        {
+            var results = new List<EvaluationResult>();
             foreach (var templateFieldExpression in templateFieldExpressions)
             {
-                var expr = templateFieldExpression.Expression;
-                if (string.IsNullOrWhiteSpace(expr) || expr == "=")
+                var result = new EvaluationResult()
                 {
-                    templateFieldExpression.Result = new ExpressionResult()
-                    {
-                        Name = templateFieldExpression.Name,
-                    };
-                }
-                else
+                    Name = templateFieldExpression.Name,
+                };
+                scope.ParentName = templateFieldExpressions.FirstOrDefault(o => o.Name == templateFieldExpression.Parent)?.Cell;
+                var expr = templateFieldExpression.Expression;
+                if (!string.IsNullOrWhiteSpace(expr) && expr != "=")
                 {
                     if (!expr.StartsWith("="))
                         expr = "=" + expr;
-                    var exprName = templateFieldExpression.Cell ?? templateFieldExpression.Name;
-                    var result = Evaluate(exprName, expr, sources);
-                    templateFieldExpression.Result = result;
+                    result = Evaluate(templateFieldExpression.Name, templateFieldExpression.Cell, expr, scope);
                 }
+                results.Add(result);
             }
+            return results;
         }
 
-        public ExpressionResult Evaluate(string exprName, string expression, Dictionary<string, JToken> sources)
+        private EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
         {
-            sources ??= new Dictionary<string, JToken>();
-            var excelFormula = new ExcelFormula(expression, context);
+            var excelFormula = new ExcelFormula(expression, scope.InLanguage);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
-            var repetitions = 1;
-            if (tokens.Any(t => t.Type == ExcelFormulaTokenType.Function
-                && string.Equals(t.Value, "RQR", StringComparison.InvariantCultureIgnoreCase)))
+            var result = new EvaluationResult()
             {
-                repetitions = sources["#COLL#"].Count();
-            }
-            var result = new ExpressionResult()
-            {
-                Name = exprName,
-                Expression = expression,
+                Name = exprName
             };
             try
             {
-                for (var i = 0; i < repetitions; i++)
-                {
-                    sources["#ROW#"] = sources.ContainsKey("#COLL#") ? sources["#COLL#"]?.Skip(i).FirstOrDefault() : null;
-                    var queue = new Queue<ExcelFormulaToken>(tokens);
-                    var excelExpression = new ExcelExpression();
-                    TraverseExpression(excelExpression, queue, sources);
-                    var operand = excelExpression.Evaluate(sources, context.OutputLang);
-                    if (i == 0)
-                    {
-                        var value = operand.Value;
-                        if (value.InnerValue is JArray collection)
-                        {
-                            sources["#COLL#"] = collection;
-                            result.ChildRows = collection.Count;
-                        }
-                        if (sources.ContainsKey("#OWN#"))
-                            sources["#OWN#"][exprName] = value.InnerValue != null ? JToken.FromObject(value.InnerValue) : null;
-                        result.Value = value.InnerValue; //################ context.OutputLang.ToString(value);
-                        result.Text = context.OutputLang.ToString(value);
-                    }
-                    result.Rows.Add(context.OutputLang.ToString(operand.Value));
-                }
+                var queue = new Queue<ExcelFormulaToken>(tokens);
+                var excelExpression = new ExcelExpression();
+                TraverseExpression(excelExpression, queue, scope);
+                var operand = excelExpression.Evaluate(scope);
+                scope.Set(cell ?? exprName, operand.Value);
+                result.Value = operand.Value.InnerValue;
+                result.Text = outputLang.ToString(operand.Value);
             }
-            catch (Exception ex)
-            {
-                result.Error = ex.Message;
-            }
+            //catch (Exception ex)
+            //{
+            //    result.Error = ex.Message;
+            //}
+            finally { }
             return result;
         }
 
-        private void TraverseExpression(ExcelExpression expression, Queue<ExcelFormulaToken> tokens, Dictionary<string, JToken> sources)
+        private void TraverseExpression(ExcelExpression expression, Queue<ExcelFormulaToken> tokens, ExpressionScope scope)
         {
             while (tokens.Any())
             {
@@ -129,19 +108,19 @@ namespace DocumentCreator
                 else if (token.Subtype == ExcelFormulaTokenSubtype.Start)
                 {
                     var childExpression = new ExcelExpression();
-                    TraverseExpression(childExpression, tokens, sources);
+                    TraverseExpression(childExpression, tokens, scope);
                     switch (token.Type)
                     {
                         case ExcelFormulaTokenType.Function:
                             var name = token.Value.ToUpper();
-                            var args = EvaluateFunctionArguments(childExpression, sources)
+                            var args = EvaluateFunctionArguments(childExpression, scope)
                                 .Select(o => o.Value)
                                 .ToList();
-                            var value = Functions.INSTANCE.Evaluate(name, args, context.OutputLang, sources);
+                            var value = Functions.INSTANCE.Evaluate(name, args, scope);
                             expression.Add(new ExcelExpressionPart(value));
                             break;
                         case ExcelFormulaTokenType.Subexpression:
-                            var subExpression = childExpression.Evaluate(sources, context.OutputLang);
+                            var subExpression = childExpression.Evaluate(scope);
                             expression.Add(subExpression);
                             break;
                         default:
@@ -150,12 +129,12 @@ namespace DocumentCreator
                 }
                 else
                 {
-                    expression.Add(new ExcelExpressionPart(token, context));
+                    expression.Add(new ExcelExpressionPart(token, scope));
                 }
             }
         }
 
-        private IEnumerable<ExcelExpressionPart> EvaluateFunctionArguments(ExcelExpression expression, IDictionary<string, JToken> sources)
+        private IEnumerable<ExcelExpressionPart> EvaluateFunctionArguments(ExcelExpression expression, ExpressionScope scope)
         {
             var args = new List<ExcelExpressionPart>();
             ExcelExpression activeArg = null;
@@ -163,7 +142,15 @@ namespace DocumentCreator
             {
                 if (item.TokenType == ExcelFormulaTokenType.Argument)
                 {
-                    args.Add(activeArg.Evaluate(sources, context.OutputLang));
+                    if (activeArg == null)
+                    {
+                        // possible optional argument -- consecutive commas
+                        args.Add(new ExcelExpressionPart(ExcelValue.NULL));
+                    }
+                    else
+                    {
+                        args.Add(activeArg.Evaluate(scope));
+                    }
                     activeArg = null;
                 }
                 else
@@ -172,7 +159,7 @@ namespace DocumentCreator
                     activeArg.Add(item);
                 }
             }
-            if (activeArg != null) args.Add(activeArg.Evaluate(sources, context.OutputLang));
+            if (activeArg != null) args.Add(activeArg.Evaluate(scope));
             return args;
         }
 
@@ -187,34 +174,17 @@ namespace DocumentCreator
             }
         }
 
-        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions)
+        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions, IEnumerable<EvaluationResult> results)
         {
-            foreach (var expression in expressions)
+            foreach (var result in results)
             {
-                if (expression.IsCollection)
+                if (result.Text == "#HIDE_CONTENT#")
                 {
-                    expressions
-                        .Where(o => o.Parent == expression.Name)
-                        .ToList()
-                        .ForEach(o =>
-                        {
-                            o.Result.Text = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
-                        });
+                    result.Text = string.Empty;
                 }
-                else if (!string.IsNullOrEmpty(expression.Parent))
+                else if (result.Text == "#SHOW_CONTENT#")
                 {
-                    expression.Result.Text = new JArray(expression.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
-                }
-                else
-                {
-                    if (expression.Result.Text == "#HIDE_CONTENT#")
-                    {
-                        expression.Result.Text = string.Empty;
-                    }
-                    else if (expression.Result.Text == "#SHOW_CONTENT#")
-                    {
-                        expression.Result.Text = expression.Content;
-                    }
+                    result.Text = expressions.First(o => o.Name == result.Name).Content;
                 }
             }
         }

@@ -90,7 +90,7 @@ namespace DocumentCreator
         }
 
         public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
-            int childCount, Dictionary<string, IEnumerable<string>> childValues)
+            Dictionary<string, IEnumerable<string>> sectionItems)
         {
             var parentSdt = FindSdt(doc.MainDocumentPart.Document.Body, parentName);
             var sdtContent = FindSdtContent(parentSdt, parentName);
@@ -98,15 +98,17 @@ namespace DocumentCreator
                 throw new NotImplementedException($"[{parentName}] Can not handle repeating sections with {sdtContent.ChildElements.Count} elements in content");
             var sourceRow = sdtContent.FirstChild;
             SdtElement newRow = (SdtElement)sourceRow;
-            for (var i = 0; i < childCount; i++)
+            var count = sectionItems.First().Value.Count();
+            for (var i = 0; i < count; i++)
             {
                 if (i > 0)
                 {
                     newRow = (SdtElement)sourceRow.CloneNode(true);
                     newRow.SdtProperties?.Elements<SdtId>().FirstOrDefault()?.Remove();
                     sourceRow.InsertAfterSelf(newRow);
+                    sourceRow = newRow;
                 }
-                foreach (var kvp in childValues)
+                foreach (var kvp in sectionItems)
                 {
                     var childSdt = FindSdt(newRow, kvp.Key);
                     var childSdtContent = FindSdtContent(childSdt, kvp.Key);
@@ -132,26 +134,21 @@ namespace DocumentCreator
             textElem.Text = text;
         }
 
-        public static bool SetContentControlContent(WordprocessingDocument doc, string name, string text, out string updatedText)
+        public static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
         {
             if (text == "#HIDE_CONTENT#")
             {
                 RemoveContentControlContent(doc, name);
-                updatedText = string.Empty;
-                return true;
             }
             else if (text == "#SHOW_CONTENT#")
             {
-                updatedText =ShowContentControlContent(doc, name);
-                return true;
+                ShowContentControlContent(doc, name);
             }
             else
             {
                 var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
                 var sdtContent = FindSdtContent(sdt, name);
                 SetTextElement(sdtContent, name, text);
-                updatedText = null;
-                return false;
             }
         }
     }

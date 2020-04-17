@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
 {
-    public class ExcelExpression : List<ExcelExpressionPart>
+    internal class ExcelExpression : List<ExcelExpressionPart>
     {
-        public ExcelExpressionPart Evaluate(IDictionary<string, JToken> sources, Language language)
+        public ExcelExpressionPart Evaluate(ExpressionScope scope)
         {
-            ResolveRangeValues(sources, language);
+            ResolveRangeValues(scope);
             if (this.Any(p => p.HasRangeValue))
                 throw new InvalidOperationException("ExcelExpression.Evaluate: Found unresolved range value during evaluation.");
             // https://support.office.com/en-us/article/calculation-operators-and-precedence-in-excel-48be406d-4975-4d31-b2b8-7af9e0e2878a
@@ -28,7 +28,7 @@ namespace DocumentCreator.ExcelFormulaParser
             return new ExcelExpressionPart(value);
         }
 
-        private void ResolveRangeValues(IDictionary<string, JToken> sources, Language language)
+        private void ResolveRangeValues(ExpressionScope scope)
         {
             for (var index = 0; index < this.Count; index++)
             {
@@ -36,12 +36,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 if (partValue.HasRangeValue)
                 {
                     var rangeAddress = partValue.Value.Text;
-                    var source = (JObject)sources["#OWN#"];
-                    if (source.ContainsKey(rangeAddress))
-                    {
-                        var value = source[rangeAddress];
-                        this[index] = new ExcelExpressionPart(ExcelValue.Create(value, language));
-                    }
+                    this[index] = new ExcelExpressionPart(scope.Get(rangeAddress));
                 }
             }
         }

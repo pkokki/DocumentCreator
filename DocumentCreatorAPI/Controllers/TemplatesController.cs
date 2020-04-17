@@ -22,9 +22,9 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpGet]
-        public string Get()
+        public IActionResult Get()
         {
-            return "Hello, Templates!";
+            return Ok(repository.GetTemplates());
         }
 
         [HttpPost, DisableRequestSizeLimit]
@@ -41,6 +41,49 @@ namespace DocumentCreatorAPI.Controllers
             }
             else
                 return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("{templateName}")]
+        public IActionResult GetTemplate([FromRoute]string templateName)
+        {
+            var template = repository.GetTemplate(templateName);
+            var processor = new TemplateProcessor();
+            template.Fields = processor.FindTemplateFields(template.Buffer);
+            return Ok(template);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/versions")]
+        public IActionResult GetTemplateVersions([FromRoute]string templateName)
+        {
+            var versions = repository.GetTemplateVersions(templateName);
+            return Ok(versions);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/versions/{version}")]
+        public IActionResult GetTemplateVersion([FromRoute]string templateName, [FromRoute]string version)
+        {
+            var template = repository.GetTemplate(templateName, version);
+            var processor = new TemplateProcessor();
+            template.Fields = processor.FindTemplateFields(template.Buffer);
+            return Ok(template);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings")]
+        public IActionResult GetTemplateMappings([FromRoute]string templateName)
+        {
+            var mappings = repository.GetTemplateMappings(templateName);
+            return Ok(mappings);
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/versions")]
+        public IActionResult GetTemplateMappingVersions([FromRoute]string templateName, [FromRoute]string mappingName)
+        {
+            return Ok($"{templateName}/mappings/{mappingName}/versions");
         }
 
         [HttpGet]
@@ -68,6 +111,20 @@ namespace DocumentCreatorAPI.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/versions/{mappingVersion}")]
+        public IActionResult GetTemplateMappingInfo([FromRoute]string templateName, [FromRoute]string mappingName, [FromRoute]string mappingVersion)
+        {
+            var mapping = repository.GetTemplateMapping(templateName, mappingName, mappingVersion);
+            if (mapping == null)
+                return NotFound();
+            var processor = new TemplateProcessor();
+            var sources = new List<EvaluationSource>();
+            mapping.Expressions = processor.GetTemplateFieldExpressions(mapping.Buffer, sources);
+            mapping.Sources = sources;
+            return Ok(mapping);
+        }
+
         [HttpPost, DisableRequestSizeLimit]
         [Route("{templateName}/mappings/{mappingName}")]
         public IActionResult CreateTemplateMapping([FromRoute]string templateName, [FromRoute]string mappingName)
@@ -85,8 +142,8 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost]
-        [Route("{templateName}/mappings/{mappingName}/{document}")]
-        public IActionResult ExecuteMappingCommand([FromRoute]string templateName,
+        [Route("{templateName}/mappings/{mappingName}/document")]
+        public IActionResult CreateDocument([FromRoute]string templateName,
             [FromRoute]string mappingName,
             [FromBody] JObject payload)
         {
@@ -103,6 +160,20 @@ namespace DocumentCreatorAPI.Controllers
             {
                 FileDownloadName = document.FileName
             };
+        }
+
+        [HttpGet]
+        [Route("{templateName}/documents")]
+        public IActionResult GetDocuments([FromRoute]string templateName)
+        {
+            return Ok($"{templateName}/documents");
+        }
+
+        [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}/documents")]
+        public IActionResult GetDocuments([FromRoute]string templateName, [FromRoute]string mappingName)
+        {
+            return Ok($"{templateName}/mappings/{mappingName}/documents");
         }
     }
 }

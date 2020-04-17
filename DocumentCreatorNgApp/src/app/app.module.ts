@@ -1,30 +1,33 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule }   from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms'; 
-import { HttpClientModule } from '@angular/common/http'; 
+import { HttpClientModule } from '@angular/common/http';
 
+import { httpErrorInterceptorProvider } from './services/http-error.interceptor';
 import { AppRoutingModule } from './app-routing.module';
+import { QuickstartModule } from './components/quickstart/quickstart.module';
+import { AdminCenterRoutingModule } from './components/admin-center/admin-center-routing.module'
 import { AppComponent } from './app.component';
-import { Step1Component } from './step1/step1.component';
-import { Step2Component } from './step2/step2.component';
-import { Step3Component } from './step3/step3.component';
-import { Step4Component } from './step4/step4.component';
+import { PageNotFoundComponent } from './components/var/page-not-found/page-not-found.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    Step1Component,
-    Step2Component,
-    Step3Component,
-    Step4Component
+    PageNotFoundComponent
   ],
   imports: [
+    CommonModule,
     BrowserModule,
-    FormsModule,
     HttpClientModule,
+    QuickstartModule,
+    AdminCenterRoutingModule,
+    // AppRoutingModule should be last.
+    // Most importantly, it comes after the modules with own routing.
     AppRoutingModule
   ],
-  providers: [],
+  providers: [
+    httpErrorInterceptorProvider
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

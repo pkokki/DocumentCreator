@@ -1,0 +1,22 @@
+<h3>Template {{template.name}}</h3>
+<a href="#" [routerLink]="['..']">Templates</a>
+
+<p>Version: {{template.version}}</p>
+<p>Date: {{template.timestamp | date:'dd/MM/yyyy'}} {{template.timestamp | date:'HH:mm:ss'}}</p>
+
+    
+<div class="tbl" style="max-width: 600px;">
+    <div class="row">
+        <div class="cell1">name</div>
+        <div class="cell1">parent</div>
+        <div class="cell1">coll</div>
+        <div class="cell8">content</div>
+    </div>
+    <div class="row" *ngFor="let fld of template.fields">
+        <div class="cell1">{{ fld.name }}</div>
+        <div class="cell1">{{ fld.parent }}</div>
+        <div class="cell1">{{ fld.isCollection?'Yes':'' }}</div>
+        <div class="cell8">{{ fld.content }}</div>
+    </div>
+</div>
+

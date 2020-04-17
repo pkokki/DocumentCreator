@@ -11,8 +11,8 @@ namespace DocumentCreator.ExcelFormulaParser
     {
         public static readonly Functions INSTANCE = new Functions();
 
-        private readonly Dictionary<string, Func<List<ExcelValue>, Language, Dictionary<string, JToken>, ExcelValue>> Registry
-            = new Dictionary<string, Func<List<ExcelValue>, Language, Dictionary<string, JToken>, ExcelValue>>();
+        private readonly Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>> Registry
+            = new Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>>();
         
         private Functions()
         {
@@ -46,30 +46,36 @@ namespace DocumentCreator.ExcelFormulaParser
             Registry.Add("OR", OR);
             Registry.Add("XOR", XOR);
 
+            Registry.Add("SUM", SUM);
+
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);
             Registry.Add("RQD", RQD);
             Registry.Add("RQL", RQL);
             Registry.Add("RQR", RQR);
             Registry.Add("CONTENT", CONTENT);
+            Registry.Add("MAPVALUE", MAPVALUE);
+            Registry.Add("MAPITEM", MAPITEM);
+            Registry.Add("GETITEM", GETITEM);
+            Registry.Add("GETLIST", GETLIST);
 
         }
 
-        public ExcelValue Evaluate(string name, List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue Evaluate(string name, List<ExcelValue> args, ExpressionScope scope)
         {
             if (Registry.TryGetValue(name, out var function))
-                return function(args, language, sources);
+                return function(args, scope);
             else
                 throw new InvalidOperationException($"Unknown function name: {name}");
         }
 
-        public ExcelValue NA(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue NA(List<ExcelValue> args, ExpressionScope scope)
         {
             return ExcelValue.NA;
         }
-        public ExcelValue PI(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope)
         {
-            return new DecimalValue(3.14159265358979M, language);
+            return new DecimalValue(3.14159265358979M, scope.OutLanguage);
         }
     }
 }
