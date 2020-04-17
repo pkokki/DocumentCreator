@@ -163,7 +163,15 @@ namespace DocumentCreator
             {
                 if (item.TokenType == ExcelFormulaTokenType.Argument)
                 {
-                    args.Add(activeArg.Evaluate(sources, context.OutputLang));
+                    if (activeArg == null)
+                    {
+                        // possible optional argument -- consecutive commas
+                        args.Add(new ExcelExpressionPart(ExcelValue.NULL));
+                    }
+                    else
+                    {
+                        args.Add(activeArg.Evaluate(sources, context.OutputLang));
+                    }
                     activeArg = null;
                 }
                 else

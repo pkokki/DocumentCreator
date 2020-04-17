@@ -46,12 +46,18 @@ namespace DocumentCreator.ExcelFormulaParser
             Registry.Add("OR", OR);
             Registry.Add("XOR", XOR);
 
+            Registry.Add("SUM", SUM);
+
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);
             Registry.Add("RQD", RQD);
             Registry.Add("RQL", RQL);
             Registry.Add("RQR", RQR);
             Registry.Add("CONTENT", CONTENT);
+            Registry.Add("MAPVALUE", MAPVALUE);
+            Registry.Add("MAPITEM", MAPITEM);
+            Registry.Add("GETITEM", GETITEM);
+            Registry.Add("GETLIST", GETLIST);
 
         }
 

@@ -36,11 +36,18 @@ namespace DocumentCreator.ExcelFormulaParser
                 if (partValue.HasRangeValue)
                 {
                     var rangeAddress = partValue.Value.Text;
-                    var source = (JObject)sources["#OWN#"];
-                    if (source.ContainsKey(rangeAddress))
+                    if (sources.ContainsKey(rangeAddress)) // TODO: Should check cell (not name) property of sources
                     {
-                        var value = source[rangeAddress];
-                        this[index] = new ExcelExpressionPart(ExcelValue.Create(value, language));
+                        this[index] = new ExcelExpressionPart(new ExcelValue.SourceReferenceValue(rangeAddress));
+                    }
+                    else
+                    {
+                        var source = (JObject)sources["#OWN#"];
+                        if (source.ContainsKey(rangeAddress))
+                        {
+                            var value = source[rangeAddress];
+                            this[index] = new ExcelExpressionPart(ExcelValue.Create(value, language));
+                        }
                     }
                 }
             }

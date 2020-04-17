@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
 {
@@ -31,6 +31,46 @@ namespace DocumentCreator.ExcelFormulaParser
         public ExcelValue CONTENT(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
         {
             return new ExcelValue.TextValue((args[0].AsBoolean() ?? false) ? "#SHOW_CONTENT#" : "#HIDE_CONTENT#", language);
+        }
+
+        public ExcelValue MAPVALUE(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        {
+            var value = ExcelValue.Create(sources[args[0].Text]?.SelectToken(args[1].Text), language);
+            if (args.Count > 2 && !(args[2] is ExcelValue.NullValue))
+            {
+                var args2 = new List<ExcelValue> { args[2], value };
+                value = MAPVALUE(args2, language, sources);
+            }
+            return value;
+        }
+
+        public ExcelValue MAPITEM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        {
+            var source = args[0].InnerValue as JArray;
+            var items = source.Select(o => o.SelectToken(args[1].Text));
+            var result = new JArray(items);
+            return ExcelValue.Create(result, language);
+        }
+
+        public ExcelValue GETITEM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        {
+            var index = args.Count > 3 ? ((int)args[3].AsDecimal().Value) - 1 : 0;
+
+            var source = args[0].InnerValue as JArray;
+            var result = ExcelValue.Create(source[index].SelectToken(args[1].Text), language);
+            if (args.Count > 2 && !(args[2] is ExcelValue.NullValue))
+            {
+                var args2 = new List<ExcelValue> { args[2], result };
+                result = MAPVALUE(args2, language, sources);
+            }
+            return result;
+        }
+        public ExcelValue GETLIST(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        {
+            var source = args[0].InnerValue as JArray;
+            var items = source.Select(o => o.SelectToken(args[1].Text));
+            var result = new JArray(items);
+            return ExcelValue.Create(result, language);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DocumentCreator.ExcelFormulaParser.Languages;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace DocumentCreator.ExcelFormulaParser
         public static readonly ExcelValue DIV0 = new ErrorValue("#DIV/0!");
         public static readonly ExcelValue TRUE = new BooleanValue(true);
         public static readonly ExcelValue FALSE = new BooleanValue(false);
+        public static readonly ExcelValue NULL = new NullValue();
 
         #endregion
 
@@ -25,8 +27,8 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             switch (token.Type)
             {
-                case JTokenType.Object: return new JsonTextValue(token, "{}", language);
-                case JTokenType.Array: return new JsonTextValue(token, "[]", language);
+                case JTokenType.Object: return new JsonTextValue(token, language);
+                case JTokenType.Array: return new JsonTextValue(token, language);
                 case JTokenType.Boolean: return new BooleanValue((bool)token);
                 case JTokenType.Integer:
                 case JTokenType.Float:
@@ -136,6 +138,16 @@ namespace DocumentCreator.ExcelFormulaParser
             protected internal override decimal? AsDecimal() { return null; }
         }
 
+        internal class NullValue : ExcelValue
+        {
+            public NullValue() : base(null, null, Language.Invariant)
+            {
+            }
+            public override string ToString(Language language) { return null; }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() { return null; }
+        }
+
         internal class TextValue : ExcelValue
         {
             public TextValue(string text, Language language) : base(text, text, language)
@@ -153,7 +165,46 @@ namespace DocumentCreator.ExcelFormulaParser
 
         internal class JsonTextValue : ExcelValue
         {
-            public JsonTextValue(JToken token, string text, Language language) : base(token, text, language)
+            private readonly bool? asBoolean;
+            private readonly decimal? asDecimal;
+
+            public JsonTextValue(JToken token, Language language) : base(token, ToText(token, language), language)
+            {
+                if (token.Type == JTokenType.Array && token.Any())
+                {
+                    var value = Create(token[0], language);
+                    asBoolean = value.AsBoolean();
+                    asDecimal = value.AsDecimal();
+                }
+            }
+
+            private static string ToText(JToken token, Language language)
+            {
+                switch (token.Type)
+                {
+                    case JTokenType.Object: return "{}";
+                    case JTokenType.Array:
+                        if (!token.Any() || token[0].Type == JTokenType.Object)
+                        {
+                            return "[]";
+                        }
+                        else
+                        {
+                            var texts = token.Select(o => Create(o, language).Text);
+                            return new JArray(texts).ToString(Formatting.None).Replace("\"", "'");
+                        }
+                    default: throw new NotSupportedException($"JsonTextValue: not supported type {token.Type}");
+                }
+            }
+
+            protected internal override bool? AsBoolean() { return asBoolean; }
+            protected internal override decimal? AsDecimal() { return asDecimal; }
+            public override string ToString(Language language) { return Text; }
+        }
+
+        internal class SourceReferenceValue : ExcelValue
+        {
+            public SourceReferenceValue(string sourceName) : base(null, sourceName, Language.Invariant)
             {
             }
             protected internal override bool? AsBoolean() { return null; }
@@ -203,34 +254,34 @@ namespace DocumentCreator.ExcelFormulaParser
 
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
-            var value = Convert.ToDecimal(a.InnerValue) + Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Language);
+            var value = a.AsDecimal() + b.AsDecimal();
+            return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
-            var value = Convert.ToDecimal(a.InnerValue) - Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Language);
+            var value = a.AsDecimal() - b.AsDecimal();
+            return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
-            var value = Convert.ToDecimal(a.InnerValue) * Convert.ToDecimal(b.InnerValue);
-            return new DecimalValue(value, a.Language);
+            var value = a.AsDecimal() * b.AsDecimal();
+            return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
         {
-            var denominator = Convert.ToDecimal(b.InnerValue);
-            return a / denominator;
+            var denominator = b.AsDecimal();
+            return a / denominator.Value;
         }
         public static ExcelValue operator /(ExcelValue a, decimal denominator)
         {
             if (denominator == 0M)
                 return DIV0;
-            var value = Convert.ToDecimal(a.InnerValue) / denominator;
-            return new DecimalValue(value, a.Language);
+            var value = a.AsDecimal() / denominator;
+            return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a)
         {
-            return new DecimalValue(-Convert.ToDecimal(a.InnerValue), a.Language);
+            return new DecimalValue(-a.AsDecimal().Value, a.Language);
         }
         public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
         {

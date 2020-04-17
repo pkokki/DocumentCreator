@@ -13,7 +13,7 @@ namespace DocumentCreator.Model
         public string Expression { get; set; }
         
         [JsonIgnore]
-        public List<string> Rows { get; set; }
+        public List<string> Rows { get; private set; }
 
         [JsonIgnore]
         public int ChildRows { get; set; }
