@@ -8,15 +8,15 @@ namespace DocumentCreator.ExcelFormulaParser
 {
     public partial class Functions
     {
-        public ExcelValue SUM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue SUM(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
             var result = 0M;
             foreach (var arg in args)
             {
-                if (arg is ExcelValue.JsonTextValue && arg.InnerValue is JArray)
+                if (arg is ExcelValue.ArrayValue)
                 {
-                    ((JArray)arg.InnerValue).ToList().ForEach(o => result += (decimal)o);
+                    ((IEnumerable<ExcelValue>)arg.InnerValue).ToList().ForEach(o => result += o.AsDecimal().Value);
                 }
                 else
                 {
@@ -25,7 +25,7 @@ namespace DocumentCreator.ExcelFormulaParser
                     result += arg.AsDecimal().Value;
                 }
             }
-            return new ExcelValue.DecimalValue(result, language);
+            return new ExcelValue.DecimalValue(result, scope.OutLanguage);
         }
     }
 }

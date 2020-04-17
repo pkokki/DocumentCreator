@@ -27,8 +27,8 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             switch (token.Type)
             {
-                case JTokenType.Object: return new JsonTextValue(token, language);
-                case JTokenType.Array: return new JsonTextValue(token, language);
+                case JTokenType.Object: return new JsonObjectValue((JObject)token, language);
+                case JTokenType.Array: return new ArrayValue((JArray)token, language);
                 case JTokenType.Boolean: return new BooleanValue((bool)token);
                 case JTokenType.Integer:
                 case JTokenType.Float:
@@ -37,13 +37,13 @@ namespace DocumentCreator.ExcelFormulaParser
             }
         }
 
-        public static ExcelValue Create(ExcelFormulaToken token, ExpressionContext context)
+        public static ExcelValue Create(ExcelFormulaToken token, ExpressionScope scope)
         {
             return token.Subtype switch
             {
-                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, context.OutputLang),
-                ExcelFormulaTokenSubtype.Number => new DecimalValue(context.InputLang.ToDecimal(token.Value), context.OutputLang),
-                ExcelFormulaTokenSubtype.Logical => new BooleanValue(context.InputLang.ToBoolean(token.Value)),
+                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, scope.OutLanguage),
+                ExcelFormulaTokenSubtype.Number => new DecimalValue(scope.InLanguage.ToDecimal(token.Value), scope.OutLanguage),
+                ExcelFormulaTokenSubtype.Logical => new BooleanValue(scope.InLanguage.ToBoolean(token.Value)),
                 ExcelFormulaTokenSubtype.Range => new RangeValue(token.Value),
                 _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
             };
@@ -61,7 +61,7 @@ namespace DocumentCreator.ExcelFormulaParser
             {
                 if (v1 is BooleanValue) 
                     return new BooleanValue(v1 == v2);
-                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                if ((v1 is TextValue && v2 is TextValue)) //*********** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
                     return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) == 0);
@@ -77,7 +77,7 @@ namespace DocumentCreator.ExcelFormulaParser
             if (oper == ">")
             {
                 if (v1 is BooleanValue) return new BooleanValue(v1 == TRUE && v2 == FALSE);
-                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                if ((v1 is TextValue && v2 is TextValue)) //********** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) > 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
                     return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) > 0);
@@ -87,13 +87,18 @@ namespace DocumentCreator.ExcelFormulaParser
             if (oper == ">=")
             {
                 if (v1 is BooleanValue) return new BooleanValue(!(v1 == FALSE && v2 == TRUE));
-                if ((v1 is TextValue && v2 is TextValue) || (v1 is JsonTextValue && v2 is JsonTextValue))
+                if ((v1 is TextValue && v2 is TextValue)) // *************** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) >= 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
                     return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) >= 0);
                 return new BooleanValue(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) >= 0);
             }
             throw new InvalidOperationException($"Unhandled comparison {v1?.GetType().Name ?? "NULL"} {oper} {v2?.GetType().Name ?? "NULL"}");
+        }
+
+        public virtual ExcelValue ElementAt(int index)
+        {
+            throw new InvalidOperationException($"{this.GetType().Name} is single-valued. ElementAt is not supported.");
         }
 
         #endregion
@@ -104,6 +109,13 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             this.InnerValue = value;
             this.Text = text ?? string.Empty;
+            this.Language = language;
+        }
+
+        protected ExcelValue(IEnumerable<ExcelValue> value, Language language)
+        {
+            this.InnerValue = value;
+            this.Text = new JArray(value.Select(o => o.Text)).ToString(Formatting.None).Replace("\"", "'");
             this.Language = language;
         }
 
@@ -163,43 +175,44 @@ namespace DocumentCreator.ExcelFormulaParser
             public override string ToString(Language language) { return Text; }
         }
 
-        internal class JsonTextValue : ExcelValue
+        internal class JsonObjectValue : ExcelValue
+        {
+            public JsonObjectValue(JObject token, Language language) : base(token, "{}", language)
+            {
+            }
+            protected internal override bool? AsBoolean() { return null; }
+            protected internal override decimal? AsDecimal() { return null; }
+            public override string ToString(Language language) { return Text; }
+        }
+
+        internal class ArrayValue : ExcelValue
         {
             private readonly bool? asBoolean;
             private readonly decimal? asDecimal;
+            private readonly IEnumerable<ExcelValue> values;
 
-            public JsonTextValue(JToken token, Language language) : base(token, ToText(token, language), language)
+            public ArrayValue(JArray token, Language language)
+                : this(token.Select(o => Create(o, language)).ToArray(), language)
             {
-                if (token.Type == JTokenType.Array && token.Any())
-                {
-                    var value = Create(token[0], language);
-                    asBoolean = value.AsBoolean();
-                    asDecimal = value.AsDecimal();
-                }
             }
-
-            private static string ToText(JToken token, Language language)
+            public ArrayValue(IEnumerable<ExcelValue> value, Language language) 
+                : base(value, language)
             {
-                switch (token.Type)
+                values = value;
+                if (values.Any())
                 {
-                    case JTokenType.Object: return "{}";
-                    case JTokenType.Array:
-                        if (!token.Any() || token[0].Type == JTokenType.Object)
-                        {
-                            return "[]";
-                        }
-                        else
-                        {
-                            var texts = token.Select(o => Create(o, language).Text);
-                            return new JArray(texts).ToString(Formatting.None).Replace("\"", "'");
-                        }
-                    default: throw new NotSupportedException($"JsonTextValue: not supported type {token.Type}");
+                    asBoolean = values.ElementAt(0).AsBoolean();
+                    asDecimal = values.ElementAt(0).AsDecimal();
                 }
             }
 
             protected internal override bool? AsBoolean() { return asBoolean; }
             protected internal override decimal? AsDecimal() { return asDecimal; }
             public override string ToString(Language language) { return Text; }
+            public override ExcelValue ElementAt(int index)
+            {
+                return values.ElementAt(index);
+            }
         }
 
         internal class SourceReferenceValue : ExcelValue

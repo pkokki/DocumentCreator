@@ -1,4 +1,5 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using DocumentCreator.ExcelFormulaParser;
+using DocumentCreator.ExcelFormulaParser.Languages;
 using DocumentCreator.Model;
 using DocumentFormat.OpenXml.Packaging;
 using Newtonsoft.Json.Linq;
@@ -65,13 +66,10 @@ namespace DocumentCreator
                             .ToList()
                             .ForEach(o =>
                             {
-                                childValues[o.Name] = o.Result.Rows;
-                                o.Result.Text = new JArray(o.Result.Rows).ToString(Newtonsoft.Json.Formatting.None).Replace("\"", "'");
+                                childValues[o.Name] = ((IEnumerable<ExcelValue>)o.Result.Value).Select(o => o.Text); 
                             });
-                        if (templateFieldExpression.Result.ChildRows == 0)
-                            throw new InvalidOperationException($"[{templateFieldExpression.Name}]: Collection is empty");
                         OpenXmlWordProcessing.ProcessRepeatingSection(doc, templateFieldExpression.Name,
-                            templateFieldExpression.Result.ChildRows, childValues);
+                            childValues.First().Value.Count(), childValues);
 
                     }
                     else if (!string.IsNullOrEmpty(templateFieldExpression.Parent))

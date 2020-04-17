@@ -89,7 +89,7 @@ namespace DocumentCreator
             Assert.Equal("10000", fields["F07"]);
             Assert.Equal("3", fields["F08"]);
             Assert.Equal("1", fields["F09"]);
-            Assert.Equal("[]", fields["F10"]);
+            Assert.Equal("['{}','{}']", fields["F10"]);
             Assert.Equal("0,17", fields["F14"]);
             Assert.Equal("1", fields["F15"]);
             Assert.Equal("1", fields["F17"]);

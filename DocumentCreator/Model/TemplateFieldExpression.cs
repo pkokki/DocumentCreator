@@ -12,6 +12,6 @@ namespace DocumentCreator.Model
         public string Content { get; set; }
         [JsonIgnore]
         // TODO: Remove from here - make it standalone
-        public ExpressionResult Result { get; set; } 
+        public EvaluationResult Result { get; set; } 
     }
 }

@@ -8,69 +8,65 @@ namespace DocumentCreator.ExcelFormulaParser
 {
     public partial class Functions
     {
-        public ExcelValue SYSDATE(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue SYSDATE(List<ExcelValue> args, ExpressionScope scope)
         {
-            return new ExcelValue.TextValue(DateTime.Today.ToString("d/M/yyyy"), language);
+            return new ExcelValue.TextValue(DateTime.Today.ToString("d/M/yyyy"), scope.OutLanguage);
         }
-        public ExcelValue SOURCE(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue SOURCE(List<ExcelValue> args, ExpressionScope scope)
         {
-            return ExcelValue.Create(sources[args[0].Text.ToString()]?.SelectToken(args[1].Text.ToString()), language);
+            return scope.Get(args[0], args[1]);
         }
-        public ExcelValue RQD(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue RQD(List<ExcelValue> args, ExpressionScope scope)
         {
-            return ExcelValue.Create(sources["RQ"]?["RequestData"]?[args[0].Text], language);
+            return scope.Get(scope.Get("RQ"), new ExcelValue.TextValue("RequestData." + args[0].Text, scope.OutLanguage));
         }
-        public ExcelValue RQL(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue RQL(List<ExcelValue> args, ExpressionScope scope)
         {
-            return ExcelValue.Create(sources["RQ"]?["LogHeader"]?[args[0].Text], language);
+            return scope.Get(scope.Get("RQ"), new ExcelValue.TextValue("LogHeader." + args[0].Text, scope.OutLanguage));
         }
-        public ExcelValue RQR(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue RQR(List<ExcelValue> args, ExpressionScope scope)
         {
-            return ExcelValue.Create(sources["#ROW#"]?[args[0].Text], language);
+            return scope.GetFromParent(args[0]);
         }
-        public ExcelValue CONTENT(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue CONTENT(List<ExcelValue> args, ExpressionScope scope)
         {
-            return new ExcelValue.TextValue((args[0].AsBoolean() ?? false) ? "#SHOW_CONTENT#" : "#HIDE_CONTENT#", language);
+            return new ExcelValue.TextValue((args[0].AsBoolean() ?? false) ? "#SHOW_CONTENT#" : "#HIDE_CONTENT#", scope.OutLanguage);
         }
 
-        public ExcelValue MAPVALUE(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue MAPVALUE(List<ExcelValue> args, ExpressionScope scope)
         {
-            var value = ExcelValue.Create(sources[args[0].Text]?.SelectToken(args[1].Text), language);
+            var value = scope.Get(args[0], args[1]);
             if (args.Count > 2 && !(args[2] is ExcelValue.NullValue))
             {
                 var args2 = new List<ExcelValue> { args[2], value };
-                value = MAPVALUE(args2, language, sources);
+                value = MAPVALUE(args2, scope);
             }
             return value;
         }
 
-        public ExcelValue MAPITEM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue MAPITEM(List<ExcelValue> args, ExpressionScope scope)
         {
-            var source = args[0].InnerValue as JArray;
-            var items = source.Select(o => o.SelectToken(args[1].Text));
-            var result = new JArray(items);
-            return ExcelValue.Create(result, language);
+            var values = ((IEnumerable<ExcelValue>)args[0].InnerValue).Select(item => scope.Get(item, args[1]));
+            return new ExcelValue.ArrayValue(values, scope.OutLanguage);
         }
 
-        public ExcelValue GETITEM(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue GETITEM(List<ExcelValue> args, ExpressionScope scope)
         {
             var index = args.Count > 3 ? ((int)args[3].AsDecimal().Value) - 1 : 0;
 
-            var source = args[0].InnerValue as JArray;
-            var result = ExcelValue.Create(source[index].SelectToken(args[1].Text), language);
+            var target = ((IEnumerable<ExcelValue>)args[0].InnerValue).ElementAt(index);
+            var result = scope.Get(target, args[1]);
             if (args.Count > 2 && !(args[2] is ExcelValue.NullValue))
             {
                 var args2 = new List<ExcelValue> { args[2], result };
-                result = MAPVALUE(args2, language, sources);
+                result = MAPVALUE(args2, scope);
             }
             return result;
         }
-        public ExcelValue GETLIST(List<ExcelValue> args, Language language, Dictionary<string, JToken> sources)
+        public ExcelValue GETLIST(List<ExcelValue> args, ExpressionScope scope)
         {
-            var source = args[0].InnerValue as JArray;
-            var items = source.Select(o => o.SelectToken(args[1].Text));
-            var result = new JArray(items);
-            return ExcelValue.Create(result, language);
+            var values = ((IEnumerable<ExcelValue>)args[0].InnerValue).Select(item => scope.Get(item, args[1]));
+            return new ExcelValue.ArrayValue(values, scope.OutLanguage);
         }
     }
 }

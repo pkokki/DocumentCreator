@@ -13,14 +13,14 @@ namespace DocumentCreator.ExcelFormulaParser
     public class ExcelFormula : IList<ExcelFormulaToken>
     {
         private readonly string formula;
-        private readonly ExpressionContext context;
+        private readonly Language inputLanguage;
         private List<ExcelFormulaToken> tokens;
 
         private ExcelFormula() { }
 
-        public ExcelFormula(string formula, ExpressionContext context)
+        public ExcelFormula(string formula, Language inputLanguage)
         {
-            this.context = context;
+            this.inputLanguage = inputLanguage;
             if (formula == null) throw new ArgumentNullException("formula");
             this.formula = formula.Trim();
             tokens = new List<ExcelFormulaToken>();
@@ -580,7 +580,7 @@ namespace DocumentCreator.ExcelFormulaParser
 
                 if ((token.Type == ExcelFormulaTokenType.Operand) && (token.Subtype == ExcelFormulaTokenSubtype.Nothing))
                 {
-                    bool isNumber = context.InputLang.TryParseDecimal(token.Value, out _);
+                    bool isNumber = inputLanguage.TryParseDecimal(token.Value, out _);
                     if (!isNumber)
                         if ((token.Value == "TRUE") || (token.Value == "FALSE"))
                             token.Subtype = ExcelFormulaTokenSubtype.Logical;

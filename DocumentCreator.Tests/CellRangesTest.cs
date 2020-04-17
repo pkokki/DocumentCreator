@@ -75,7 +75,7 @@ namespace DocumentCreator
             AssertExpression(expressions, "F05", "MM");
             AssertExpression(expressions, "F06", "3.10");
 
-            AssertExpression(expressions, "F10", "[]");
+            AssertExpression(expressions, "F10", "['{}','{}']");
 
             AssertExpression(expressions, "F11", "['1','3']");
             AssertExpression(expressions, "F12", "100");
