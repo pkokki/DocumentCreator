@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DocumentCreator.ExcelFormulaParser.Languages
 {
-    public abstract class Language
+    public class Language
     {
         private readonly CultureInfo culture;
 
@@ -25,7 +25,7 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             }
         }
 
-        protected Language(CultureInfo culture)
+        public Language(CultureInfo culture)
         {
             this.culture = culture;
             EmptyText = new ExcelValue.TextValue(string.Empty, this);
@@ -51,15 +51,15 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             return value?.ToString(this);
         }
 
-        public string ToString(DateTime value, string format = null)
+        public virtual string ToString(DateTime value, string format = null)
         {
             format ??= culture.DateTimeFormat.ShortDatePattern;
-            return value.ToString(format);
+            return value.ToString(format, culture);
         }
-        public string ToTimeString(DateTime value, string format = null)
+        public virtual string ToTimeString(DateTime value, string format = null)
         {
             format ??= culture.DateTimeFormat.ShortTimePattern;
-            return value.ToString(format);
+            return value.ToString(format, culture);
         }
 
         public string ToString(decimal value, int? decimals = null, bool commas = false)
