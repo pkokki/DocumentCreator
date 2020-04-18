@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
+import { EnvService } from '../env/env.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class State {
 
-    constructor() {
-        this.apiBaseUrl = 'https://localhost:44381/api';
+    constructor(private env: EnvService) {
+        env.getEnv().subscribe(env => this.apiBaseUrl = env.baseUrl);
         this.templateName = 'T01';
         this.mappingName = 'M01';
         this.testPayload = JSON.stringify(

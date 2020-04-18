@@ -16,11 +16,11 @@ export class AdminCenterHomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.envService.active().subscribe(env => this.updateVM(env));
+    this.envService.getEnv().subscribe(env => this.updateVM(env));
   }
 
   activate(endpointName: string) {
-    this.envService.activate(endpointName).subscribe(env => this.updateVM(env));
+    this.updateVM(this.envService.activate(endpointName));
   }
 
   private updateVM(env: Env) {

@@ -3,7 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  endpoints: [
+    { "name": "iisexpress", "url": "https://localhost:44381/api" },
+    { "name": "standalone", "url": "https://localhost:5001/api" }
+  ]
 };
 
 /*

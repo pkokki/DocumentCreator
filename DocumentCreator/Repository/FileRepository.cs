@@ -35,7 +35,7 @@ namespace DocumentCreator.Repository
 
         public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
         {
-            var baseFolder = Path.Combine(rootPath, "temp", "html");
+            var baseFolder = Path.Combine(rootPath, "dcfs", "files", "html");
             if (!Directory.Exists(baseFolder))
                 Directory.CreateDirectory(baseFolder);
             if (html != null)
@@ -120,7 +120,7 @@ namespace DocumentCreator.Repository
 
         public ContentItem GetEmptyMapping()
         {
-            var emptyMappingPath = Path.Combine(rootPath, "temp", "empty_mappings_prod.xlsm");
+            var emptyMappingPath = Path.Combine(rootPath, "dcfs", "empty_mappings_prod.xlsm");
             if (!File.Exists(emptyMappingPath))
             {
                 var masterMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
@@ -157,7 +157,7 @@ namespace DocumentCreator.Repository
             {
                 if (templatesFolder == null)
                 {
-                    templatesFolder = Path.Combine(rootPath, "temp", "templates");
+                    templatesFolder = Path.Combine(rootPath, "dcfs", "files", "templates");
                     if (!Directory.Exists(templatesFolder))
                         Directory.CreateDirectory(templatesFolder);
                 }
@@ -170,7 +170,7 @@ namespace DocumentCreator.Repository
             {
                 if (mappingsFolder == null)
                 {
-                    mappingsFolder = Path.Combine(rootPath, "temp", "mappings");
+                    mappingsFolder = Path.Combine(rootPath, "dcfs", "files", "mappings");
                     if (!Directory.Exists(mappingsFolder))
                         Directory.CreateDirectory(mappingsFolder);
                 }
@@ -183,7 +183,7 @@ namespace DocumentCreator.Repository
             {
                 if (documentsFolder == null)
                 {
-                    documentsFolder = Path.Combine(rootPath, "temp", "documents");
+                    documentsFolder = Path.Combine(rootPath, "dcfs", "files", "documents");
                     if (!Directory.Exists(documentsFolder))
                         Directory.CreateDirectory(documentsFolder);
                 }
@@ -193,7 +193,7 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<Template> GetTemplates()
         {
-            var templates = Directory.GetFiles(TemplatesFolder)
+            var templates = Directory.GetFiles(TemplatesFolder, "*.docx")
                 .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
                 .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
                 .GroupBy(a => a.Name)
@@ -244,7 +244,7 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<Template> GetTemplateVersions(string templateName)
         {
-            var templates = Directory.GetFiles(TemplatesFolder)
+            var templates = Directory.GetFiles(TemplatesFolder, "*.docx")
                 .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
                 .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
                 .Where(a => a.Name.Equals(templateName, StringComparison.CurrentCultureIgnoreCase))
