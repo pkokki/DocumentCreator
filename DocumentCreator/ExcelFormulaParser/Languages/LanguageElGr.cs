@@ -35,5 +35,19 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
                 return text;
             return ReplaceLetters(base.ToUpper(text), UpperAccent, UpperNoAccent).Replace('ς', 'Σ');
         }
+
+        public override string ToString(DateTime value, string format = null)
+        {
+            // When running unit tests on github we receive "π.μ." instead of "πμ"
+            var text = base.ToString(value, format);
+            return text.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
+        }
+
+        public override string ToTimeString(DateTime value, string format = null)
+        {
+            // When running unit tests on github we receive "π.μ." instead of "πμ"
+            var text = base.ToTimeString(value, format);
+            return text.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
+        }
     }
 }

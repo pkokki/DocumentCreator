@@ -49,8 +49,8 @@ namespace DocumentCreator.ExcelFormula
         [Fact]
         public void NOW()
         {
-            AssertExpression("=NOW()", DateTime.Now.ToShortDateString());
-            AssertExpression("=NOW()+123", (DateTime.Now.AddDays(123)).ToShortDateString());
+            AssertExpression("=NOW()", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("el-GR")));
+            AssertExpression("=NOW()+123", (DateTime.Now.AddDays(123)).ToString("d", CultureInfo.GetCultureInfo("el-GR")));
         }
     }
 }
