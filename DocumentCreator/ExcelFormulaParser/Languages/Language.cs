@@ -51,6 +51,17 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             return value?.ToString(this);
         }
 
+        public string ToString(DateTime value, string format = null)
+        {
+            format ??= culture.DateTimeFormat.ShortDatePattern;
+            return value.ToString(format);
+        }
+        public string ToTimeString(DateTime value, string format = null)
+        {
+            format ??= culture.DateTimeFormat.ShortTimePattern;
+            return value.ToString(format);
+        }
+
         public string ToString(decimal value, int? decimals = null, bool commas = false)
         {
             string format = null;
@@ -59,6 +70,28 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             else if (decimals.HasValue)
                 format = $"F{decimals.Value}";
             return value.ToString(format, culture);
+        }
+
+        public string ToString(decimal value, string format)
+        {
+            var translatedFormat = TranslateFormat(format, culture);
+            return value.ToString(translatedFormat, culture);
+        }
+
+        private string TranslateFormat(string format, CultureInfo culture)
+        {
+            var sb = new StringBuilder();
+            foreach (var ch1 in format)
+            {
+                var ch2 = ch1;
+                var nf = culture.NumberFormat;
+                if (nf.NumberDecimalSeparator[0] == ch1)
+                    ch2 = '.';
+                else if (nf.NumberGroupSeparator[0] == ch1)
+                    ch2 = ',';
+                sb.Append(ch2);
+            }
+            return sb.ToString();
         }
 
         public decimal ToDecimal(string value)
