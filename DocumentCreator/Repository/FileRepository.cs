@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace DocumentCreator.Repository
 {
@@ -20,15 +21,35 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateTemplate(string templateName, byte[] contents)
         {
-            var templateFilename = Path.Combine(TemplatesFolder, $"{templateName}_{DateTime.Now.Ticks}.docx");
+            var templateversionName = $"{templateName}_{DateTime.Now.Ticks}";
+            var templateFilename = Path.Combine(TemplatesFolder, $"{templateversionName}.docx");
             File.WriteAllBytes(templateFilename, contents);
             return new ContentItem()
             {
-                Name = templateName,
+                Name = templateversionName,
                 Path = templateFilename,
                 FileName = Path.GetFileName(templateFilename),
                 Buffer = contents
             };
+        }
+
+        public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
+        {
+            var baseFolder = Path.Combine(rootPath, "temp", "html");
+            if (!Directory.Exists(baseFolder))
+                Directory.CreateDirectory(baseFolder);
+            if (html != null)
+            {
+                File.WriteAllText(Path.Combine(baseFolder, $"{htmlName}.html"), html, Encoding.UTF8);
+            }
+            if (images != null && images.Any())
+            {
+                var imageFolder = Path.Combine(baseFolder, htmlName);
+                if (!Directory.Exists(imageFolder))
+                    Directory.CreateDirectory(imageFolder);
+                foreach (var kvp in images)
+                    File.WriteAllBytes(Path.Combine(imageFolder, kvp.Key), kvp.Value);
+            }
         }
 
         public ContentItem CreateMapping(string templateName, string mappingName, byte[] contents)

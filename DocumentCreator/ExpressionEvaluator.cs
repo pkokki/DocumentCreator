@@ -71,7 +71,7 @@ namespace DocumentCreator
         {
             if (!expression.StartsWith("="))
                 expression = "=" + expression;
-            var excelFormula = new ExcelFormula(expression, scope.InLanguage);
+            var excelFormula = new ExcelFormulaParser.ExcelFormula(expression, scope.InLanguage);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
             var result = new EvaluationResult()
             {

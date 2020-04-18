@@ -8,4 +8,4 @@
 <button [disabled]="uploading || !state.templateName || !state.mappingName" (click)="submit()">Create Word document</button>
 
 <div style="color: red">{{submitError}}</div>
-<div style="color: blue">{{submitResponse}}</div>
+<div [hidden]="!htmlUrl">View the WORD as HTML <a target="_blank" href="{{htmlUrl}}">here</a>.</div>
