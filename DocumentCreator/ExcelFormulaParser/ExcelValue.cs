@@ -245,6 +245,61 @@ namespace DocumentCreator.ExcelFormulaParser
             public override string ToString(Language language) { return Text; }
         }
 
+        internal class DateValue : DecimalValue
+        {
+            private static readonly DateTime BASE = new DateTime(1900, 1, 1);
+            public DateValue(int year, int month, int day, Language language) 
+                : this(ToDateSerial(year, month, day), language)
+            {
+            }
+            public DateValue(decimal serial, Language language)
+                : base(serial, language, 0, false)
+            {
+                Serial = serial;
+                Date = BASE.AddDays((double)serial - 1);
+            }
+
+            public decimal Serial { get; }
+            public DateTime Date { get; }
+
+            private static int ToDateSerial(int year, int month, int day)
+            {
+                var ts = new DateTime(year, month, day) - BASE;
+                return ts.Days + 1;
+            }
+
+            public override string ToString(Language language) 
+            { 
+                return language.ToString(Date); 
+            }
+        }
+
+        internal class TimeValue : DecimalValue
+        {
+            private static readonly DateTime BASE = new DateTime(1900, 1, 1);
+            public TimeValue(int hours, int minutes, int seconds, Language language)
+                : base(ToTimeSerial(hours, minutes, seconds), language, 0, false)
+            {
+                Time = BASE + new TimeSpan(hours, minutes, seconds);
+            }
+            public TimeValue(decimal serial, Language language)
+                : base(serial, language, 0, false)
+            {
+                Time = BASE.AddDays((double)serial - 1);
+            }
+            public DateTime Time { get; }
+
+            private static decimal ToTimeSerial(int hours, int minutes, int seconds)
+            {
+                return (hours * 3600M + minutes * 60M + seconds) / 86400M;
+            }
+
+            public override string ToString(Language language)
+            {
+                return language.ToTimeString(Time);
+            }
+        }
+
         internal class DecimalValue : ExcelValue
         {
             private readonly int? decimals;
@@ -268,16 +323,28 @@ namespace DocumentCreator.ExcelFormulaParser
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() + b.AsDecimal();
+            if (a is DateValue)
+                return new DateValue(value.Value, a.Language);
+            else if (a is TimeValue)
+                return new TimeValue(value.Value, a.Language);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() - b.AsDecimal();
+            if (a is DateValue)
+                return new DateValue(value.Value, a.Language);
+            else if (a is TimeValue)
+                return new TimeValue(value.Value, a.Language); 
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() * b.AsDecimal();
+            if (a is DateValue)
+                return new DateValue(value.Value, a.Language);
+            else if (a is TimeValue)
+                return new TimeValue(value.Value, a.Language); 
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
@@ -290,6 +357,10 @@ namespace DocumentCreator.ExcelFormulaParser
             if (denominator == 0M)
                 return DIV0;
             var value = a.AsDecimal() / denominator;
+            if (a is DateValue)
+                return new DateValue(value.Value, a.Language);
+            else if (a is TimeValue)
+                return new TimeValue(value.Value, a.Language); 
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a)

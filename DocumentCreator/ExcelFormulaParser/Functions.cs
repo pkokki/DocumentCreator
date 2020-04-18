@@ -17,7 +17,9 @@ namespace DocumentCreator.ExcelFormulaParser
         private Functions()
         {
             Registry.Add("NA", NA);
-            Registry.Add("PI", PI);
+            Registry.Add("NOW", NOW);
+            Registry.Add("DATE", DATE);
+            Registry.Add("TIME", TIME);
 
             Registry.Add("CONCATENATE", CONCATENATE);
             Registry.Add("EXACT", EXACT);
@@ -46,6 +48,7 @@ namespace DocumentCreator.ExcelFormulaParser
             Registry.Add("OR", OR);
             Registry.Add("XOR", XOR);
 
+            Registry.Add("PI", PI);
             Registry.Add("SUM", SUM);
 
             Registry.Add("SYSDATE", SYSDATE);
@@ -73,9 +76,24 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             return ExcelValue.NA;
         }
-        public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope)
+        public ExcelValue NOW(List<ExcelValue> args, ExpressionScope scope)
         {
-            return new DecimalValue(3.14159265358979M, scope.OutLanguage);
+            var now = DateTime.Now;
+            return new DateValue(now.Year, now.Month, now.Day, scope.OutLanguage);
+        }
+        public ExcelValue DATE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotInteger(0, null, out int year)) return ExcelValue.NA;
+            if (args.NotInteger(1, null, out int month)) return ExcelValue.NA;
+            if (args.NotInteger(2, null, out int day)) return ExcelValue.NA;
+            return new DateValue(year, month, day, scope.OutLanguage);
+        }
+        public ExcelValue TIME(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotInteger(0, null, out int hours)) return ExcelValue.NA;
+            if (args.NotInteger(1, null, out int minutes)) return ExcelValue.NA;
+            if (args.NotInteger(2, null, out int seconds)) return ExcelValue.NA;
+            return new TimeValue(hours, minutes, seconds, scope.OutLanguage);
         }
     }
 }

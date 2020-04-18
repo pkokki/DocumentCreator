@@ -194,11 +194,34 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=T(123.4)", "");
             AssertExpression("=T(NA())", "#N/A");
         }
-        //[Fact]
-        //public void TEXT()
-        //{
-        //    /* Formats a number and converts it to text */
-        //}
+        [Fact]
+        public void TEXT()
+        {
+            /* Formats a number and converts it to text */
+            AssertExpression("=TEXT(1234.567,\"0,00\")", "1234,57");
+            AssertExpression("=TEXT(1234.567,\"#.##0,00\")", "1.234,57");
+            AssertExpression("=TEXT(0.567,\"#.##0,00\")", "0,57");
+
+            AssertExpression("=TEXT(1234,\"0000000\")", "0001234");
+            
+            AssertExpression("=TEXT(0.285,\"0,0%\")", "28,5%");
+            AssertExpression("=TEXT(0.0017,\"0,000%\")", "0,170%");
+            AssertExpression("=TEXT(0.17,\"0,000\") & \"%\"", "0,170%");
+
+            AssertExpression("=TEXT(1234.567,\"$#.##0,00\")", "$1.234,57");
+
+            AssertExpression("=DATE(2020,4,11)", "11/4/2020");
+
+            AssertExpression("=TEXT(DATE(2020,4,11),\"MM/dd/yy\")", "04/11/20");    // ΜΜ/ΗΗ/ΕΕ
+            AssertExpression("=TEXT(DATE(2020,4,11),\"dddd\")", "Σάββατο");         // ΗΗΗΗ
+            AssertExpression("=TEXT(DATE(2020,4,11)+TIME(10,12,23),\"h:mm tt\")", "10:12 πμ");  // Ω:ΛΛ AM/PM
+
+            //AssertExpression("=TEXT(4.34,\"# ?/?\")", "4 1/3");
+            //AssertExpression("=TRIM(TEXT(0.34,\"# ?/?\"))", "1/3");
+            //AssertExpression("=TEXT(12200000,\"0,00E+00\")", "1,22E+07");
+            //AssertExpression("=TEXT(1234567898,\"[<=9999999]###-####,(###) ###-####\")", "(123) 456-7898");
+            //AssertExpression("=TEXT(123456,\"##0° 00' 00''\")", "12° 34' 56''");
+        }
         // [Fact] public void TEXTJOIN() { /* Combines the text from multiple ranges and/or strings, and includes a delimiter you specify between each text value that will be combined. If the delimiter is an empty text string, this function will effectively concatenate the ranges. */ }
         [Fact]
         public void TRIM()
