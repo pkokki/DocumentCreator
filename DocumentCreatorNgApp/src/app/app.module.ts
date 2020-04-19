@@ -9,6 +9,7 @@ import { QuickstartModule } from './components/quickstart/quickstart.module';
 import { AdminCenterRoutingModule } from './components/admin-center/admin-center-routing.module'
 import { AppComponent } from './app.component';
 import { PageNotFoundComponent } from './components/var/page-not-found/page-not-found.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { PageNotFoundComponent } from './components/var/page-not-found/page-not-
     AdminCenterRoutingModule,
     // AppRoutingModule should be last.
     // Most importantly, it comes after the modules with own routing.
-    AppRoutingModule
+    AppRoutingModule,
+    BrowserAnimationsModule
   ],
   providers: [
     httpErrorInterceptorProvider
