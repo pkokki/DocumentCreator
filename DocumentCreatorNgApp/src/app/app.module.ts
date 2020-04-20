@@ -10,6 +10,13 @@ import { AdminCenterRoutingModule } from './components/admin-center/admin-center
 import { AppComponent } from './app.component';
 import { PageNotFoundComponent } from './components/var/page-not-found/page-not-found.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatCardModule } from '@angular/material/card';
+
 
 @NgModule({
   declarations: [
@@ -25,7 +32,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     // AppRoutingModule should be last.
     // Most importantly, it comes after the modules with own routing.
     AppRoutingModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    LayoutModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatListModule
   ],
   providers: [
     httpErrorInterceptorProvider

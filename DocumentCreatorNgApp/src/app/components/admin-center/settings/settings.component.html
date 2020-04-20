@@ -1,0 +1,12 @@
+<mat-list>
+    <div mat-subheader>Available endpoints</div>
+    <mat-list-item *ngFor="let endpoint of availableEndpoints">
+        <mat-radio-button 
+            [value]="endpoint" 
+            [checked]="selectedEndpointName == endpoint.name" 
+            (change)="endpointSelectionChanged($event)">
+        </mat-radio-button>
+        <div mat-line>{{endpoint.name}}</div>
+        <pre mat-line>{{endpoint.url}}</pre>
+    </mat-list-item>
+</mat-list>
