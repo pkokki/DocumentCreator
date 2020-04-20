@@ -1,23 +1,35 @@
+<h2>Getting started with Document Creator</h2>
+<mat-vertical-stepper [linear]="false" #stepper>
+    <mat-step label="Step 1: Create template">
+        <app-step1></app-step1>
+    </mat-step>
+    <mat-step label="Step 2: Download an empty mapping sheet">
+        <app-step2></app-step2>
+    </mat-step>
+    <mat-step label="Step 3: Upload a complete mapping sheet">
+        <app-step3></app-step3>
+    </mat-step>
+    <mat-step label="Step 4: Create documents">
+        <app-step4></app-step4>
+    </mat-step>
+</mat-vertical-stepper>
+<!--- 
 <div>
-    <h2>Getting started</h2>
     <h3>Parameters</h3>
-    <p><label>API base url:</label> <input [(ngModel)]="state.apiBaseUrl" placeholder="name"/></p>
-    <p><label>Template name:</label> <input [(ngModel)]="state.templateName" placeholder="name"/></p>
-    <p><label>Mappings name:</label> <input [(ngModel)]="state.mappingName" placeholder="name"/></p>
+    <p><label>API base url:</label> <input [(ngModel)]="state.apiBaseUrl" placeholder="name" /></p>
+    <p><label>Template name:</label> <input [(ngModel)]="state.templateName" placeholder="name" /></p>
+    <p><label>Mappings name:</label> <input [(ngModel)]="state.mappingName" placeholder="name" /></p>
 
-    <!-- Step 1 -->
     <h3>Step 1: Create template</h3>
     <app-step1></app-step1>
 
-    <!-- Step 2 -->
     <h3>Step 2: Download an empty mapping sheet</h3>
     <app-step2></app-step2>
 
-    <!-- Step 3 -->
     <h3>Step 3: Upload a complete mapping sheet</h3>
     <app-step3></app-step3>
 
-    <!-- Step 4 -->
     <h3>Step 4: Create a document</h3>
     <app-step4></app-step4>
 </div>
+-->

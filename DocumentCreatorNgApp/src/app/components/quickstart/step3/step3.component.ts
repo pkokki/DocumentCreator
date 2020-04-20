@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { UploadService } from '../../../services/upload/upload.service'
 import { State } from '../../../services/state/state.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-step3',
@@ -10,10 +11,12 @@ export class Step3Component implements OnInit {
   @ViewChild('file', { static: false }) file: ElementRef;
   
   uploading = false;
-  errorMessage: string;
-  fileName: string;
 
-  constructor(public state: State, private uploadService: UploadService) { }
+  constructor(
+    public state: State, 
+    private uploadService: UploadService,
+    private snackBar: MatSnackBar
+  ) { }
 
   ngOnInit(): void {
   }
@@ -23,15 +26,13 @@ export class Step3Component implements OnInit {
     if (files.length > 0) {
       const file = files[0];
       this.uploading = true;
-      this.errorMessage = null;
-      this.fileName = file.name;
       const uploadUrl = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName;
       const progress = this.uploadService.upload(uploadUrl, null, file);
       progress.subscribe(end => {
         this.uploading = false;
+        this.snackBar.open('Template uploaded succesfully', null, { duration: 2000 });
       }, err => {
         this.uploading = false;
-        this.errorMessage = err;
       });
     }
   }

@@ -1,16 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
 
-code,pre {
-  font-family: Roboto Mono,monospace
-}
-
-code {
-  font-size: 80%
-}
-
-pre {
-  font-size: 12px
+code, pre, .input-code {
+  font-family: Roboto Mono, monospace;
+  font-size: 80%;
 }
 
   .spacer {
@@ -84,14 +77,7 @@ pre {
   }
 
 
-  svg.material-icons {
-    height: 24px;
-    width: auto;
-  }
 
-  svg.material-icons:not(:last-child) {
-    margin-right: 8px;
-  }
 
   .table-row {
     width: 100%;

@@ -1,11 +1,10 @@
-<p>Upload the Excel workbook.</p>
+<p>Upload the Excel workbook with the mappings definition.</p>
 
 <pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre>
 
-<div>
-    <button [disabled]="uploading || !state.templateName" (click)="addFile()">Select Excel to upload</button> {{fileName}}
-</div>
-
-<div style="color: red">{{errorMessage}}</div>
-
 <input type="file" #file style="display: none" (change)="onFileAdd()" />
+<button mat-stroked-button color="primary"
+    [disabled]="uploading || !state.templateName" 
+    (click)="addFile()">
+    Select Excel to upload
+</button>
