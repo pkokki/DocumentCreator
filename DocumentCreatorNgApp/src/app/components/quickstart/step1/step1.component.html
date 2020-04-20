@@ -1,11 +1,18 @@
-<div>Prepare and upload a Word template with content controls:</div>
+<p>Prepare and upload a Word template with content controls.</p>
 
-<pre>POST {{state.apiBaseUrl}}/templates</pre>
+<p>
+    <mat-form-field appearance="fill" style="width:80%">
+        <mat-label>Template name</mat-label>
+        <input matInput placeholder="" [(ngModel)]="state.templateName">
+        <mat-hint>If the name exists a new version is created, otherwise a new template is created.</mat-hint>
+    </mat-form-field>
+</p>
 
-<div>
-    <button [disabled]="uploading || !state.templateName" (click)="addFile()">Select Word to upload</button> {{fileName}}
-</div>
-
-<div style="color: red">{{errorMessage}}</div>
+<pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}</pre>
 
 <input type="file" #file style="display: none" (change)="onFileAdd()" />
+<button mat-stroked-button color="primary" 
+    [disabled]="uploading || !state.templateName" 
+    (click)="addFile()">
+    Select Word to upload
+</button>

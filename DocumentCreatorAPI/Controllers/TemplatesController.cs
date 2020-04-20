@@ -36,8 +36,13 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var ms = new MemoryStream();
                 formFile.CopyTo(ms);
-                repository.CreateTemplate(templateName, ms.ToArray());
-                return Ok();
+                var contentItem = repository.CreateTemplate(templateName, ms.ToArray());
+                
+                var templateVersionName = contentItem.Name;
+                var conversion = OpenXmlWordConverter.ConvertToHtml(ms, templateVersionName);
+                repository.SaveHtml(templateVersionName, null, conversion.Images);
+
+                return Ok(contentItem);
             }
             else
                 return BadRequest();
@@ -153,6 +158,10 @@ namespace DocumentCreatorAPI.Controllers
 
             var documentBytes = processor.CreateDocument(template.Buffer, mapping.Buffer, payload);
             var document = repository.CreateDocument(templateName, mappingName, documentBytes);
+
+            var templateVersionName = template.Name;
+            var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, templateVersionName, document.Name);
+            repository.SaveHtml(document.Name, conversion.Html, conversion.Images);
 
             var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");

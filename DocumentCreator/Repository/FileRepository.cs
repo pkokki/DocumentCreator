@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace DocumentCreator.Repository
 {
@@ -20,15 +21,35 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateTemplate(string templateName, byte[] contents)
         {
-            var templateFilename = Path.Combine(TemplatesFolder, $"{templateName}_{DateTime.Now.Ticks}.docx");
+            var templateversionName = $"{templateName}_{DateTime.Now.Ticks}";
+            var templateFilename = Path.Combine(TemplatesFolder, $"{templateversionName}.docx");
             File.WriteAllBytes(templateFilename, contents);
             return new ContentItem()
             {
-                Name = templateName,
+                Name = templateversionName,
                 Path = templateFilename,
                 FileName = Path.GetFileName(templateFilename),
                 Buffer = contents
             };
+        }
+
+        public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
+        {
+            var baseFolder = Path.Combine(rootPath, "dcfs", "files", "html");
+            if (!Directory.Exists(baseFolder))
+                Directory.CreateDirectory(baseFolder);
+            if (html != null)
+            {
+                File.WriteAllText(Path.Combine(baseFolder, $"{htmlName}.html"), html, Encoding.UTF8);
+            }
+            if (images != null && images.Any())
+            {
+                var imageFolder = Path.Combine(baseFolder, htmlName);
+                if (!Directory.Exists(imageFolder))
+                    Directory.CreateDirectory(imageFolder);
+                foreach (var kvp in images)
+                    File.WriteAllBytes(Path.Combine(imageFolder, kvp.Key), kvp.Value);
+            }
         }
 
         public ContentItem CreateMapping(string templateName, string mappingName, byte[] contents)
@@ -99,7 +120,7 @@ namespace DocumentCreator.Repository
 
         public ContentItem GetEmptyMapping()
         {
-            var emptyMappingPath = Path.Combine(rootPath, "temp", "empty_mappings_prod.xlsm");
+            var emptyMappingPath = Path.Combine(rootPath, "dcfs", "empty_mappings_prod.xlsm");
             if (!File.Exists(emptyMappingPath))
             {
                 var masterMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
@@ -136,7 +157,7 @@ namespace DocumentCreator.Repository
             {
                 if (templatesFolder == null)
                 {
-                    templatesFolder = Path.Combine(rootPath, "temp", "templates");
+                    templatesFolder = Path.Combine(rootPath, "dcfs", "files", "templates");
                     if (!Directory.Exists(templatesFolder))
                         Directory.CreateDirectory(templatesFolder);
                 }
@@ -149,7 +170,7 @@ namespace DocumentCreator.Repository
             {
                 if (mappingsFolder == null)
                 {
-                    mappingsFolder = Path.Combine(rootPath, "temp", "mappings");
+                    mappingsFolder = Path.Combine(rootPath, "dcfs", "files", "mappings");
                     if (!Directory.Exists(mappingsFolder))
                         Directory.CreateDirectory(mappingsFolder);
                 }
@@ -162,7 +183,7 @@ namespace DocumentCreator.Repository
             {
                 if (documentsFolder == null)
                 {
-                    documentsFolder = Path.Combine(rootPath, "temp", "documents");
+                    documentsFolder = Path.Combine(rootPath, "dcfs", "files", "documents");
                     if (!Directory.Exists(documentsFolder))
                         Directory.CreateDirectory(documentsFolder);
                 }
@@ -172,7 +193,7 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<Template> GetTemplates()
         {
-            var templates = Directory.GetFiles(TemplatesFolder)
+            var templates = Directory.GetFiles(TemplatesFolder, "*.docx")
                 .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
                 .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
                 .GroupBy(a => a.Name)
@@ -223,7 +244,7 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<Template> GetTemplateVersions(string templateName)
         {
-            var templates = Directory.GetFiles(TemplatesFolder)
+            var templates = Directory.GetFiles(TemplatesFolder, "*.docx")
                 .Select(f => new { Path = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 2) })
                 .Select(a => new { FullName = a.Path, Name = a.NameParts[0], Version = a.NameParts[1] })
                 .Where(a => a.Name.Equals(templateName, StringComparison.CurrentCultureIgnoreCase))

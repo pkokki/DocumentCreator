@@ -1,279 +1,85 @@
 /* You can add global styles to this file, and also import other style files */
 
+code, pre, .input-code {
+  font-family: Roboto Mono, monospace;
+  font-size: 80%;
+}
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 8px 0;
-  }
+.spacer {
+  flex: 1;
+}
 
-  p {
-    margin: 0px;
-  }
+.logo {
+  height: 40px;
+}
 
-  label {
-    display: inline-block;
-    width: 140px;
-    text-align: right;
-    padding: 2px;
-  }
+.logo:hover {
+  opacity: 0.8;
+}
 
-  pre, code {
-    font-size: smaller;
-  }
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  a,
-  a:visited,
-  a:hover {
-    color: #1976d2;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: #125699;
-  }
-
-  .spacer {
-    flex: 1;
-  }
-
-  .toolbar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    background-color: #1976d2;
-    color: white;
-    font-weight: 600;
-  }
-
-  .toolbar img {
-    margin: 0 16px;
-  }
-
-  .toolbar .logo {
-    height: 40px;
-    margin: 0 16px;
-  }
-
-  .toolbar .logo:hover {
-    opacity: 0.8;
-  }
-
-  nav a,
-  nav a:visited,
-  nav a:hover {
-    color: white;
-    margin-right: 12px;
-  }
-  nav a:hover {
-    opacity: 0.8;
-  }
-
-  .content {
-    display: flex;
-    margin: 82px auto 32px;
-    padding: 0 16px;
-    max-width: 960px;
-    flex-direction: column;
-    align-items: center;
-  }
+.w-100 {
+  width: 100%;
+}
 
 
-  footer {
-    margin-top: 18px;
-    display: flex;
-    align-items: center;
-    line-height: 20px;
-    font-size: smaller;
-    color: #808080;
-  }
+footer {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+  font-size: smaller;
+  color: #808080;
+}
 
-  footer a {
-    display: flex;
-    align-items: center;
-  }
+footer a,
+footer a:visited {
+  display: flex;
+  align-items: center;
+  color: #3f51b5;
+  text-decoration: none;
+}
 
-  .github-star-badge {
-    color: #24292e;
-    display: flex;
-    align-items: center;
-    font-size: smaller;
-    padding: 3px 10px;
-    border: 1px solid rgba(27,31,35,.2);
-    border-radius: 3px;
-    background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
-    margin-left: 4px;
-    font-weight: 600;
-    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
-  }
+.github-star-badge {
+  color: #24292e;
+  display: flex;
+  align-items: center;
+  font-size: smaller;
+  padding: 3px 10px;
+  border: 1px solid rgba(27,31,35,.2);
+  border-radius: 3px;
+  background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+  margin-left: 4px;
+  font-weight: 600;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+}
 
-  .github-star-badge:hover {
-    background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
-    border-color: rgba(27,31,35,.35);
-    background-position: -.5em;
-  }
+.github-star-badge:hover {
+  background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
+  border-color: rgba(27,31,35,.35);
+  background-position: -.5em;
+}
 
-  .github-star-badge .material-icons {
-    height: 12px;
-    width: 12px;
-    margin-right: 2px;
-  }
+.github-star-badge .material-icons {
+  height: 12px;
+  width: 12px;
+  margin-right: 2px;
+}
 
-  svg#clouds {
-    position: fixed;
-    bottom: -160px;
-    left: -230px;
-    z-index: -10;
-    width: 1920px;
-  }
+svg#clouds {
+  position: fixed;
+  bottom: -160px;
+  left: -230px;
+  z-index: -10;
+  width: 1920px;
+}
+  
 
-
-  svg.material-icons {
-    height: 24px;
-    width: auto;
-  }
-
-  svg.material-icons:not(:last-child) {
-    margin-right: 8px;
-  }
-
-.card svg.material-icons path {
-    fill: #888;
-  }
-
-  .card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 16px;
-  }
-
-  .card {
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    background-color: #eeeeee;
-    height: 40px;
-    width: 200px;
-    margin: 0 8px 16px;
-    padding: 16px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.2s ease-in-out;
-    line-height: 24px;
-  }
-
-  .card-container .card:not(:last-child) {
-    margin-right: 0;
-  }
-
-  .card.card-small {
-    height: 16px;
-    width: 168px;
-  }
-
-  .card-container .card:not(.highlight-card) {
-    cursor: pointer;
-  }
-
-  .card-container .card:not(.highlight-card):hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 17px rgba(black, 0.35);
-  }
-
-  .card-container .card:not(.highlight-card):hover .material-icons path {
-    fill: rgb(105, 103, 103);
-  }
-
-  .card.highlight-card {
-    background-color: #1976d2;
-    color: white;
-    font-weight: 600;
-    border: none;
-    width: auto;
-    min-width: 30%;
-    position: relative;
-  }
-
-  .card.card.highlight-card span {
-    margin-left: 60px;
-  }
-
-  /* Responsive Styles */
-  @media screen and (max-width: 767px) {
-
-    .card-container > *:not(.circle-link) ,
-    .terminal {
-      width: 100%;
-    }
-
-    .card:not(.highlight-card) {
-      height: 16px;
-      margin: 8px 0;
-    }
-
-    .card.highlight-card span {
-      margin-left: 72px;
-    }
-
-  }
-
-  .table-row {
-    width: 100%;
-    min-width: 400px;
-    max-width: 450px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 6px 6px;
-    margin-bottom: 4px;
-    border-radius: 2px;
-    background-color: #EEEEEE;
-  }
-
-  /* https://stackoverflow.com/questions/48570109/layout-a-flex-box-similar-to-a-table */
-  .tbl {
-    display: flex;
-    flex-direction: column;
-  }
-  .row {
-    display: flex;
-    min-height: 14px;
-  }
-  .row div {
-    /* border: 1px solid red; */
-    padding: 2px 4px;
-  }
-  .cell1 {
-    flex: 1;
-  }
-  .cell2 {
-    flex: 2;
-  }
-  .cell3 {
-    flex: 3;
-  }
-  .cell4 {
-    flex: 4;
-  }
-  .cell8 {
-    flex: 8;
-  }
-  .row:first-child div {
-    display: flex;
-    background-color: #eeeeee;
-    /*justify-content: center;         /*  center horiz. */
-    /*align-items: center;             /*  center vert. */
-  }
-  .row .cell {
-    box-sizing: border-box;
-  }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 

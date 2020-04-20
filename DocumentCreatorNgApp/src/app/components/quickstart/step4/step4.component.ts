@@ -11,8 +11,8 @@ export class Step4Component implements OnInit {
   
   constructor(public state: State, private http: HttpClient, private sanitizer: DomSanitizer) { }
 
-  submitError;
-  submitResponse;
+  submitError: any;
+  htmlUrl: string;
   uploading = false;
 
   ngOnInit(): void {
@@ -21,7 +21,7 @@ export class Step4Component implements OnInit {
   submit() {
     this.uploading = true;
     this.submitError = null;
-    this.submitResponse = null;
+    this.htmlUrl = null;
     const url = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName+ '/document';
     const body = this.state.testPayload;
     const headers = new HttpHeaders({
@@ -35,6 +35,7 @@ export class Step4Component implements OnInit {
         var contentDisposition = response.headers.get('content-disposition');
         var filename = contentDisposition.split('filename=')[1].split(';')[0] ?? 'document.docx';
         var contentType = response.headers.get('content-type');
+        this.htmlUrl = this.state.apiBaseUrl.replace('/api', '/html') + '/' + filename.replace('.docx', '.html');
         this.downLoadFile(response.body, contentType, filename);
       },
       err => { 

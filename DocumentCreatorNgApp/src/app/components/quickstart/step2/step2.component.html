@@ -1,13 +1,26 @@
-<div>Ask DocumentCreator to download an Excel workbook for mappings definition:</div>
+<p>Download an Excel workbook with the mappings definition for the template.</p>
 
-<div><pre>GET {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre></div>
+<p>
+    <mat-form-field appearance="fill" style="width:100%">
+        <mat-label>Mappings name</mat-label>
+        <input matInput placeholder="" [(ngModel)]="state.mappingName">
+        <mat-hint>
+            If the name exists the latest version for the selected template is downloaded,
+            otherwise a new empty definition is prepared.
+        </mat-hint>
+    </mat-form-field>
+</p>
 
-<div>
-    <button [disabled]="!state.templateName" 
-        (click)="download()"
-        >Download Excel mappings</button>
-</div>
+<pre>GET {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}</pre>
+
+<p>
+    <button mat-stroked-button color="primary" 
+        [disabled]="!state.templateName" 
+        (click)="download()">
+        Download Excel mappings
+    </button>
+</p>
 
 <p>Use the <code>Test Mappings</code> button in the Excel worksheet to test your expressions</p>
-<div><code>POST {{state.apiBaseUrl}}/evaluations</code></div>
 
+<code>POST {{state.apiBaseUrl}}/evaluations/{{state.templateName}}</code>

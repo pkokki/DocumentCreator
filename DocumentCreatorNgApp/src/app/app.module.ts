@@ -3,6 +3,7 @@ import { CommonModule }   from '@angular/common';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 
+import { MaterialModule } from './material.module';
 import { httpErrorInterceptorProvider } from './services/http-error.interceptor';
 import { AppRoutingModule } from './app-routing.module';
 import { QuickstartModule } from './components/quickstart/quickstart.module';
@@ -19,6 +20,8 @@ import { PageNotFoundComponent } from './components/var/page-not-found/page-not-
     CommonModule,
     BrowserModule,
     HttpClientModule,
+    MaterialModule,
+
     QuickstartModule,
     AdminCenterRoutingModule,
     // AppRoutingModule should be last.

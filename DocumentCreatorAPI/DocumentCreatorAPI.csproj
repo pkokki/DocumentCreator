@@ -12,7 +12,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="dcfs\empty_mappings_prod.xlsm" />
+    <None Remove="dcfs\files\documents\.gitkeep" />
+    <None Remove="dcfs\files\html\.gitkeep" />
+    <None Remove="dcfs\files\mappings\.gitkeep" />
+    <None Remove="dcfs\files\templates\.gitkeep" />
     <None Remove="Resources\Dictionary.cls" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="dcfs\empty_mappings_prod.xlsm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dcfs\files\documents\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dcfs\files\html\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dcfs\files\mappings\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dcfs\files\templates\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

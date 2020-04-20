@@ -21,5 +21,7 @@ namespace DocumentCreator.Repository
         IEnumerable<Template> GetTemplateVersions(string templateName);
         IEnumerable<TemplateMapping> GetTemplateMappings(string templateName);
         TemplateMapping GetTemplateMapping(string templateName, string mappingName, string mappingVersion);
+
+        void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images);
     }
 }

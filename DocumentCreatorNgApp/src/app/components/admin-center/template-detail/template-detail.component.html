@@ -1,22 +1,19 @@
-<h3>Template {{template.name}}</h3>
-<a href="#" [routerLink]="['..']">Templates</a>
+<h2>Template {{template.name}}</h2>
 
-<p>Version: {{template.version}}</p>
-<p>Date: {{template.timestamp | date:'dd/MM/yyyy'}} {{template.timestamp | date:'HH:mm:ss'}}</p>
+<mat-grid-list cols="5" gutterSize="0" rowHeight="1.2em">
+    <mat-grid-tile colspan="2" class="mat-caption"><div class="w-100">Version</div></mat-grid-tile>
+    <mat-grid-tile colspan="2" class="mat-caption"><div class="w-100">Date</div></mat-grid-tile>
+    <mat-grid-tile colspan="1" class="mat-caption"><div class="w-100">Size</div></mat-grid-tile>
 
-    
-<div class="tbl" style="max-width: 600px;">
-    <div class="row">
-        <div class="cell1">name</div>
-        <div class="cell1">parent</div>
-        <div class="cell1">coll</div>
-        <div class="cell8">content</div>
-    </div>
-    <div class="row" *ngFor="let fld of template.fields">
-        <div class="cell1">{{ fld.name }}</div>
-        <div class="cell1">{{ fld.parent }}</div>
-        <div class="cell1">{{ fld.isCollection?'Yes':'' }}</div>
-        <div class="cell8">{{ fld.content }}</div>
-    </div>
-</div>
+    <mat-grid-tile colspan="2"><div class="w-100">{{template.version}}</div></mat-grid-tile>
+    <mat-grid-tile colspan="2"><div class="w-100">{{template.timestamp | date:'dd/MM/yyyy'}} {{template.timestamp | date:'HH:mm:ss'}}</div></mat-grid-tile>
+    <mat-grid-tile colspan="1"><div class="w-100">{{template.size}}</div></mat-grid-tile>
+</mat-grid-list>
+
+<mat-list>
+    <mat-list-item *ngFor="let fld of template.fields">
+        <mat-icon mat-list-icon>{{fld.isCollection ? 'list' : fld.parent ? 'more_horiz' : 'code'}}</mat-icon>
+        <div mat-line>{{fld.name}} {{fld.content}}</div>
+    </mat-list-item>
+</mat-list>
 

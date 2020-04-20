@@ -3,7 +3,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace DocumentCreatorAPI
 {
@@ -56,6 +60,20 @@ namespace DocumentCreatorAPI
 
             app.UseAuthorization();
 
+            // See: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-3.1
+            app.UseFileServer(new FileServerOptions() 
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "dcfs", "files", "html")),
+                RequestPath = "/html",
+                EnableDirectoryBrowsing = false
+            });
+
+            app.UseDefaultFiles(new DefaultFilesOptions()
+            {
+                DefaultFileNames = new List<string> { "index.html", "default.html" }
+            }); ;
+            app.UseStaticFiles();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -340,3 +340,9 @@ ASALocalRun/
 healthchecksdb
 
 [Tt]emp/
+
+# DocumentCreator file server structure
+# https://stackoverflow.com/questions/46301811/gitignore-all-files-in-folders-but-keep-folder-structure
+**/dcfs/files/**
+!**/dcfs/files/**/
+!**/dcfs/files/**/.gitkeep

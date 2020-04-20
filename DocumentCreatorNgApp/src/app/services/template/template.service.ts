@@ -15,7 +15,7 @@ export class TemplateService {
   getTemplates(): Observable<Template[]> {
     return this.envService.get<Template[]>('/templates').pipe(
       tap(ev => {
-        //console.log(ev);
+        console.log('getTemplates', ev);
       })
     );
   }
@@ -37,6 +37,7 @@ export interface Template {
   name: string;
   version: string;
   timestamp: Date;
+  size: number;
   fields: TemplateField[] | null;
 }
 

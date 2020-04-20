@@ -1,11 +1,26 @@
-<div>Send a JSON request to create a new document based on template and mappings</div>
+<p>Send a JSON request to create a new document based on template and mappings</p>
+
 <pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}/document</pre>
-<div>
-    <textarea [(ngModel)]="state.testPayload" placeholder="json payload" style="font-size: 11px; width: 100%;min-height: 100px;">
-    </textarea>
-</div>
 
-<button [disabled]="uploading || !state.templateName || !state.mappingName" (click)="submit()">Create Word document</button>
+<p>
+    <mat-form-field appearance="fill" style="width:100%">
+        <mat-label>JSON payload</mat-label>
+        <textarea matInput style="font-family: Roboto Mono, monospace; font-size: 80%;"
+            matTextareaAutosize
+            matAutosizeMinRows="8"
+            matAutosizeMaxRows="10"
+            [(ngModel)]="state.testPayload">
+        </textarea>
+        <mat-hint>
+            The payload of source named RQ in the definition.
+        </mat-hint>
+    </mat-form-field>
+</p>
 
-<div style="color: red">{{submitError}}</div>
-<div style="color: blue">{{submitResponse}}</div>
+<button mat-stroked-button color="primary"
+    [disabled]="uploading || !state.templateName || !state.mappingName" 
+    (click)="submit()">
+    Create new Word document
+</button>
+
+<div [hidden]="!htmlUrl"><a target="_blank" href="{{htmlUrl}}">Click</a> to view the WORD as HTML.</div>
