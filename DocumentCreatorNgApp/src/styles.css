@@ -1,135 +1,84 @@
 /* You can add global styles to this file, and also import other style files */
 
-
 code, pre, .input-code {
   font-family: Roboto Mono, monospace;
   font-size: 80%;
 }
 
-  .spacer {
-    flex: 1;
-  }
+.spacer {
+  flex: 1;
+}
 
-  .logo {
-    height: 40px;
-  }
+.logo {
+  height: 40px;
+}
 
-  .logo:hover {
-    opacity: 0.8;
-  }
+.logo:hover {
+  opacity: 0.8;
+}
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-
-  footer {
-    margin-top: 18px;
-    display: flex;
-    align-items: center;
-    line-height: 20px;
-    font-size: smaller;
-    color: #808080;
-  }
-
-  footer a,
-  footer a:visited {
-    display: flex;
-    align-items: center;
-    color: #3f51b5;
-    text-decoration: none;
-  }
-
-  .github-star-badge {
-    color: #24292e;
-    display: flex;
-    align-items: center;
-    font-size: smaller;
-    padding: 3px 10px;
-    border: 1px solid rgba(27,31,35,.2);
-    border-radius: 3px;
-    background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
-    margin-left: 4px;
-    font-weight: 600;
-    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
-  }
-
-  .github-star-badge:hover {
-    background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
-    border-color: rgba(27,31,35,.35);
-    background-position: -.5em;
-  }
-
-  .github-star-badge .material-icons {
-    height: 12px;
-    width: 12px;
-    margin-right: 2px;
-  }
-
-  svg#clouds {
-    position: fixed;
-    bottom: -160px;
-    left: -230px;
-    z-index: -10;
-    width: 1920px;
-  }
+.w-100 {
+  width: 100%;
+}
 
 
+footer {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+  font-size: smaller;
+  color: #808080;
+}
 
+footer a,
+footer a:visited {
+  display: flex;
+  align-items: center;
+  color: #3f51b5;
+  text-decoration: none;
+}
 
-  .table-row {
-    width: 100%;
-    min-width: 400px;
-    max-width: 450px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 6px 6px;
-    margin-bottom: 4px;
-    border-radius: 2px;
-    background-color: #EEEEEE;
-  }
+.github-star-badge {
+  color: #24292e;
+  display: flex;
+  align-items: center;
+  font-size: smaller;
+  padding: 3px 10px;
+  border: 1px solid rgba(27,31,35,.2);
+  border-radius: 3px;
+  background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+  margin-left: 4px;
+  font-weight: 600;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+}
 
-  /* https://stackoverflow.com/questions/48570109/layout-a-flex-box-similar-to-a-table */
-  .tbl {
-    display: flex;
-    flex-direction: column;
-  }
-  .row {
-    display: flex;
-    min-height: 14px;
-  }
-  .row div {
-    /* border: 1px solid red; */
-    padding: 2px 4px;
-  }
-  .cell1 {
-    flex: 1;
-  }
-  .cell2 {
-    flex: 2;
-  }
-  .cell3 {
-    flex: 3;
-  }
-  .cell4 {
-    flex: 4;
-  }
-  .cell8 {
-    flex: 8;
-  }
-  .row:first-child div {
-    display: flex;
-    background-color: #eeeeee;
-    /*justify-content: center;         /*  center horiz. */
-    /*align-items: center;             /*  center vert. */
-  }
-  .row .cell {
-    box-sizing: border-box;
-  }
+.github-star-badge:hover {
+  background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
+  border-color: rgba(27,31,35,.35);
+  background-position: -.5em;
+}
 
+.github-star-badge .material-icons {
+  height: 12px;
+  width: 12px;
+  margin-right: 2px;
+}
+
+svg#clouds {
+  position: fixed;
+  bottom: -160px;
+  left: -230px;
+  z-index: -10;
+  width: 1920px;
+}
+  
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

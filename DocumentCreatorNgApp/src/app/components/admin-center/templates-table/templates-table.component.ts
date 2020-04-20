@@ -4,6 +4,8 @@ import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { TemplatesTableDataSource } from './templates-table-datasource';
 import { TemplateService, Template } from 'src/app/services/template/template.service';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-templates-table',
@@ -18,13 +20,20 @@ export class TemplatesTableComponent implements AfterViewInit, OnInit {
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['name', 'version', 'timestamp', 'size', 'isActive', 'actions'];
+  title: string;
+  templateName: string;
 
   constructor(
+    private route: ActivatedRoute,
     private templateService: TemplateService
   ) {}
 
   ngOnInit() {
-    this.dataSource = new TemplatesTableDataSource(this.templateService);
+    this.route.paramMap.subscribe((params: ParamMap) => {
+      this.templateName = params.get('name');
+      this.title = this.templateName ? `Versions of template ${this.templateName}` : 'All templates (latest versions)';
+      this.dataSource = new TemplatesTableDataSource(this.templateName, this.templateService);
+    });
   }
 
   ngAfterViewInit() {

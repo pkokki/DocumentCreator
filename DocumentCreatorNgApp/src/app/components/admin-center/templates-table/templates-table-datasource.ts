@@ -16,6 +16,7 @@ export class TemplatesTableDataSource extends DataSource<Template> {
   sort: MatSort;
 
   constructor(
+    private templateName: string,
     private templateService: TemplateService
   ) {
     super();
@@ -39,7 +40,8 @@ export class TemplatesTableDataSource extends DataSource<Template> {
     )
     .subscribe();
 
-    return this.templateService.getTemplates().pipe(
+    const operation = this.templateName ? this.templateService.getTemplateVersions(this.templateName) : this.templateService.getTemplates();
+    return operation.pipe(
       tap(data => this.data = data)
     );
   }
