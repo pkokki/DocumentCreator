@@ -1,6 +1,6 @@
 <h2>{{title}}</h2>
 
-<table mat-table matSort aria-label="Templates">
+<table mat-table matSort aria-label="Templates" [dataSource]="dataSource">
   <!-- name Column -->
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>

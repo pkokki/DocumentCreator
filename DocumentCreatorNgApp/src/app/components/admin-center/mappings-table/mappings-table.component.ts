@@ -1,26 +1,21 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import { Component, OnInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Mapping, MappingsService } from 'src/app/services/mappings/mappings.service';
-import { MappingsTableDataSource } from './mappings-table-datasource';
 
 @Component({
   selector: 'app-mappings-table',
   templateUrl: './mappings-table.component.html',
   styleUrls: ['./mappings-table.component.css']
 })
-export class MappingsTableComponent implements AfterViewInit, OnInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable) table: MatTable<Mapping>;
-  dataSource: MappingsTableDataSource;
+export class MappingsTableComponent implements OnInit {
+  dataSource: MatTableDataSource<Mapping>;
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['name', 'creationDate', 'templates', 'documents', 'isActive', 'actions'];
   title: string;
   templateName: string;
+  templateVersion: string;
   mappingsName: string;
 
   constructor(
@@ -29,17 +24,15 @@ export class MappingsTableComponent implements AfterViewInit, OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params: ParamMap) => {
+    this.route.queryParamMap.subscribe((params: ParamMap) => {
       this.templateName = params.get('templateName');
-      this.mappingsName = params.get('mappingsName');
+      this.templateVersion = params.get('templateVersion');
       this.title = this.templateName ? `Mappings associated with template ${this.templateName}` : 'All mappings';
-      this.dataSource = new MappingsTableDataSource(this.templateName, this.mappingsName, this.mappingsService);
+      this.dataSource = new MatTableDataSource<Mapping>(); 
+      const operation = this.mappingsService.getMappings(this.templateName, this.templateVersion);
+      operation.subscribe(data => {
+        this.dataSource.data = data;
+      });
     });
-  }
-
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
   }
 }

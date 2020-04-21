@@ -1,8 +1,5 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
-import { TemplatesTableDataSource } from './templates-table-datasource';
+import { Component, OnInit } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { TemplateService, Template } from 'src/app/services/template/template.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 
@@ -11,11 +8,8 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
   templateUrl: './templates-table.component.html',
   styleUrls: ['./templates-table.component.css']
 })
-export class TemplatesTableComponent implements AfterViewInit, OnInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable) table: MatTable<Template>;
-  dataSource: TemplatesTableDataSource;
+export class TemplatesTableComponent implements OnInit {
+  dataSource: MatTableDataSource<Template>;
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['name', 'version', 'timestamp', 'size', 'isActive', 'actions'];
@@ -31,13 +25,11 @@ export class TemplatesTableComponent implements AfterViewInit, OnInit {
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.templateName = params.get('name');
       this.title = this.templateName ? `Versions of template ${this.templateName}` : 'All templates (latest versions)';
-      this.dataSource = new TemplatesTableDataSource(this.templateName, this.templateService);
+      this.dataSource = new MatTableDataSource<Template>(); 
+      const operation = this.templateName ? this.templateService.getTemplateVersions(this.templateName) : this.templateService.getTemplates();
+      operation.subscribe(data => {
+        this.dataSource.data = data;
+      });
     });
-  }
-
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
   }
 }
