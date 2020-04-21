@@ -1,6 +1,7 @@
 ﻿using DocumentCreator.Model;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -297,6 +298,62 @@ namespace DocumentCreator.Repository
                 TemplateVersion = Path.GetFileNameWithoutExtension(fullName).Split('_')[1],
                 Buffer = File.ReadAllBytes(fullName)
             };
+        }
+
+        public IEnumerable<Mapping> GetMappings(string templateName = null)
+        {
+            var mappings = Directory.GetFiles(MappingsFolder, "*.xlsm")
+                .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], Name = a.NameParts[2], Version = a.NameParts[3] })
+                .Where(a => templateName == null || string.Equals(a.TemplateName, templateName, StringComparison.InvariantCultureIgnoreCase))
+                .GroupBy(a => a.Name)
+                .Select(ag => new { Name = ag.Key, FirstVersion = ag.OrderBy(o => o.Version).First() })
+                .Select(a => new { a.Name, Info = new FileInfo(a.FirstVersion.FullName) })
+                .Select(a => new Mapping()
+                {
+                    Name = a.Name,
+                    CreationDate = a.Info.CreationTime,
+                    Templates = Directory.GetFiles(MappingsFolder, $"*_*_{a.Name}_*.xlsm")
+                        .Select(o => Path.GetFileNameWithoutExtension(o).Split('_', 2).First())
+                        .Distinct()
+                        .Count(),
+                    Documents = Directory.GetFiles(DocumentsFolder, $"*_*_{a.Name}_*_*.docx")
+                        .Length
+                })
+                .ToList();
+            return mappings;
+        }
+
+        public PagedResults<Document> GetDocuments(DocumentParams query)
+        {
+            query ??= new DocumentParams();
+            
+            var pathPattern = $"{query.TemplateName ?? "*"}_{query.TemplateVersion ?? "*"}_{query.MappingsName ?? "*"}_{query.MappingsVersion ?? "*"}_*.docx";
+            var targetDocuments = Directory.GetFiles(DocumentsFolder, pathPattern)
+                .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 5) })
+                .Select(a => new { 
+                    Id = a.NameParts[4], 
+                    TemplateName = a.NameParts[0], 
+                    Templateversion = a.NameParts[1], 
+                    MappingsName = a.NameParts[2], 
+                    MappingsVersion = a.NameParts[3],
+                    Info = new FileInfo(a.FullName)
+                })
+                .Select(a => new Document()
+                {
+                    Id = a.Id,
+                    TemplateName = a.TemplateName,
+                    TemplateVersion = a.Templateversion,
+                    MappingName = a.MappingsName,
+                    MappingVersion = a.MappingsVersion,
+                    Timestamp = a.Info.CreationTime,
+                    Size = a.Info.Length
+                });
+
+            var orderBy = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(query.OrderBy ?? "Id");
+            return targetDocuments
+                .AsQueryable()
+                .CreatePagedResults(query.Page, query.PageSize, orderBy, !query.Descending);
         }
     }
 }
