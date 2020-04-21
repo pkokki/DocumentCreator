@@ -1,0 +1,18 @@
+.mat-table {
+  width: 100%;
+}
+
+.mat-column-templates, .mat-column-documents {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.mat-column-isActive {
+  text-align: center;
+  justify-content: normal;
+}
+
+.mat-column-actions {
+  text-align: right;
+  justify-content: flex-end;
+}

@@ -23,14 +23,7 @@ namespace DocumentCreatorAPI.Controllers
 
         [HttpGet]
         [Route("")]
-        public IActionResult Get()
-        {
-            return Ok(repository.GetMappings());
-        }
-
-        [HttpGet]
-        [Route("/templates/{templateName}")]
-        public IActionResult GetForTemplate([FromRoute]string templateName)
+        public IActionResult Get([FromQuery]string templateName)
         {
             return Ok(repository.GetMappings(templateName));
         }

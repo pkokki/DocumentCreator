@@ -1,0 +1,76 @@
+<h2>{{title}}</h2>
+
+<table mat-table matSort aria-label="Mappings">
+    <!-- name Column -->
+    <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let row">{{row.name}}</td>
+    </ng-container>
+
+    <!-- version Column -->
+    <ng-container matColumnDef="creationDate">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created at</th>
+        <td mat-cell *matCellDef="let row">{{row.creationDate | date:'dd/MM/yyyy'}}
+            {{row.creationDate | date:'HH:mm:ss'}}</td>
+    </ng-container>
+
+    <!-- timestamp Column -->
+    <ng-container matColumnDef="templates">
+        <th mat-header-cell *matHeaderCellDef>Templates</th>
+        <td mat-cell *matCellDef="let row">{{row.templates}}</td>
+    </ng-container>
+
+    <!-- size Column -->
+    <ng-container matColumnDef="documents">
+        <th mat-header-cell *matHeaderCellDef>Documents</th>
+        <td mat-cell *matCellDef="let row">{{row.documents}}</td>
+    </ng-container>
+
+    <!-- Links and actions -->
+    <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef>Active</th>
+        <td mat-cell *matCellDef="let row">
+            <mat-slide-toggle color="primary" [checked]="true" [disabled]="false"></mat-slide-toggle>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu" aria-label="icon-button with a menu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionsMenu="matMenu">
+                <div [hidden]="mappingsName">
+                    <button mat-menu-item [routerLink]="['./', row.name, 'versions']">
+                        <svg width="24" viewBox="0 0 24 24">
+                            <path
+                                d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                        </svg>
+                        <span>Versions</span>
+                    </button>
+                </div>
+                <button mat-menu-item [routerLink]="['/admin/documents']"
+                    [queryParams]="{ mappingsName: row.name, mappingsVersion: (mappingsName ? row.version : 'all')}">
+                    <mat-icon>folder_open</mat-icon>
+                    <span>Documents</span>
+                </button>
+                <button mat-menu-item [routerLink]="['.']">
+                    <!-- https://materialdesignicons.com/ delete-outline Google @Google-->
+                    <svg width="24" viewBox="0 0 24 24">
+                        <path
+                            d="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+                    </svg>
+                    <span>Delete</span>
+                </button>
+            </mat-menu>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<mat-paginator #paginator [length]="dataSource?.data.length" [pageIndex]="0" [pageSize]="5"
+    [pageSizeOptions]="[5, 10, 20, 100]">
+</mat-paginator>

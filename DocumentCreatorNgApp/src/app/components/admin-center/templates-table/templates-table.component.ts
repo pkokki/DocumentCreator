@@ -5,7 +5,6 @@ import { MatTable } from '@angular/material/table';
 import { TemplatesTableDataSource } from './templates-table-datasource';
 import { TemplateService, Template } from 'src/app/services/template/template.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-templates-table',

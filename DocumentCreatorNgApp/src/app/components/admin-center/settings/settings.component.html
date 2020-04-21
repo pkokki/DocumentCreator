@@ -4,6 +4,7 @@
     <div mat-subheader>Available endpoints</div>
     <mat-list-item *ngFor="let endpoint of availableEndpoints">
         <mat-radio-button 
+            labelPosition="before" 
             [value]="endpoint" 
             [checked]="selectedEndpointName == endpoint.name" 
             (change)="endpointSelectionChanged($event)">

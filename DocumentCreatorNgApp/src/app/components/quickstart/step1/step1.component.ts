@@ -5,7 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-step1',
-  templateUrl: './step1.component.html'
+  templateUrl: './step1.component.html',
+  styleUrls: ['../quickstart.component.css']
 })
 export class Step1Component implements OnInit {
   @ViewChild('file', { static: false }) private file: ElementRef;

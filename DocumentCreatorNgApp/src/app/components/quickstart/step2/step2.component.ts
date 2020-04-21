@@ -3,7 +3,8 @@ import { State } from '../../../services/state/state.service';
 
 @Component({
   selector: 'app-step2',
-  templateUrl: './step2.component.html'
+  templateUrl: './step2.component.html',
+  styleUrls: ['../quickstart.component.css']
 })
 export class Step2Component implements OnInit {
   constructor(public state: State) { }

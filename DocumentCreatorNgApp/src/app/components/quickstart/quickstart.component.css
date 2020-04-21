@@ -1,0 +1,8 @@
+code, pre, .input-code {
+    font-family: Roboto Mono, monospace;
+    font-size: 80%;
+}
+
+.mat-form-field {
+    max-width: 350px;
+}
