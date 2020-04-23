@@ -12,7 +12,7 @@ export class DocumentService {
         private envService: EnvService,
     ) { }
 
-    getDocuments(filters?: string | string[], page?: number, pageSize?: number, orderBy?: string, isDesc?: boolean): Observable<Document[]> {
+    getDocuments(filters?: string | string[], page?: number, pageSize?: number, orderBy?: string, isDesc?: boolean): Observable<PagedResults<Document>> {
         const params = [];
         if (page) params.push(`page=${page}`);
         if (pageSize) params.push(`pageSize=${pageSize}`);
@@ -22,13 +22,21 @@ export class DocumentService {
             params.push(Array.isArray(filters) ? [...filters] : filters);
         }
 
-        const url = '/documents' + (params.length ? '?' +  params.join('&') : '');
-        return this.envService.get<Document[]>(url).pipe(
+        const query = params.length ? '?' + params.join('&') : null;
+        return this.envService.get<PagedResults<Document>>('/documents' + query).pipe(
             tap(ev => {
-                console.log('getDocuments', ev);
+                console.log('getDocuments', query, ev);
             })
         );
     }
+}
+
+export interface PagedResults<T> {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    total: number;
+    results: T[];
 }
 
 export interface Document {
