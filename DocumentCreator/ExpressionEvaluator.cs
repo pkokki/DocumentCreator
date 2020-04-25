@@ -1,7 +1,6 @@
-﻿using DocumentCreator.ExcelFormulaParser;
+﻿using DocumentCreator.Core.Model;
+using DocumentCreator.ExcelFormulaParser;
 using DocumentCreator.ExcelFormulaParser.Languages;
-using DocumentCreator.Model;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,14 +21,14 @@ namespace DocumentCreator
             this.outputLang = outputLang;
         }
 
-        public EvaluationResponse Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
+        public Evaluation Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
         {
-            var expressions = new List<TemplateFieldExpression>(request.Expressions);
+            var expressions = new List<MappingExpression>(request.Expressions);
             PreEvaluate(expressions, templateFields);
             var results = Evaluate(expressions, request.Sources);
             PostEvaluate(expressions, results);
-        
-            var response = new EvaluationResponse()
+
+            var response = new Evaluation()
             {
                 Total = expressions.Count(o => !string.IsNullOrEmpty(o.Expression)),
                 Errors = results.Count(o => !string.IsNullOrEmpty(o.Error)),
@@ -37,19 +36,19 @@ namespace DocumentCreator
             };
             return response;
         }
-        
-        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<TemplateFieldExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
+
+        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, IEnumerable<MappingSource> sources)
         {
             return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
         }
 
 
-        public EvaluationResult Evaluate(string exprName, string cell, string expression, IEnumerable<EvaluationSource> sources)
+        public EvaluationResult Evaluate(string exprName, string cell, string expression, IEnumerable<MappingSource> sources)
         {
             return Evaluate(exprName, cell, expression, new ExpressionScope(inputLang, outputLang, sources));
         }
 
-        private IEnumerable<EvaluationResult> Evaluate(IEnumerable<TemplateFieldExpression> templateFieldExpressions, ExpressionScope scope)
+        private IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, ExpressionScope scope)
         {
             var results = new List<EvaluationResult>();
             foreach (var templateFieldExpression in templateFieldExpressions)
@@ -162,7 +161,7 @@ namespace DocumentCreator
             return args;
         }
 
-        private void PreEvaluate(List<TemplateFieldExpression> expressions, IEnumerable<TemplateField> templateFields)
+        private void PreEvaluate(List<MappingExpression> expressions, IEnumerable<TemplateField> templateFields)
         {
             if (templateFields != null)
             {
@@ -173,7 +172,7 @@ namespace DocumentCreator
             }
         }
 
-        private void PostEvaluate(IEnumerable<TemplateFieldExpression> expressions, IEnumerable<EvaluationResult> results)
+        private void PostEvaluate(IEnumerable<MappingExpression> expressions, IEnumerable<EvaluationResult> results)
         {
             foreach (var result in results)
             {

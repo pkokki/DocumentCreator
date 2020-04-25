@@ -1,12 +1,5 @@
-﻿using DocumentCreator;
-using DocumentCreator.Model;
-using DocumentCreator.Repository;
+﻿using DocumentCreator.Core.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -25,7 +18,7 @@ namespace DocumentCreatorAPI.Controllers
         [Route("")]
         public IActionResult Get([FromQuery]string templateName)
         {
-            return Ok(repository.GetMappings(templateName));
+            return Ok(repository.GetMappingStats(templateName));
         }
     }
 }

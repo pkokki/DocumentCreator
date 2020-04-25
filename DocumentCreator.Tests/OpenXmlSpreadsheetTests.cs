@@ -1,4 +1,4 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.Core.Model;
 using DocumentFormat.OpenXml.Packaging;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +15,7 @@ namespace DocumentCreator
             using var ms = new MemoryStream(File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm"));
             using var doc = SpreadsheetDocument.Open(ms, false);
 
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<EvaluationSource>());
+            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<MappingSource>());
 
             Assert.NotEmpty(templateFieldExpressions);
         }
@@ -26,7 +26,7 @@ namespace DocumentCreator
             using var ms = new MemoryStream(File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm"));
             using var doc = SpreadsheetDocument.Open(ms, false);
 
-            var expressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<EvaluationSource>());
+            var expressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<MappingSource>());
             var processor = new ExpressionEvaluator();
             var results = processor.Evaluate(expressions, null);
 

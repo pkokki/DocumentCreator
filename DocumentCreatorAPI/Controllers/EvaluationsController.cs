@@ -1,12 +1,6 @@
-﻿using DocumentCreator;
-using DocumentCreator.ExcelFormulaParser.Languages;
-using DocumentCreator.Model;
-using DocumentCreator.Repository;
+﻿using DocumentCreator.Core;
+using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -14,13 +8,13 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class EvaluationsController : ControllerBase
     {
-        private readonly IRepository repository;
+        private readonly IMappingProcessor processor;
 
-        public EvaluationsController(IRepository repository)
+        public EvaluationsController(IMappingProcessor processor)
         {
-            this.repository = repository;
+            this.processor = processor;
         }
-        
+
         [HttpGet]
         public string Get()
         {
@@ -28,20 +22,10 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult TestEvaluations(EvaluationRequest request)
+        public IActionResult TestEvaluations([FromBody]EvaluationRequest request)
         {
-            IEnumerable<TemplateField> templateFields = null;
-            if (!string.IsNullOrEmpty(request.TemplateName))
-            {
-                var template = repository.GetLatestTemplate(request.TemplateName);
-                if (template == null)
-                    return NotFound();
-                var templateProcessor = new TemplateProcessor();
-                templateFields = templateProcessor.FindTemplateFields(template.Buffer);
-            }
 
-            var processor = new ExpressionEvaluator();
-            var response = processor.Evaluate(request, templateFields);
+            var response = processor.Evaluate(request);
             return Ok(response);
         }
     }

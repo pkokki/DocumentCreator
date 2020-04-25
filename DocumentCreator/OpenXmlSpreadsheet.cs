@@ -1,4 +1,4 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.Core.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.CustomProperties;
 using DocumentFormat.OpenXml.Packaging;
@@ -6,12 +6,21 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
 {
     public static class OpenXmlSpreadsheet
     {
+        public static IEnumerable<MappingExpression> GetTemplateFieldExpressions(byte[] mappingBytes, ICollection<MappingSource> sources)
+        {
+            using var mappingsStream = new MemoryStream(mappingBytes);
+            using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
+            var templateFieldExpressions = GetTemplateFieldExpressions(mappingsDoc, sources);
+            return templateFieldExpressions;
+        }
+
         public static Worksheet GetFirstWorkSheet(SpreadsheetDocument mappingsDoc)
         {
             var wbPart = mappingsDoc.WorkbookPart;
@@ -70,7 +79,7 @@ namespace DocumentCreator
             return stringTablePart;
         }
 
-        
+
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
         private static int InsertSharedStringItem(SharedStringTablePart stringTablePart, string text)
@@ -173,9 +182,9 @@ namespace DocumentCreator
             }
         }
 
-        public static IEnumerable<TemplateFieldExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc, ICollection<EvaluationSource> sources)
+        public static IEnumerable<MappingExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc, ICollection<MappingSource> sources)
         {
-            var templateFieldExpressions = new List<TemplateFieldExpression>();
+            var templateFieldExpressions = new List<MappingExpression>();
             var worksheet = GetFirstWorkSheet(doc);
             var stringTablePart = GetSharedStringTablePart(doc);
             var rowIndex = 3U;
@@ -185,7 +194,7 @@ namespace DocumentCreator
                 name = GetCellValue(worksheet, stringTablePart, $"A{rowIndex}");
                 if (!string.IsNullOrEmpty(name))
                 {
-                    var templateFieldExpression = new TemplateFieldExpression()
+                    var templateFieldExpression = new MappingExpression()
                     {
                         Name = name,
                         Parent = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}"),
@@ -215,7 +224,7 @@ namespace DocumentCreator
                     }
                     else
                     {
-                        sources.Add(new EvaluationSource() 
+                        sources.Add(new MappingSource()
                         {
                             Name = name,
                             Cell = $"N{rowIndex}",
@@ -228,8 +237,8 @@ namespace DocumentCreator
             return templateFieldExpressions;
         }
 
-        private static List<TemplateFieldExpression> ReorderExpressionsWithCalcChain(WorkbookPart workbookPart,
-            List<TemplateFieldExpression> expressions)
+        private static List<MappingExpression> ReorderExpressionsWithCalcChain(WorkbookPart workbookPart,
+            List<MappingExpression> expressions)
         {
             var calculationChainPart = workbookPart.CalculationChainPart;
             var calculationChain = calculationChainPart.CalculationChain;

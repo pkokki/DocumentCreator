@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DocumentCreator.Model;
-using DocumentCreator.Repository;
+﻿using DocumentCreator.Core;
+using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocumentCreatorAPI.Controllers
@@ -11,17 +8,17 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class DocumentsController : ControllerBase
     {
-        private readonly IRepository repository;
+        private readonly IDocumentProcessor processor;
 
-        public DocumentsController(IRepository repository)
+        public DocumentsController(IDocumentProcessor processor)
         {
-            this.repository = repository;
+            this.processor = processor;
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery]DocumentParams documentParams)
+        public IActionResult Get([FromQuery]DocumentQuery documentParams)
         {
-            return Ok(repository.GetDocuments(documentParams));
+            return Ok(processor.GetDocuments(documentParams));
         }
     }
 }

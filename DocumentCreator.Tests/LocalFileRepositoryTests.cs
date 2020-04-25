@@ -1,7 +1,6 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.Core;
+using DocumentCreator.Core.Model;
 using DocumentCreator.Repository;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -11,25 +10,28 @@ namespace DocumentCreator
     public class LocalFileRepositoryTests
     {
         private const string BASE_FOLDER = @"C:\panos\repos\DocumentCreator\DocumentCreatorAPI\";
-        private readonly FileRepository repo;
+        private readonly IDocumentProcessor docProcessor;
+        private readonly IMappingProcessor mappingProcessor;
 
         public LocalFileRepositoryTests()
         {
-            repo = Directory.Exists(BASE_FOLDER) ? new FileRepository(BASE_FOLDER) : null;
+            var repo = Directory.Exists(BASE_FOLDER) ? new FileRepository(BASE_FOLDER) : null;
+            if (repo != null)
+            {
+                mappingProcessor = new MappingProcessor(repo);
+                docProcessor = new DocumentProcessor(repo);
+            }
         }
 
         [Fact]
         public void GetMappings()
         {
-            if (repo != null)
+            if (docProcessor != null)
             {
-                var all = repo.GetMappings();
-                Assert.NotEmpty(all);
-
-                var t01 = repo.GetMappings("T01");
+                var t01 = mappingProcessor.GetMappings("T01");
                 Assert.NotEmpty(t01);
 
-                var none = repo.GetMappings("xxx");
+                var none = mappingProcessor.GetMappings("xxx");
                 Assert.Empty(none);
             }
         }
@@ -37,9 +39,9 @@ namespace DocumentCreator
         [Fact]
         public void GetAllDocuments()
         {
-            if (repo != null)
+            if (docProcessor != null)
             {
-                var response = repo.GetDocuments(new DocumentParams());
+                var response = docProcessor.GetDocuments(new DocumentQuery());
                 Assert.NotNull(response);
                 Assert.Equal(1, response.Page);
                 Assert.Equal(10, response.PageSize);
@@ -52,9 +54,9 @@ namespace DocumentCreator
         [Fact]
         public void GetAllDocumentsWithTemplateName()
         {
-            if (repo != null)
+            if (docProcessor != null)
             {
-                var response = repo.GetDocuments(new DocumentParams() { TemplateName = "T02" });
+                var response = docProcessor.GetDocuments(new DocumentQuery() { TemplateName = "T02" });
                 Assert.NotEmpty(response.Results);
             }
         }
@@ -62,9 +64,9 @@ namespace DocumentCreator
         [Fact]
         public void GetAllDocumentsWithOrderBy()
         {
-            if (repo != null)
+            if (docProcessor != null)
             {
-                var response = repo.GetDocuments(new DocumentParams() { OrderBy = "templateName" });
+                var response = docProcessor.GetDocuments(new DocumentQuery() { OrderBy = "templateName" });
                 Assert.NotEmpty(response.Results);
             }
         }
@@ -72,10 +74,10 @@ namespace DocumentCreator
         [Fact]
         public void GetAllDocumentsWithPaging()
         {
-            if (repo != null)
+            if (docProcessor != null)
             {
-                var page1 = repo.GetDocuments(new DocumentParams() { PageSize = 5 });
-                var page2 = repo.GetDocuments(new DocumentParams() { Page = 2, PageSize = 5 });
+                var page1 = docProcessor.GetDocuments(new DocumentQuery() { PageSize = 5 });
+                var page2 = docProcessor.GetDocuments(new DocumentQuery() { Page = 2, PageSize = 5 });
                 Assert.Equal(1, page1.Page);
                 Assert.Equal(5, page1.PageSize);
                 Assert.Equal(5, page1.Results.Count());

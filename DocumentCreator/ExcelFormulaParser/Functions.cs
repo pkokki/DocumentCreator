@@ -1,8 +1,5 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using static DocumentCreator.ExcelFormulaParser.ExcelValue;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -13,7 +10,7 @@ namespace DocumentCreator.ExcelFormulaParser
 
         private readonly Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>> Registry
             = new Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>>();
-        
+
         private Functions()
         {
             Registry.Add("NA", NA);

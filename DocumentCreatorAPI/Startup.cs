@@ -1,3 +1,6 @@
+using DocumentCreator;
+using DocumentCreator.Core;
+using DocumentCreator.Core.Repository;
 using DocumentCreator.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -5,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -26,6 +28,10 @@ namespace DocumentCreatorAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IRepository>(sp => new FileRepository(Env.ContentRootPath));
+            services.AddScoped<ITemplateProcessor, TemplateProcessor>();
+            services.AddScoped<IMappingProcessor, MappingProcessor>();
+            services.AddScoped<IDocumentProcessor, DocumentProcessor>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAny",
@@ -40,7 +46,8 @@ namespace DocumentCreatorAPI
             });
             services
                 .AddControllers()
-                .AddNewtonsoftJson(options => {
+                .AddNewtonsoftJson(options =>
+                {
                     options.UseCamelCasing(true);
                 });
         }
@@ -61,7 +68,7 @@ namespace DocumentCreatorAPI
             app.UseAuthorization();
 
             // See: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-3.1
-            app.UseFileServer(new FileServerOptions() 
+            app.UseFileServer(new FileServerOptions()
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "dcfs", "files", "html")),
                 RequestPath = "/html",
@@ -73,7 +80,7 @@ namespace DocumentCreatorAPI
                 DefaultFileNames = new List<string> { "index.html", "default.html" }
             }); ;
             app.UseStaticFiles();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -12,7 +12,7 @@ namespace DocumentCreator.ExcelFormula
         // [Fact] public void CHAR() { /* Returns the character specified by the code number */ }
         // [Fact] public void CLEAN() { /* Removes all nonprintable characters from text */ }
         // [Fact] public void CODE() { /* Returns a numeric code for the first character in a text string */ }
-        
+
         [Fact]
         public void CONCATENATE()
         {
@@ -203,7 +203,7 @@ namespace DocumentCreator.ExcelFormula
             AssertExpression("=TEXT(0.567,\"#.##0,00\")", "0,57");
 
             AssertExpression("=TEXT(1234,\"0000000\")", "0001234");
-            
+
             AssertExpression("=TEXT(0.285,\"0,0%\")", "28,5%");
             AssertExpression("=TEXT(0.0017,\"0,000%\")", "0,170%");
             AssertExpression("=TEXT(0.17,\"0,000\") & \"%\"", "0,170%");

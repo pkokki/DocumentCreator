@@ -1,4 +1,4 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.Core.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace DocumentCreator
             var json = JObject.Parse(File.ReadAllText("./Resources/EvaluateForExcelExample01.json"));
             var request = json.ToObject<EvaluationRequest>();
             var templateBytes = File.ReadAllBytes("./Resources/EvaluateForExcelExample01.docx");
-            var templateFields = new TemplateProcessor().FindTemplateFields(templateBytes);
+            var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
 
             var processor = new ExpressionEvaluator();
             var response = processor.Evaluate(request, templateFields);

@@ -1,16 +1,24 @@
-﻿using DocumentCreator.Model;
+﻿using DocumentCreator.Core.Model;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Office2013.Word;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
 {
     public static class OpenXmlWordProcessing
     {
+        public static IEnumerable<TemplateField> FindTemplateFields(byte[] buffer)
+        {
+            using var ms = new MemoryStream(buffer);
+            using var doc = WordprocessingDocument.Open(ms, false);
+            return GetTemplateFields(doc);
+        }
+
         public static IEnumerable<TemplateField> GetTemplateFields(WordprocessingDocument doc)
         {
             var sdts = doc.MainDocumentPart.Document.Body
