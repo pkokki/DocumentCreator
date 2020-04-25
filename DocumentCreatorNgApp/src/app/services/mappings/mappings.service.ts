@@ -12,7 +12,7 @@ export class MappingsService {
     private envService: EnvService,
   ) { }
 
-  getMappings(templateName?: string, templateVersion?: string): Observable<Mapping[]> {
+  getMappings(mappingName?: string, templateName?: string, templateVersion?: string): Observable<Mapping[]> {
     return this.envService.get<Mapping[]>(`/mappings?templateName=${templateName}`).pipe(
       tap(ev => {
         console.log('getMappings', ev);

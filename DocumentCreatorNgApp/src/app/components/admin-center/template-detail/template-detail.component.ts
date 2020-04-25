@@ -20,8 +20,8 @@ export class TemplateDetailComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.pipe(
       switchMap((params: ParamMap) => { 
-        var name = params.get('name');
-        var version = params.get('version');
+        var name = params.get('templateName');
+        var version = params.get('templateVersion');
         return this.templateService.getTemplate(name, version); 
       })
     ).subscribe(data => {

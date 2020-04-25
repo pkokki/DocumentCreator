@@ -1,6 +1,10 @@
 <h2>{{title}}</h2>
 
-<table mat-table matSort aria-label="Mappings" [dataSource]="dataSource">
+<div class="loading-shade" *ngIf="isLoading">
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+</div>
+
+<table mat-table matSort aria-label="Mappings" [dataSource]="pagedData">
     <!-- name Column -->
     <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
@@ -41,7 +45,13 @@
                 <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #actionsMenu="matMenu">
-                <div [hidden]="mappingsName">
+                <div [hidden]="mappingName">
+                    <button mat-menu-item [routerLink]="['./', row.name, 'templates']">
+                        <mat-icon aria-hidden="false">picture_in_picture</mat-icon>
+                        <span>Templates</span>
+                    </button>
+                </div>
+                <div [hidden]="mappingName">
                     <button mat-menu-item [routerLink]="['./', row.name, 'versions']">
                         <svg width="24" viewBox="0 0 24 24">
                             <path
@@ -50,8 +60,7 @@
                         <span>Versions</span>
                     </button>
                 </div>
-                <button mat-menu-item [routerLink]="['/admin/documents']"
-                    [queryParams]="{ mappingsName: row.name, mappingsVersion: (mappingsName ? row.version : 'all')}">
+                <button mat-menu-item [routerLink]="['./', mappingName ? row.version : row.name, 'documents']">
                     <mat-icon>folder_open</mat-icon>
                     <span>Documents</span>
                 </button>
@@ -71,6 +80,4 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
 
-<mat-paginator #paginator [length]="dataSource?.data.length" [pageIndex]="0" [pageSize]="5"
-    [pageSizeOptions]="[5, 10, 20, 100]">
-</mat-paginator>
+<mat-paginator [length]="sourceDataCount" [pageSizeOptions]="[5, 10, 20, 100]"></mat-paginator>

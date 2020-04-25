@@ -1,6 +1,10 @@
 <h2>{{title}}</h2>
 
-<table mat-table matSort aria-label="Templates" [dataSource]="dataSource">
+<div class="loading-shade" *ngIf="isLoading">
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+</div>
+
+<table mat-table matSort [dataSource]="pagedData">
   <!-- name Column -->
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
@@ -53,11 +57,11 @@
             <span>Versions</span>
           </button>
         </div>
-        <button mat-menu-item [routerLink]="['/admin/mappings']" [queryParams]="{ templateName: row.name, templateVersion: (templateName ? row.version : 'all')}">
+        <button mat-menu-item [routerLink]="['./', templateName ? row.version : row.name, 'mappings']">
           <mat-icon>transform</mat-icon>
           <span>Mappings</span>
         </button>
-        <button mat-menu-item [routerLink]="['/admin/documents']" [queryParams]="{ templateName: row.name, templateVersion: (templateName ? row.version : 'all')}">
+        <button mat-menu-item [routerLink]="['./', templateName ? row.version : row.name, 'documents']">
           <mat-icon>folder_open</mat-icon>
           <span>Documents</span>
         </button>
@@ -77,6 +81,4 @@
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
 
-<mat-paginator #paginator [length]="dataSource?.data.length" [pageIndex]="0" [pageSize]="5"
-  [pageSizeOptions]="[5, 10, 20, 100]">
-</mat-paginator>
+<mat-paginator [length]="sourceDataCount" [pageSizeOptions]="[5, 10, 20, 100]"></mat-paginator>

@@ -12,8 +12,15 @@ export class TemplateService {
     private envService: EnvService,
   ) { }
 
-  getTemplates(): Observable<Template[]> {
-    return this.envService.get<Template[]>('/templates').pipe(
+  getTemplates(templateName?: string, mappingName?: string): Observable<Template[]> {
+    let url: string;
+    if (templateName)
+      url = `/templates/${templateName}/versions`;
+    else if (mappingName) 
+      url = `/mappings/${mappingName}/templates`;
+    else
+      url = '/templates';
+    return this.envService.get<Template[]>(url).pipe(
       tap(ev => {
         console.log('getTemplates', ev);
       })
@@ -25,10 +32,6 @@ export class TemplateService {
       return this.envService.get<Template>(`/templates/${name}/versions/${version}`);
     else
       return this.envService.get<Template>(`/templates/${name}`);
-  }
-
-  getTemplateVersions(name: string): Observable<Template[]> {
-    return this.envService.get<Template[]>(`/templates/${name}/versions`);
   }
 }
 
