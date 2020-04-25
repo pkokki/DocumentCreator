@@ -35,7 +35,7 @@ namespace DocumentCreator
         public DocumentDetails CreateDocument(string templateName, string mappingName, JObject payload)
         {
             var template = repository.GetLatestTemplate(templateName);
-            var mapping = repository.GetLatestMapping(templateName, mappingName);
+            var mapping = repository.GetLatestMapping(templateName, null, mappingName);
 
             var documentBytes = CreateDocument(template.Buffer, mapping.Buffer, payload);
             var document = repository.CreateDocument(templateName, mappingName, documentBytes);

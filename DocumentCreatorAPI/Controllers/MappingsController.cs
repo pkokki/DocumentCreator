@@ -1,4 +1,5 @@
-﻿using DocumentCreator.Core.Repository;
+﻿using DocumentCreator.Core;
+using DocumentCreator.Core.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocumentCreatorAPI.Controllers
@@ -7,18 +8,26 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class MappingsController : ControllerBase
     {
-        private readonly IRepository repository;
+        private readonly IMappingProcessor processor;
 
-        public MappingsController(IRepository repository)
+        public MappingsController(IMappingProcessor processor)
         {
-            this.repository = repository;
+            this.processor = processor;
         }
 
         [HttpGet]
         [Route("")]
-        public IActionResult Get([FromQuery]string templateName)
+        public IActionResult Get()
         {
-            return Ok(repository.GetMappingStats(templateName));
+            return Ok(processor.GetMappingStats());
+        }
+
+        [HttpGet]
+        [Route("{mappingName}/templates")]
+        public IActionResult GetTemplates([FromRoute]string mappingName)
+        {
+            var versions = processor.GetMappingStats(mappingName);
+            return Ok(versions);
         }
     }
 }

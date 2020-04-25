@@ -7,17 +7,16 @@ namespace DocumentCreator.Core.Model
 {
     public class MappingData
     {
-        public string Name { get; set; }
+        public string MappingName { get; set; }
         public string TemplateName { get; set; }
     }
     public class Mapping : MappingData
     {
-        public string Version { get; set; }
+        public string MappingVersion { get; set; }
         public string TemplateVersion { get; set; }
         public DateTime Timestamp { get; set; }
         public long Size { get; set; }
-        public int? Templates { get; set; }
-        public int? Documents { get; set; }
+        
         [JsonIgnore]
         public byte[] Buffer { get; set; }
         public string FileName { get; set; }
@@ -46,5 +45,12 @@ namespace DocumentCreator.Core.Model
         public JObject Payload { get; set; }
     }
 
-
+    public class MappingStats
+    {
+        public string MappingName { get; set; }
+        public string TemplateName { get; set; }
+        public DateTime Timestamp { get; set; }
+        public int Templates { get; set; }
+        public int Documents { get; set; }
+    }
 }

@@ -241,6 +241,8 @@ namespace DocumentCreator
             List<MappingExpression> expressions)
         {
             var calculationChainPart = workbookPart.CalculationChainPart;
+            if (calculationChainPart == null)
+                return expressions;
             var calculationChain = calculationChainPart.CalculationChain;
             var cells = expressions.Select(o => o.Cell);
             var orderedExpressions = calculationChain.Elements<CalculationCell>()

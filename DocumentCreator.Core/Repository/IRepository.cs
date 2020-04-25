@@ -13,11 +13,11 @@ namespace DocumentCreator.Core.Repository
         ContentItem GetTemplate(string templateName, string version = null);
 
 
-        IEnumerable<ContentItemSummary> GetMappings(string templateName);
-        IEnumerable<ContentItemStats> GetMappingStats(string templateName = null);
+        IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null);
+        IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null);
         byte[] GetEmptyMapping();
-        ContentItem GetLatestMapping(string templateName, string mappingName);
-        ContentItem GetMapping(string templateName, string mappingName, string mappingVersion);
+        ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName);
+        ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion);
         ContentItem CreateMapping(string templateName, string mappingName, byte[] contents);
 
 

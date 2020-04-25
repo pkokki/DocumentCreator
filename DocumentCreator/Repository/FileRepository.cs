@@ -71,9 +71,11 @@ namespace DocumentCreator.Repository
             return new FileContentItem(templateFileName);
         }
 
-        public ContentItem GetLatestMapping(string templateName, string mappingName)
+        public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
         {
-            var templateVersionName = GetLatestTemplateVersionName(templateName);
+            var templateVersionName = templateVersion == null 
+                ? GetLatestTemplateVersionName(templateName)
+                : $"{templateName}_{templateVersion}";
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
             return GetTemplateMapping(mappingVersionName);
         }
@@ -184,45 +186,52 @@ namespace DocumentCreator.Repository
             return templates;
         }
 
-        public IEnumerable<ContentItemSummary> GetMappings(string templateName)
+        public IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
         {
-            var mappings = Directory.GetFiles(MappingsFolder, $"{templateName}_*.*")
+            var mappings = Directory.GetFiles(MappingsFolder, $"{templateName ?? "*"}_{templateVersion ?? "*"}_{mappingName ?? "*"}_*.xlsm")
                 .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] })
-                .GroupBy(a => a.Name)
-                .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
-                .OrderBy(a => a.Name).ThenBy(a => a.Data.Version)
-                .ToList()
-                .Select(a => new FileContentItemSummary(a.Data.FullName));
-            return mappings;
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] });
+            if (mappingName == null)
+                return mappings.GroupBy(a => a.Name)
+                    .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
+                    .OrderBy(a => a.Name).ThenBy(a => a.Data.Version)
+                    .ToList()
+                    .Select(a => new FileContentItemSummary(a.Data.FullName));
+            else
+                return mappings
+                    .OrderBy(a => a.Version)
+                    .ToList()
+                    .Select(a => new FileContentItemSummary(a.FullName));
         }
 
-        public ContentItem GetMapping(string templateName, string mappingName, string mappingVersion)
+        public ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
         {
-            var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_*_{mappingName}_{mappingVersion}.xlsm").FirstOrDefault();
+            var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_{templateVersion ?? "*"}_{mappingName}_{mappingVersion ?? "*"}.xlsm")
+                .OrderByDescending(o => o)
+                .FirstOrDefault();
             if (fullName == null)
                 return null;
             return new FileContentItem(fullName);
         }
 
-        public IEnumerable<ContentItemStats> GetMappingStats(string templateName = null)
+        public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)
         {
             var mappings = Directory.GetFiles(MappingsFolder, "*.xlsm")
                 .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], Name = a.NameParts[2], Version = a.NameParts[3] })
-                .Where(a => templateName == null || string.Equals(a.TemplateName, templateName, StringComparison.InvariantCultureIgnoreCase))
-                .GroupBy(a => a.Name)
-                .Select(ag => new { Name = ag.Key, FirstVersion = ag.OrderBy(o => o.Version).First() })
-                .Select(a => new { a.Name, Info = new FileInfo(a.FirstVersion.FullName) })
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], MappingName = a.NameParts[2], Version = a.NameParts[3] })
+                .Where(a => mappingName == null || string.Equals(a.MappingName, mappingName, StringComparison.InvariantCultureIgnoreCase))
+                .GroupBy(a => mappingName == null ? a.MappingName : a.TemplateName)
+                .Select(a => a.OrderBy(o => o.Version).First())
                 .Select(a => new ContentItemStats()
                 {
-                    Name = a.Name,
-                    CreationDate = a.Info.CreationTime,
-                    Templates = Directory.GetFiles(MappingsFolder, $"*_*_{a.Name}_*.xlsm")
+                    MappingName = a.MappingName,
+                    TemplateName = a.TemplateName,
+                    TimeStamp = new FileInfo(a.FullName).CreationTime,
+                    Templates = mappingName != null ? 1 : Directory.GetFiles(MappingsFolder, $"*_*_{a.MappingName}_*.xlsm")
                         .Select(o => Path.GetFileNameWithoutExtension(o).Split('_', 2).First())
                         .Distinct()
                         .Count(),
-                    Documents = Directory.GetFiles(DocumentsFolder, $"*_*_{a.Name}_*_*.docx")
+                    Documents = Directory.GetFiles(DocumentsFolder, $"{(mappingName == null ? "*" : a.TemplateName)}_*_{a.MappingName}_*_*.docx")
                         .Length
                 })
                 .ToList();
