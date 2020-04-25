@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -51,7 +50,7 @@ namespace DocumentCreator.ExcelFormulaParser
 
         public static ExcelValue CreateBoolean(string oper, ExcelValue v1, ExcelValue v2, bool ignoreCase = true)
         {
-            if (v1 == NA|| v2 == NA)
+            if (v1 == NA || v2 == NA)
                 return NA;
             if (v1 is ErrorValue)
                 return v1;
@@ -59,7 +58,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 return v2;
             if (oper == "=")
             {
-                if (v1 is BooleanValue) 
+                if (v1 is BooleanValue)
                     return new BooleanValue(v1 == v2);
                 if ((v1 is TextValue && v2 is TextValue)) //*********** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
@@ -166,7 +165,7 @@ namespace DocumentCreator.ExcelFormulaParser
             {
             }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() 
+            protected internal override decimal? AsDecimal()
             {
                 if (decimal.TryParse(Text, out decimal v))
                     return v;
@@ -195,7 +194,7 @@ namespace DocumentCreator.ExcelFormulaParser
                 : this(token.Select(o => Create(o, language)).ToArray(), language)
             {
             }
-            public ArrayValue(IEnumerable<ExcelValue> value, Language language) 
+            public ArrayValue(IEnumerable<ExcelValue> value, Language language)
                 : base(value, language)
             {
                 values = value;
@@ -248,7 +247,7 @@ namespace DocumentCreator.ExcelFormulaParser
         internal class DateValue : DecimalValue
         {
             private static readonly DateTime BASE = new DateTime(1900, 1, 1);
-            public DateValue(int year, int month, int day, Language language) 
+            public DateValue(int year, int month, int day, Language language)
                 : this(ToDateSerial(year, month, day), language)
             {
             }
@@ -268,9 +267,9 @@ namespace DocumentCreator.ExcelFormulaParser
                 return ts.Days + 1;
             }
 
-            public override string ToString(Language language) 
-            { 
-                return language.ToString(Date); 
+            public override string ToString(Language language)
+            {
+                return language.ToString(Date);
             }
         }
 
@@ -305,7 +304,7 @@ namespace DocumentCreator.ExcelFormulaParser
             private readonly int? decimals;
             private readonly bool commas;
 
-            public DecimalValue(decimal value, Language language, int? decimals = null, bool commas = false) 
+            public DecimalValue(decimal value, Language language, int? decimals = null, bool commas = false)
                 : base(value, language.ToString(value, decimals, commas), language)
             {
                 this.decimals = decimals;
@@ -335,7 +334,7 @@ namespace DocumentCreator.ExcelFormulaParser
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language); 
+                return new TimeValue(value.Value, a.Language);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
@@ -344,7 +343,7 @@ namespace DocumentCreator.ExcelFormulaParser
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language); 
+                return new TimeValue(value.Value, a.Language);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
@@ -360,7 +359,7 @@ namespace DocumentCreator.ExcelFormulaParser
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language); 
+                return new TimeValue(value.Value, a.Language);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a)

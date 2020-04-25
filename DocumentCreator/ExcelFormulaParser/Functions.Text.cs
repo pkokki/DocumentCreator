@@ -1,9 +1,6 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace DocumentCreator.ExcelFormulaParser
 {
@@ -55,7 +52,7 @@ namespace DocumentCreator.ExcelFormulaParser
             if (args.NotInteger(1, 1, out int numChars)) return ExcelValue.VALUE;
             var length = Math.Min(numChars, text.Length);
             return new ExcelValue.TextValue(text.Substring(0, length), scope.OutLanguage);
-            
+
         }
 
         public ExcelValue RIGHT(List<ExcelValue> args, ExpressionScope scope)
@@ -71,7 +68,7 @@ namespace DocumentCreator.ExcelFormulaParser
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
             if (args.NotText(0, null, scope.OutLanguage, out string text)) return ExcelValue.VALUE;
-            if (args.NotInteger(1, 1, out int start)) return ExcelValue.VALUE; 
+            if (args.NotInteger(1, 1, out int start)) return ExcelValue.VALUE;
             if (args.NotInteger(2, 1, out int numChars)) return ExcelValue.VALUE;
             var length = Math.Min(numChars, text.Length - start + 1);
             return new ExcelValue.TextValue(text.Substring(start - 1, length), scope.OutLanguage);

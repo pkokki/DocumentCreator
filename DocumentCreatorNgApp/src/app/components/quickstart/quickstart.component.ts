@@ -3,7 +3,8 @@ import { State } from 'src/app/services/state/state.service';
 
 @Component({
   selector: 'app-quickstart',
-  templateUrl: './quickstart.component.html'
+  templateUrl: './quickstart.component.html',
+  styleUrls: ['./quickstart.component.css']
 })
 export class QuickstartComponent implements OnInit {
 

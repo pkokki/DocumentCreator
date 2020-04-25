@@ -5,7 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-step3',
-  templateUrl: './step3.component.html'
+  templateUrl: './step3.component.html',
+  styleUrls: ['../quickstart.component.css']
 })
 export class Step3Component implements OnInit {
   @ViewChild('file', { static: false }) file: ElementRef;

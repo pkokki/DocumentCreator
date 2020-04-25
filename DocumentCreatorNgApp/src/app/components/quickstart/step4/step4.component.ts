@@ -5,7 +5,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-step4',
-  templateUrl: './step4.component.html'
+  templateUrl: './step4.component.html',
+  styleUrls: ['../quickstart.component.css', 'step4.component.css']
 })
 export class Step4Component implements OnInit {
   

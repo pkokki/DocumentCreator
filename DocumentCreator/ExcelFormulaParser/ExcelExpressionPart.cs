@@ -1,5 +1,4 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace DocumentCreator.ExcelFormulaParser
@@ -47,8 +46,8 @@ namespace DocumentCreator.ExcelFormulaParser
         public bool IsComparisonOperator =>
             TokenType == ExcelFormulaTokenType.OperatorInfix && originalToken.Subtype == ExcelFormulaTokenSubtype.Logical;
 
-        public bool HasRangeValue => TokenType == ExcelFormulaTokenType.Operand 
-            && originalToken != null 
+        public bool HasRangeValue => TokenType == ExcelFormulaTokenType.Operand
+            && originalToken != null
             && originalToken.Subtype == ExcelFormulaTokenSubtype.Range;
 
         public ExcelValue Value

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Globalization;
 using System.Text;
 
@@ -45,7 +44,7 @@ namespace DocumentCreator.ExcelFormulaParser.Languages
             }
             return builder.ToString();
         }
-        
+
         public string ToString(ExcelValue value)
         {
             return value?.ToString(this);

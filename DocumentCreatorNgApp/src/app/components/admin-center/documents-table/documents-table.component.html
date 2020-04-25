@@ -1,0 +1,72 @@
+<h2>Documents</h2>
+<h4>Criteria: {{criteria}}</h4>
+
+<div class="loading-shade" *ngIf="isLoadingResults">
+    <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+</div>
+
+<div class="table-container">
+
+    <table mat-table [dataSource]="documents"
+        matSort matSortActive="id" matSortDisableClear matSortDirection="desc">
+
+        <ng-container matColumnDef="link">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
+            <td mat-cell *matCellDef="let row">
+                <a mat-button target="_blank" href="/api/html/{{row.Id}}">
+                    <svg style="width:16px;height:16px" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+                    </svg>
+                </a>
+                <a mat-button target="_blank" [routerLink]="['./', row.id]">
+                    <svg style="width:16px;height:16px" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H7.83Q7.5 20.75 7.24 20.5 7 20.26 7 19.92V17H2.83Q2.5 17 2.24 16.76 2 16.5 2 16.17V7.83Q2 7.5 2.24 7.24 2.5 7 2.83 7H7V4.08Q7 3.74 7.24 3.5 7.5 3.25 7.83 3.25M7.03 11.34L8.23 15.28H9.6L10.91 8.72H9.53L8.75 12.6L7.64 8.85H6.5L5.31 12.62L4.53 8.72H3.09L4.4 15.28H5.77M20.75 19.5V17H8.25V19.5M20.75 15.75V12.63H12V15.75M20.75 11.38V8.25H12V11.38M20.75 7V4.5H8.25V7Z" />
+                    </svg>
+                </a>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
+            <td mat-cell *matCellDef="let row">
+                <a mat-flat-button [routerLink]="['./', row.id]">{{row.id}}</a>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="timestamp">
+            <th mat-header-cell *matHeaderCellDef>Created at</th>
+            <td mat-cell *matCellDef="let row">{{row.timestamp | date:'dd/MM/yyyy'}}
+                {{row.timestamp | date:'HH:mm:ss'}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="templateName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Template</th>
+            <td mat-cell *matCellDef="let row">{{row.templateName}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="templateVersion">
+            <th mat-header-cell *matHeaderCellDef>Version</th>
+            <td mat-cell *matCellDef="let row">{{row.templateVersion}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mappingName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Mapping</th>
+            <td mat-cell *matCellDef="let row">{{row.mappingName}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mappingVersion">
+            <th mat-header-cell *matHeaderCellDef>Version</th>
+            <td mat-cell *matCellDef="let row">{{row.mappingVersion}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Size</th>
+            <td mat-cell *matCellDef="let row">{{row.size}}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>
+
+<mat-paginator [length]="totalDocuments" [pageSizeOptions]="[5, 10, 20, 100]"></mat-paginator>

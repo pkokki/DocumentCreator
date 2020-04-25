@@ -14,8 +14,7 @@ namespace DocumentCreator
         {
             var buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx");
 
-            var processor = new TemplateProcessor();
-            var templateFields = processor.FindTemplateFields(buffer);
+            var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 
             Assert.Equal(7, templateFields.Count());
             Assert.Equal(new string[] {
@@ -34,8 +33,7 @@ namespace DocumentCreator
         {
             var buffer = File.ReadAllBytes("./Resources/FindTemplateFields002.docx");
 
-            var processor = new TemplateProcessor();
-            var templateFields = processor.FindTemplateFields(buffer);
+            var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 
             Assert.Equal(11, templateFields.Count());
         }
@@ -46,7 +44,7 @@ namespace DocumentCreator
             var emptyMapping = File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm");
             var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
 
-            var processor = new TemplateProcessor();
+            var processor = new MappingProcessor(null);
             var bytes = processor.CreateMappingForTemplate(emptyMapping, "T01", "M01", "http://localhost/api", templateBytes);
 
             Assert.NotEmpty(bytes);
@@ -59,7 +57,7 @@ namespace DocumentCreator
             var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
             var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
 
-            var processor = new TemplateProcessor();
+            var processor = new DocumentProcessor(null);
             var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
 
             Assert.NotEmpty(docBytes);
@@ -73,7 +71,7 @@ namespace DocumentCreator
             var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
             var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
 
-            var processor = new TemplateProcessor();
+            var processor = new DocumentProcessor(null);
             var results = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
 
             Assert.NotEmpty(results);

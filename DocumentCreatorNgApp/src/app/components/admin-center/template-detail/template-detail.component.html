@@ -1,13 +1,13 @@
 <h2>Template {{template.name}}</h2>
 
-<mat-grid-list cols="5" gutterSize="0" rowHeight="1.2em">
-    <mat-grid-tile colspan="2" class="mat-caption"><div class="w-100">Version</div></mat-grid-tile>
-    <mat-grid-tile colspan="2" class="mat-caption"><div class="w-100">Date</div></mat-grid-tile>
-    <mat-grid-tile colspan="1" class="mat-caption"><div class="w-100">Size</div></mat-grid-tile>
+<mat-grid-list cols="3" gutterSize="0" rowHeight="1.2em" style="max-width:600px">
+    <mat-grid-tile class="mat-caption">Version</mat-grid-tile>
+    <mat-grid-tile class="mat-caption">Date</mat-grid-tile>
+    <mat-grid-tile class="mat-caption">Size</mat-grid-tile>
 
-    <mat-grid-tile colspan="2"><div class="w-100">{{template.version}}</div></mat-grid-tile>
-    <mat-grid-tile colspan="2"><div class="w-100">{{template.timestamp | date:'dd/MM/yyyy'}} {{template.timestamp | date:'HH:mm:ss'}}</div></mat-grid-tile>
-    <mat-grid-tile colspan="1"><div class="w-100">{{template.size}}</div></mat-grid-tile>
+    <mat-grid-tile>{{template.version}}</mat-grid-tile>
+    <mat-grid-tile>{{template.timestamp | date:'dd/MM/yyyy'}} {{template.timestamp | date:'HH:mm:ss'}}</mat-grid-tile>
+    <mat-grid-tile>{{template.size}}</mat-grid-tile>
 </mat-grid-list>
 
 <mat-list>
