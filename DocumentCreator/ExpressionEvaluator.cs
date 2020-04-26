@@ -86,10 +86,10 @@ namespace DocumentCreator
                 result.Value = operand.Value.InnerValue;
                 result.Text = outputLang.ToString(operand.Value);
             }
-            //catch (Exception ex)
-            //{
-            //    result.Error = ex.Message;
-            //}
+            catch (Exception ex)
+            {
+                result.Error = ex.Message;
+            }
             finally { }
             return result;
         }

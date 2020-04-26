@@ -70,7 +70,7 @@ namespace DocumentCreator.Repository
                 .FirstOrDefault();
             if (templateFileName == null)
                 return null;
-            return new FileContentItem(templateFileName);
+            return FileContentItem.Create(templateFileName);
         }
 
         public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
@@ -86,7 +86,7 @@ namespace DocumentCreator.Repository
             if (mappingVersionName == null)
                 return null;
             var mappingFileName = Path.Combine(MappingsFolder, $"{mappingVersionName}.xlsm");
-            return new FileContentItem(mappingFileName);
+            return FileContentItem.Create(mappingFileName);
         }
 
         public byte[] GetEmptyMapping()
@@ -175,7 +175,7 @@ namespace DocumentCreator.Repository
         {
             return string.IsNullOrEmpty(version)
                 ? GetLatestTemplate(templateName)
-                : new FileContentItem(TemplatesFolder, $"{templateName}_{version}.docx");
+                : FileContentItem.Create(TemplatesFolder, $"{templateName}_{version}.docx");
         }
 
         public IEnumerable<ContentItemSummary> GetTemplateVersions(string templateName)
@@ -213,7 +213,7 @@ namespace DocumentCreator.Repository
                 .FirstOrDefault();
             if (fullName == null)
                 return null;
-            return new FileContentItem(fullName);
+            return FileContentItem.Create(fullName);
         }
 
         public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)

@@ -15,11 +15,12 @@ namespace DocumentCreator.Core.Model
         public string Version { get; set; }
         public DateTime Timestamp { get; set; }
         public long Size { get; set; }
-        public IEnumerable<TemplateField> Fields { get; set; }
     }
 
     public class TemplateDetails : Template
     {
+        public IEnumerable<TemplateField> Fields { get; set; }
+
         [JsonIgnore]
         public byte[] Buffer { get; set; }
     }

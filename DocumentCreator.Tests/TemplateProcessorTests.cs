@@ -1,120 +1,209 @@
 using DocumentCreator.Core.Model;
+using DocumentCreator.Core.Repository;
+using DocumentCreator.ExcelFormulaParser.Languages;
+using Moq;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace DocumentCreator
 {
+    public static class MockData
+    {
+        public static DateTime Timestamp(int index)
+        {
+            return new DateTime(637227000000000000L + index * 1000000000000L);
+        }
+    }
     public class TemplateProcessorTests
     {
-        [Fact]
-        public void CanFindTemplateFields001()
+        private readonly Mock<IRepository> repository;
+        private readonly TemplateProcessor processor;
+
+        public TemplateProcessorTests()
         {
-            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx");
-
-            var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
-
-            Assert.Equal(7, templateFields.Count());
-            Assert.Equal(new string[] {
-                "FromAccountNumber",
-                "FromAccountHolder",
-                "ToAccountNumber",
-                "Currency",
-                "Amount",
-                "TransactionDate",
-                "TransactionTime"
-            }, templateFields.Select(o => o.Name).ToArray());
+            repository = new Mock<IRepository>();
+            processor = new TemplateProcessor(repository.Object);
         }
 
         [Fact]
-        public void CanFindTemplateFields002()
+        public void GetTemplates_NoTemplateName_OK()
         {
-            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields002.docx");
-
-            var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
-
-            Assert.Equal(11, templateFields.Count());
-        }
-
-        [Fact]
-        public void CanCreateMappingForTemplate()
-        {
-            var emptyMapping = File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm");
-            var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
-
-            var processor = new MappingProcessor(null);
-            var bytes = processor.CreateMappingForTemplate(emptyMapping, "T01", "M01", "http://localhost/api", templateBytes);
-
-            Assert.NotEmpty(bytes);
-        }
-
-        [Fact]
-        public void CanCreateDocument()
-        {
-            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
-            var payload = new DocumentPayload()
+            var timestamp1 = MockData.Timestamp(1);
+            repository.Setup(r => r.GetTemplates()).Returns(new List<ContentItemSummary>()
             {
-                Sources = new List<MappingSource>() 
-                {
-                    new MappingSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
-                }
-            };
+                new ContentItemSummary() { Name = "T01_V01", FileName = "T01.docx", Path = "/files/T01.docx", Size = 42, Timestamp = timestamp1 },
+                new ContentItemSummary() { Name = "T02_V02", FileName = "T02.docx", Path = "/files/T02.docx", Size = 43, Timestamp = MockData.Timestamp(2) },
+            });
 
-            var processor = new DocumentProcessor(null);
-            var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
+            var result = processor.GetTemplates();
 
-            Assert.NotEmpty(docBytes);
-            File.WriteAllBytes("./Output/CreateDocumentTest.docx", docBytes);
+            Assert.Equal(2, result.Count());
+            var t1 = result.First();
+            Assert.Equal("T01", t1.TemplateName);
+            Assert.Equal("T01.docx", t1.FileName);
+            Assert.Equal("V01", t1.Version);
+            Assert.Equal(timestamp1, t1.Timestamp);
+            Assert.Equal(42, t1.Size);
         }
 
         [Fact]
-        public void CanCreateDocumentInMemory()
+        public void GetTemplates_ExistingTemplateName_OK()
         {
-            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
-            var payload = new DocumentPayload()
+            var timestamp1 = MockData.Timestamp(1);
+            repository.Setup(r => r.GetTemplateVersions("T01")).Returns(new List<ContentItemSummary>()
             {
-                Sources = new List<MappingSource>()
-                {
-                    new MappingSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
-                }
-            };
-            var processor = new DocumentProcessor(null);
-            var results = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
+                new ContentItemSummary() { Name = "T01_V01", FileName = "T01A.docx", Path = "/files/T01A.docx", Size = 42, Timestamp = timestamp1 },
+                new ContentItemSummary() { Name = "T01_V02", FileName = "T01B.docx", Path = "/files/T01B.docx", Size = 43, Timestamp = MockData.Timestamp(2) },
+            });
 
-            Assert.NotEmpty(results);
-            Assert.True(results.All(o => o.Error == null));
-            var fields = new Dictionary<string, string>();
-            results.ToList().ForEach(o => fields.Add(o.Name, o.Text));
-            Assert.Equal(DateTime.Today.ToString("d/M/yyyy"), fields["F01"]);
-            Assert.Equal("ΠΡΟΘΕΣΜΙΑΚΗ ΜΕ BONUS 3 ΜΗΝΩΝ - ΑΠΟ ΕΥΡΩ 10.000", fields["F02"]);
-            Assert.Equal("923456789012345", fields["F03"]);
-            Assert.Equal("3", fields["F04"]);
-            Assert.Equal("MONTH", fields["F05"]);
-            Assert.Equal("έκαστης", fields["F06"]);
-            Assert.Equal("10000", fields["F07"]);
-            Assert.Equal("3", fields["F08"]);
-            Assert.Equal("1", fields["F09"]);
-            Assert.Equal("['{}','{}']", fields["F10"]);
-            Assert.Equal("0,17", fields["F14"]);
-            Assert.Equal("1", fields["F15"]);
-            Assert.Equal("1", fields["F17"]);
-            Assert.Equal("5000", fields["F19"]);
-            Assert.Equal("10000", fields["F20"]);
-            Assert.Equal("Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000", fields["F21"]);
-            Assert.Equal("923456789012345", fields["F22"]);
-            Assert.Equal("123", fields["F23"]);
+            var result = processor.GetTemplates("T01");
 
-            Assert.Equal("#SHOW_CONTENT#", fields["F16"]);
-            Assert.Equal("#HIDE_CONTENT#", fields["F18"]);
+            Assert.Equal(2, result.Count());
+            var t1 = result.First();
+            Assert.Equal("T01", t1.TemplateName);
+            Assert.Equal("T01A.docx", t1.FileName);
+            Assert.Equal("V01", t1.Version);
+            Assert.Equal(timestamp1, t1.Timestamp);
+            Assert.Equal(42, t1.Size);
+        }
 
-            Assert.Equal("['1','3']", fields["F11"]);
-            Assert.Equal("['0,2','0,25']", fields["F12"]);
-            Assert.Equal("['500','1000']", fields["F13"]);
+        [Fact]
+        public void GetTemplates_NotExistingTemplateName_Empty()
+        {
+            repository.Setup(r => r.GetTemplateVersions("XXX")).Returns(new List<ContentItemSummary>());
+
+            var result = processor.GetTemplates("XXX");
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetTemplate_TemplateNameOnly_OK()
+        {
+            repository.Setup(r => r.GetTemplate("T01", null)).Returns(new ContentItem() 
+            {
+                Name = "T01_V01",
+                FileName = "T01A.docx",
+                Path = "/files/T01A.docx",
+                Size = 42,
+                Timestamp = MockData.Timestamp(1),
+                Buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx")
+            });
+
+            var result = processor.GetTemplate("T01");
+
+            Assert.NotNull(result);
+            Assert.Equal("T01", result.TemplateName);
+            Assert.Equal("T01A.docx", result.FileName);
+            Assert.Equal("V01", result.Version);
+            Assert.Equal(MockData.Timestamp(1), result.Timestamp);
+            Assert.Equal(42, result.Size);
+            Assert.NotEmpty(result.Buffer);
+            Assert.NotEmpty(result.Fields);
+        }
+
+        [Fact]
+        public void GetTemplate_TemplateNameAndVersion_OK()
+        {
+            repository.Setup(r => r.GetTemplate("T01", "V01")).Returns(new ContentItem()
+            {
+                Name = "T01_V01",
+                FileName = "T01A.docx",
+                Path = "/files/T01A.docx",
+                Size = 42,
+                Timestamp = MockData.Timestamp(1),
+                Buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx")
+            });
+
+            var result = processor.GetTemplate("T01", "V01");
+
+            Assert.NotNull(result);
+            Assert.Equal("T01", result.TemplateName);
+            Assert.Equal("T01A.docx", result.FileName);
+            Assert.Equal("V01", result.Version);
+            Assert.Equal(MockData.Timestamp(1), result.Timestamp);
+            Assert.Equal(42, result.Size);
+            Assert.NotEmpty(result.Buffer);
+            Assert.NotEmpty(result.Fields);
+        }
+
+        [Fact]
+        public void GetTemplate_NotExistingTemplateName_Null()
+        {
+            repository.Setup(r => r.GetTemplate("XXX", null)).Returns((ContentItem)null);
+
+            var result = processor.GetTemplate("XXX");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetTemplate_NotExistingTemplateVersion_Null()
+        {
+            repository.Setup(r => r.GetTemplate("T01", "XXX")).Returns((ContentItem)null);
+
+            var result = processor.GetTemplate("T01", "XXX");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void CreateTemplate_OK()
+        {
+            var templateData = new TemplateData() { TemplateName = "T01" };
+            repository.Setup(r => r.CreateTemplate("T01", It.IsAny<byte[]>())).Returns((string _, byte[] bytes) => new ContentItem() 
+            {
+                Name = "T01_V01",
+                FileName = "T01A.docx",
+                Path = "/files/T01A.docx",
+                Size = 42,
+                Timestamp = MockData.Timestamp(1),
+                Buffer = bytes
+            });
+
+            var result = processor.CreateTemplate(templateData, File.ReadAllBytes("./Resources/FindTemplateFields001.docx"));
+
+            Assert.NotNull(result);
+            Assert.Equal("T01", result.TemplateName);
+            Assert.Equal("T01A.docx", result.FileName);
+            Assert.Equal("V01", result.Version);
+            Assert.Equal(MockData.Timestamp(1), result.Timestamp);
+            Assert.Equal(42, result.Size);
+            Assert.NotEmpty(result.Buffer);
+            Assert.NotEmpty(result.Fields);
+        }
+
+        [Fact]
+        public void CreateTemplate_NoTemplateData_Fails()
+        {
+            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(null, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
+
+        }
+
+        [Fact]
+        public void CreateTemplate_NoTemplateName_Fails()
+        {
+            var templateData = new TemplateData() { TemplateName = null };
+            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
+        }
+
+        [Fact]
+        public void CreateTemplate_NoTemplateBuffer_Fails()
+        {
+            var templateData = new TemplateData() { TemplateName = "T01" };
+            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, null));
+        }
+
+        [Fact]
+        public void CreateTemplate_TemplateBufferNotWord_Fails()
+        {
+            var templateData = new TemplateData() { TemplateName = "T01" };
+            Assert.Throws<ArgumentException>(() => processor.CreateTemplate(templateData, Encoding.ASCII.GetBytes("Not WORD")));
         }
     }
 }
