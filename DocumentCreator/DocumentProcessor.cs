@@ -25,19 +25,24 @@ namespace DocumentCreator
         public PagedResults<Document> GetDocuments(DocumentQuery query)
         {
             var documents = repository.GetDocuments(query.TemplateName, query.TemplateVersion, query.MappingsName, query.MappingsVersion);
-            var orderBy = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(query.OrderBy ?? "Id");
+            var orderBy = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(query.OrderBy ?? nameof(Document.DocumentId));
             return documents
                 .Select(o => Transform(o))
                 .AsQueryable()
                 .CreatePagedResults(query.Page, query.PageSize, orderBy, !query.Descending);
         }
 
-        public DocumentDetails CreateDocument(string templateName, string mappingName, JObject payload)
+        public DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload)
         {
             var template = repository.GetLatestTemplate(templateName);
-            var mapping = repository.GetLatestMapping(templateName, null, mappingName);
 
-            var documentBytes = CreateDocument(template.Buffer, mapping.Buffer, payload);
+            byte[] mappingBytes = null;
+            if (mappingName != null)
+            {
+                var mapping = repository.GetLatestMapping(templateName, null, mappingName);
+                mappingBytes = mapping.Buffer;
+            }
+            var documentBytes = CreateDocument(template.Buffer, mappingBytes, payload);
             var document = repository.CreateDocument(templateName, mappingName, documentBytes);
 
             var templateVersionName = template.Name;
@@ -46,25 +51,35 @@ namespace DocumentCreator
             return TransformFull(document);
         }
 
-        public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, JObject payload)
+        public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
         {
-            var sources = new List<MappingSource>
-            {
-                new MappingSource { Name = "RQ", Payload = payload }
-            };
+            var sources = payload?.Sources != null ? new List<MappingSource>(payload.Sources) : new List<MappingSource>();
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingBytes, sources);
+            var templateFieldExpressions = mappingBytes != null
+                ? OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingBytes, sources)
+                : BuildIdentityExpressions(templateFields, payload);
             var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
             var contentControlData = BuildContentControlData(templateFields, results);
             return MergeTemplateWithMappings(contentControlData, templateBytes);
         }
 
-        public IEnumerable<EvaluationResult> CreateDocumentInMem(byte[] templateBytes, byte[] mappingBytes, JObject payload)
+        private IEnumerable<MappingExpression> BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, DocumentPayload payload)
         {
-            var sources = new List<MappingSource>
+            var sourceName = payload?.Sources?.FirstOrDefault()?.Name ?? "X";
+            return templateFields.Select((o, index) => new MappingExpression()
             {
-                new MappingSource { Name = "RQ", Payload = payload }
-            };
+                Name = o.Name,
+                Cell = o.Name,
+                Content = o.Content,
+                IsCollection = o.IsCollection,
+                Parent = o.Parent,
+                Expression = $"=SOURCE(\"{sourceName}\",{o.Name})"
+            });
+        }
+
+        public IEnumerable<EvaluationResult> CreateDocumentInMem(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
+        {
+            var sources = payload?.Sources != null ? new List<MappingSource>(payload.Sources) : new List<MappingSource>();
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
             var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingBytes, sources);
             var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
@@ -173,7 +188,7 @@ namespace DocumentCreator
             document.TemplateVersion = parts[1];
             document.MappingName = parts[2];
             document.MappingVersion = parts[3];
-            document.Id = parts[4];
+            document.DocumentId = parts[4];
             document.Timestamp = new DateTime(long.Parse(parts[4]));
             document.Size = content.Size;
             document.FileName = content.FileName;

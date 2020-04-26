@@ -16,9 +16,9 @@ namespace DocumentCreator
             this.repository = repository;
         }
 
-        private Template Transform(ContentItem contentItem)
+        private TemplateDetails TransformFull(ContentItem contentItem)
         {
-            var template = new Template();
+            var template = new TemplateDetails();
             Transform(contentItem, template);
             template.Buffer = contentItem.Buffer;
             return template;
@@ -34,7 +34,7 @@ namespace DocumentCreator
         {
             var parts = contentItem.Name.Split('_');
             template.FileName = contentItem.FileName;
-            template.Name = parts[0];
+            template.TemplateName = parts[0];
             template.Version = parts[1];
             template.Timestamp = new DateTime(long.Parse(parts[1]));
             template.Size = contentItem.Size;
@@ -48,22 +48,22 @@ namespace DocumentCreator
                 return repository.GetTemplateVersions(templateName).Select(o => Transform(o));
         }
 
-        public Template GetTemplate(string templateName, string templateVersion = null)
+        public TemplateDetails GetTemplate(string templateName, string templateVersion = null)
         {
-            var template = Transform(repository.GetTemplate(templateName, templateVersion));
+            var template = TransformFull(repository.GetTemplate(templateName, templateVersion));
             template.Fields = OpenXmlWordProcessing.FindTemplateFields(template.Buffer);
             return template;
         }
 
-        public Template CreateTemplate(TemplateData templateData, byte[] bytes)
+        public TemplateDetails CreateTemplate(TemplateData templateData, byte[] bytes)
         {
-            var contentItem = repository.CreateTemplate(templateData.Name, bytes);
+            var contentItem = repository.CreateTemplate(templateData.TemplateName, bytes);
 
             var templateVersionName = contentItem.Name;
             var conversion = OpenXmlWordConverter.ConvertToHtml(bytes, templateVersionName);
             repository.SaveHtml(templateVersionName, null, conversion.Images);
 
-            return Transform(contentItem);
+            return TransformFull(contentItem);
         }
     }
 }

@@ -55,7 +55,9 @@ namespace DocumentCreator.Repository
         public ContentItem CreateDocument(string templateName, string mappingName, byte[] contents)
         {
             var templateVersionName = GetLatestTemplateVersionName(templateName);
-            var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
+            var mappingVersionName = mappingName != null
+                ? GetLatestMappingVersionName($"{templateVersionName}_{mappingName}")
+                : $"{templateVersionName}__";
             var documentFileName = Path.Combine(DocumentsFolder, $"{mappingVersionName}_{DateTime.Now.Ticks}.docx");
             return new FileContentItem(documentFileName, contents);
         }

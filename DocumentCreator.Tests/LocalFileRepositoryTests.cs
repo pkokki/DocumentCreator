@@ -84,7 +84,7 @@ namespace DocumentCreator
                 Assert.Equal(2, page2.Page);
                 Assert.Equal(5, page2.PageSize);
                 Assert.Equal(5, page2.Results.Count());
-                Assert.Empty(page1.Results.Select(o => o.Id).Intersect(page2.Results.Select(o => o.Id)));
+                Assert.Empty(page1.Results.Select(o => o.DocumentId).Intersect(page2.Results.Select(o => o.DocumentId)));
             }
         }
     }

@@ -6,6 +6,6 @@ namespace DocumentCreator.Core
     public interface IDocumentProcessor
     {
         PagedResults<Document> GetDocuments(DocumentQuery query);
-        DocumentDetails CreateDocument(string templateName, string mappingName, JObject payload);
+        DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload);
     }
 }

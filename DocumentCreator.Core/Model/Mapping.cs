@@ -12,18 +12,17 @@ namespace DocumentCreator.Core.Model
     }
     public class Mapping : MappingData
     {
-        public string MappingVersion { get; set; }
         public string TemplateVersion { get; set; }
+        public string MappingVersion { get; set; }
         public DateTime Timestamp { get; set; }
         public long Size { get; set; }
-        
-        [JsonIgnore]
-        public byte[] Buffer { get; set; }
         public string FileName { get; set; }
     }
 
     public class MappingDetails : Mapping
     {
+        [JsonIgnore]
+        public byte[] Buffer { get; set; }
         public IEnumerable<MappingExpression> Expressions { get; set; }
         public IEnumerable<MappingSource> Sources { get; set; }
     }

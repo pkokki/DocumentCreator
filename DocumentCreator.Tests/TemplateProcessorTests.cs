@@ -1,3 +1,4 @@
+using DocumentCreator.Core.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,13 @@ namespace DocumentCreator
         {
             var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
             var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
-            var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
+            var payload = new DocumentPayload()
+            {
+                Sources = new List<MappingSource>() 
+                {
+                    new MappingSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
+                }
+            };
 
             var processor = new DocumentProcessor(null);
             var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
@@ -69,8 +76,13 @@ namespace DocumentCreator
         {
             var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
             var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
-            var payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json"));
-
+            var payload = new DocumentPayload()
+            {
+                Sources = new List<MappingSource>()
+                {
+                    new MappingSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
+                }
+            };
             var processor = new DocumentProcessor(null);
             var results = processor.CreateDocumentInMem(wordBytes, excelBytes, payload);
 
