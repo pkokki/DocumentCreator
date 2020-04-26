@@ -16,49 +16,34 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         //{ path: 'templates/:templateName/mappings', component: MappingsTableComponent },
-        [HttpGet]
-        [Route("{templateName}/mappings")]
-        public IActionResult GetTemplateMappings([FromRoute]string templateName)
-        {
-            var mappings = processor.GetMappings(templateName);
-            return Ok(mappings);
-        }
-
+        //{ path: 'templates/:templateName/versions/:templateVersion/mappings/:mappingName/versions', component: MappingsTableComponent },
+        //{ path: 'templates/:templateName/mappings/:mappingName/versions', component: MappingsTableComponent },
         //{ path: 'templates/:templateName/versions/:templateVersion/mappings', component: MappingsTableComponent },
         [HttpGet]
-        [Route("{templateName}/versions/:templateVersion/mappings")]
-        public IActionResult GetTemplateVersionMappings([FromRoute]string templateName, [FromRoute]string templateVersion)
-        {
-            var mappings = processor.GetMappings(templateName, templateVersion);
-            return Ok(mappings);
-        }
-
-        //{ path: 'templates/:templateName/mappings/:mappingName/versions', component: MappingsTableComponent },
-        [HttpGet]
+        [Route("{templateName}/mappings")]
+        [Route("{templateName}/versions/{templateVersion}/mappings")]
         [Route("{templateName}/mappings/{mappingName}/versions")]
-        public IActionResult GetTemplateMappingVersions([FromRoute]string templateName, [FromRoute]string mappingName)
+        [Route("{templateName}/versions/{templateVersion}/mappings/{mappingName}/versions")]
+        public IActionResult GetTemplateMappingVersions([FromRoute]string templateName, [FromRoute]string templateVersion, [FromRoute]string mappingName)
         {
-            var mappings = processor.GetMappings(templateName, mappingName);
+            var mappings = processor.GetMappings(templateName, templateVersion, mappingName);
             return Ok(mappings);
         }
 
+        //{ path: 'templates/:templateName/mappings/:mappingName', component: MappingsDetailComponent },
+        //{ path: 'templates/:templateName/versions/:versionName/mappings/:mappingName', component: MappingsDetailComponent },
         //{ path: 'templates/:templateName/mappings/:mappingName/versions/:mappingVersion', component: MappingsDetailComponent },
         [HttpGet]
+        [Route("{templateName}/mappings/{mappingName}")]
         [Route("{templateName}/mappings/{mappingName}/versions/{mappingVersion}")]
-        public IActionResult GetTemplateMappingInfo([FromRoute]string templateName, [FromRoute]string mappingName, [FromRoute]string mappingVersion)
+        [Route("{templateName}/versions/{templateVersion}/mappings/{mappingName}")]
+        [Route("{templateName}/versions/{templateVersion}/mappings/{mappingName}/versions/{mappingVersion}")]
+        public IActionResult GetTemplateMappingVersionInfo([FromRoute]string templateName, [FromRoute]string templateVersion, [FromRoute]string mappingName, [FromRoute]string mappingVersion)
         {
-            var mapping = processor.GetMapping(templateName, mappingName, mappingVersion);
+            var mapping = processor.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
             if (mapping == null)
                 return NotFound();
             return Ok(mapping);
-            //var mapping = repository.GetTemplateMapping(templateName, mappingName, mappingVersion);
-            //if (mapping == null)
-            //    return NotFound();
-            //var processor = new TemplateProcessor();
-            //var sources = new List<EvaluationSource>();
-            //mapping.Expressions = processor.GetTemplateFieldExpressions(mapping.Buffer, sources);
-            //mapping.Sources = sources;
-            //return Ok(mapping);
         }
 
 

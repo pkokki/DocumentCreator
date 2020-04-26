@@ -13,7 +13,7 @@ export class Step2Component implements OnInit {
   }
 
   download() {
-    const url = this.state.apiBaseUrl+'/templates/'+this.state.templateName+'/mappings/'+this.state.mappingName;
+    const url = this.state.apiBaseUrl+'/templates/'+this.state.templateName+'/mappings/'+this.state.mappingName+'/xls';
     window.open(url, '_blank');
   }
 }

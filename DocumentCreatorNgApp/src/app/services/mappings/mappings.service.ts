@@ -12,18 +12,55 @@ export class MappingsService {
     private envService: EnvService,
   ) { }
 
-  getMappings(mappingName?: string, templateName?: string, templateVersion?: string): Observable<Mapping[]> {
-    return this.envService.get<Mapping[]>(`/mappings?templateName=${templateName}`).pipe(
+  getMappings(mappingName?: string): Observable<Mapping[]> {
+    let url = '/mappings';
+    if (mappingName)
+      url += `/${mappingName}/templates`;
+    return this.envService.get<Mapping[]>(url).pipe(
       tap(ev => {
         console.log('getMappings', ev);
+      })
+    )
+  }
+
+  getMappingVersions(templateName?: string, templateVersion?: string, mappingName?: string): Observable<MappingVersion[]> {
+    var url: string;
+    if (templateName) {
+      url = `/templates/${templateName}`;
+      if (templateVersion)
+        url += `/versions/${templateVersion}`;
+      if (mappingName)
+        url += `/mappings/${mappingName}/versions`;
+      else
+        url += '/mappings';
+    }
+    else if (mappingName) {
+      url = `/mappings/${mappingName}/versions`;
+    }
+    else
+      window.alert(`WTF? ${templateName} ${templateVersion} ${mappingName}`);
+    return this.envService.get<MappingVersion[]>(url).pipe(
+      tap(ev => {
+        console.log('getMappingVersions', ev);
       })
     );
   }
 }
 
 export interface Mapping {
-  name: string;
-  creationDate: Date;
+  mappingName: string;
+  templateName: string;
+  timestamp: Date;
   templates: number;
   documents: number;
+}
+
+export interface MappingVersion {
+  mappingName: string;
+  mappingVersion: string;
+  templateName: string;
+  templateVersion: string;
+  fileName: string;
+  timestamp: Date;
+  size: number;
 }

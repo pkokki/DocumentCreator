@@ -37,7 +37,8 @@ export class TemplateService {
 
 
 export interface Template {
-  name: string;
+  templateName: string;
+  fileName: string;
   version: string;
   timestamp: Date;
   size: number;

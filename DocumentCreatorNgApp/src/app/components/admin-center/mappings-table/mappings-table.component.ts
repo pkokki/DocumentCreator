@@ -19,15 +19,13 @@ export class MappingsTableComponent implements OnInit, AfterViewInit {
 
   // ---------------------------------------------------------------------
   title: string;
-  templateName: string;
-  templateVersion: string;
   mappingName: string;
 
   source: Observable<Mapping[]>;
   sourceData: Mapping[] = null;
   pagedData: Mapping[] = [];
 
-  displayedColumns = ['name', 'creationDate', 'templates', 'documents', 'isActive', 'actions'];
+  displayedColumns: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,16 +34,16 @@ export class MappingsTableComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params: ParamMap) => {
-      this.templateName = params.get('templateName');
-      this.templateVersion = params.get('templateVersion');
       this.mappingName = params.get('mappingName');
-      console.log(params);
-      this.title = this.templateName 
-        ? `Mappings associated with template ${this.templateName}` + (this.templateVersion ? ' - version ' + this.templateVersion : '')
-        : this.mappingName
-        ? `Versions of mapping ${this.mappingName}`
-        : 'All mappings';
-      this.source = this.mappingsService.getMappings(this.mappingName, this.templateName, this.templateVersion);
+      if (this.mappingName) {
+        this.title = `Templates associated with mapping ${this.mappingName}`;
+        this.displayedColumns = ['templateName', 'mappingName', 'timestamp', 'documents', 'isActive', 'actions'];
+      }
+      else {
+        this.title = 'All mappings';
+        this.displayedColumns = ['mappingName', 'timestamp', 'templates', 'documents', 'isActive', 'actions'];
+      }
+      this.source = this.mappingsService.getMappings(this.mappingName);
     });
   }
 
@@ -58,7 +56,7 @@ export class MappingsTableComponent implements OnInit, AfterViewInit {
       this.pageData();
       this.isLoading = false;
     }, () => this.isLoading = false);
-    
+
     this.sort.sortChange.subscribe(() => {
       this.paginator.pageIndex = 0;
       this.sortData();

@@ -27,7 +27,7 @@ export class Step3Component implements OnInit {
     if (files.length > 0) {
       const file = files[0];
       this.uploading = true;
-      const uploadUrl = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName;
+      const uploadUrl = this.state.apiBaseUrl + '/templates/' + this.state.templateName + '/mappings/' + this.state.mappingName + '/xls';
       const progress = this.uploadService.upload(uploadUrl, null, file);
       progress.subscribe(end => {
         this.uploading = false;

@@ -6,7 +6,7 @@ namespace DocumentCreator.Core.Model
 {
     public class TemplateData
     {
-        public string Name { get; set; }
+        public string TemplateName { get; set; }
     }
 
     public class Template : TemplateData
@@ -15,9 +15,14 @@ namespace DocumentCreator.Core.Model
         public string Version { get; set; }
         public DateTime Timestamp { get; set; }
         public long Size { get; set; }
+    }
+
+    public class TemplateDetails : Template
+    {
+        public IEnumerable<TemplateField> Fields { get; set; }
+
         [JsonIgnore]
         public byte[] Buffer { get; set; }
-        public IEnumerable<TemplateField> Fields { get; set; }
     }
 
     public class TemplateField

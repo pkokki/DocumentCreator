@@ -1,6 +1,7 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System.IO;
 
 namespace DocumentCreatorAPI.Controllers
@@ -17,22 +18,9 @@ namespace DocumentCreatorAPI.Controllers
         }
 
         //{ path: 'templates', component: TemplatesTableComponent },
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(processor.GetTemplates());
-        }
-
-        //{ path: 'templates/:templateName', component: TemplateDetailComponent },
-        [HttpGet]
-        [Route("{templateName}")]
-        public IActionResult GetTemplate([FromRoute]string templateName)
-        {
-            return Ok(processor.GetTemplate(templateName));
-        }
-
         //{ path: 'templates/:templateName/versions', component: TemplatesTableComponent },
         [HttpGet]
+        [Route("")]
         [Route("{templateName}/versions")]
         public IActionResult GetTemplateVersions([FromRoute]string templateName)
         {
@@ -40,18 +28,26 @@ namespace DocumentCreatorAPI.Controllers
             return Ok(versions);
         }
 
+        //{ path: 'templates/:templateName', component: TemplateDetailComponent },
         //{ path: 'templates/:templateName/versions/:templateVersion', component: TemplateDetailComponent },
         [HttpGet]
+        [Route("{templateName}")]
         [Route("{templateName}/versions/{templateVersion}")]
-        public IActionResult GetTemplateVersion([FromRoute]string templateName, [FromRoute]string templateVersion)
+        public IActionResult GetTemplate([FromRoute]string templateName, [FromRoute]string templateVersion)
         {
             return Ok(processor.GetTemplate(templateName, templateVersion));
         }
 
+
+
         [HttpPost, DisableRequestSizeLimit]
-        public IActionResult CreateTemplate([FromBody]TemplateData templateData)
+        [Route("")]
+        public IActionResult CreateTemplate()
         {
-            //var templateName = Request.Form["name"][0];
+            var templateData = new TemplateData()
+            {
+                TemplateName = Request.Form["name"]
+            };
             var formFile = Request.Form.Files[0];
             if (formFile.Length > 0)
             {

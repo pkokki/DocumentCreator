@@ -18,20 +18,33 @@ namespace DocumentCreator
             this.repository = repository;
         }
 
-        public IEnumerable<Mapping> GetMappings(string templateName, string mappingName = null)
+        public IEnumerable<MappingStats> GetMappingStats(string mappingName = null)
         {
-            var items = repository.GetMappings(templateName);
+            var items = repository.GetMappingStats(mappingName)
+                .Select(o => new MappingStats() 
+                {
+                    MappingName = o.MappingName,
+                    TemplateName = mappingName == null ? null : o.TemplateName,
+                    Timestamp = o.TimeStamp,
+                    Documents = o.Documents,
+                    Templates = o.Templates
+                });
+            return items;
+        }
+
+        public IEnumerable<Mapping> GetMappings(string templateName = null, string templateVersion = null, string mappingName = null)
+        {
+            var items = repository.GetMappings(templateName, templateVersion, mappingName);
             return items.Select(o => Transform(o)).ToList();
         }
 
-        public MappingDetails GetMapping(string templateName, string mappingName, string mappingVersion = null)
+        public MappingDetails GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
         {
             ContentItem content;
             if (mappingVersion == null)
-                content = repository.GetLatestMapping(templateName, mappingName);
+                content = repository.GetLatestMapping(templateName, templateVersion, mappingName);
             else
-                content = repository.GetMapping(templateName, mappingName, mappingVersion);
-
+                content = repository.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
             return TransformFull(content);
         }
 
@@ -113,12 +126,10 @@ namespace DocumentCreator
             mapping.FileName = content.FileName;
             mapping.TemplateName = parts[0];
             mapping.TemplateVersion = parts[1];
-            mapping.Name = parts[2];
-            mapping.Version = parts[3];
-            mapping.Timestamp = new DateTime(long.Parse(parts[3]));
+            mapping.MappingName = parts[2];
+            mapping.MappingVersion = parts[3];
+            mapping.Timestamp = content.Timestamp;
             mapping.Size = content.Size;
-            mapping.Documents = null;
-            mapping.Templates = null;
         }
 
         private MappingSource Transform(MappingSource source)

@@ -30,11 +30,12 @@ export class Step1Component implements OnInit {
       this.uploading = true;
       const progress = this.uploadService.upload(this.state.apiBaseUrl + '/templates', { name: this.state.templateName }, file);
       progress.subscribe(end => {
-        this.uploading = false;
-        this.snackBar.open('Template uploaded succesfully', null, { duration: 2000 });
+        if (end == 100) {
+          this.uploading = false;
+          this.snackBar.open('Template uploaded succesfully', null, { duration: 2000 });
+        }
       }, err => {
         this.uploading = false;
-        //this.errorMessage = err;
       });
     }
   }

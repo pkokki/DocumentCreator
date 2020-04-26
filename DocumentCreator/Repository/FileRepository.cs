@@ -21,6 +21,9 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateTemplate(string templateName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+            
             var templateVersionName = $"{templateName}_{DateTime.Now.Ticks}";
             var templateFilename = Path.Combine(TemplatesFolder, $"{templateVersionName}.docx");
             return new FileContentItem(templateFilename, contents);
@@ -47,42 +50,73 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateMapping(string templateName, string mappingName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+
             var templateVersionName = GetLatestTemplateVersionName(templateName);
+            if (templateVersionName == null)
+                throw new ArgumentException($"Template {templateName} not found.");
             var mappingFileName = Path.Combine(MappingsFolder, $"{templateVersionName}_{mappingName}_{DateTime.Now.Ticks}.xlsm");
             return new FileContentItem(mappingFileName, contents);
         }
 
         public ContentItem CreateDocument(string templateName, string mappingName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+
             var templateVersionName = GetLatestTemplateVersionName(templateName);
+            if (templateVersionName == null)
+                throw new ArgumentException($"Template {templateName} not found.");
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
+            if (mappingVersionName == null)
+                throw new ArgumentException($"Mapping {mappingName} not found.");
+
             var documentFileName = Path.Combine(DocumentsFolder, $"{mappingVersionName}_{DateTime.Now.Ticks}.docx");
             return new FileContentItem(documentFileName, contents);
         }
 
         public ContentItem GetLatestTemplate(string templateName)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+
             var templateFileName = Directory
                 .GetFiles(TemplatesFolder, $"{templateName}_*.docx")
                 .OrderByDescending(o => o)
                 .FirstOrDefault();
             if (templateFileName == null)
                 return null;
-            return new FileContentItem(templateFileName);
+            return FileContentItem.Create(templateFileName);
         }
 
-        public ContentItem GetLatestMapping(string templateName, string mappingName)
+        public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
         {
-            var templateVersionName = GetLatestTemplateVersionName(templateName);
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            var templateVersionName = string.IsNullOrEmpty(templateVersion) 
+                ? GetLatestTemplateVersionName(templateName)
+                : GetExistingTemplateName(templateName, templateVersion);
+            if (string.IsNullOrEmpty(templateVersionName)) throw new ArgumentException(nameof(templateName));
+
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
             return GetTemplateMapping(mappingVersionName);
         }
+
+        private string GetExistingTemplateName(string templateName, string templateVersion)
+        {
+            var name = $"{templateName}_{templateVersion}";
+            if (File.Exists(Path.Combine(TemplatesFolder, name + ".docx")))
+                return name;
+            throw new ArgumentException($"Template {templateName} version {templateVersion} not found.");
+        }
+
         public ContentItem GetTemplateMapping(string mappingVersionName)
         {
             if (mappingVersionName == null)
                 return null;
             var mappingFileName = Path.Combine(MappingsFolder, $"{mappingVersionName}.xlsm");
-            return new FileContentItem(mappingFileName);
+            return FileContentItem.Create(mappingFileName);
         }
 
         public byte[] GetEmptyMapping()
@@ -171,7 +205,7 @@ namespace DocumentCreator.Repository
         {
             return string.IsNullOrEmpty(version)
                 ? GetLatestTemplate(templateName)
-                : new FileContentItem(TemplatesFolder, $"{templateName}_{version}.docx");
+                : FileContentItem.Create(TemplatesFolder, $"{templateName}_{version}.docx");
         }
 
         public IEnumerable<ContentItemSummary> GetTemplateVersions(string templateName)
@@ -184,45 +218,52 @@ namespace DocumentCreator.Repository
             return templates;
         }
 
-        public IEnumerable<ContentItemSummary> GetMappings(string templateName)
+        public IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
         {
-            var mappings = Directory.GetFiles(MappingsFolder, $"{templateName}_*.*")
+            var mappings = Directory.GetFiles(MappingsFolder, $"{templateName ?? "*"}_{templateVersion ?? "*"}_{mappingName ?? "*"}_*.xlsm")
                 .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] })
-                .GroupBy(a => a.Name)
-                .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
-                .OrderBy(a => a.Name).ThenBy(a => a.Data.Version)
-                .ToList()
-                .Select(a => new FileContentItemSummary(a.Data.FullName));
-            return mappings;
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], TemplateVersion = a.NameParts[1], Name = a.NameParts[2], Version = a.NameParts[3] });
+            if (mappingName == null)
+                return mappings.GroupBy(a => a.Name)
+                    .Select(ag => new { Name = ag.Key, Data = ag.OrderByDescending(o => o.Version).First() })
+                    .OrderBy(a => a.Name).ThenBy(a => a.Data.Version)
+                    .ToList()
+                    .Select(a => new FileContentItemSummary(a.Data.FullName));
+            else
+                return mappings
+                    .OrderBy(a => a.Version)
+                    .ToList()
+                    .Select(a => new FileContentItemSummary(a.FullName));
         }
 
-        public ContentItem GetMapping(string templateName, string mappingName, string mappingVersion)
+        public ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
         {
-            var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_*_{mappingName}_{mappingVersion}.xlsm").FirstOrDefault();
+            var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_{templateVersion ?? "*"}_{mappingName}_{mappingVersion ?? "*"}.xlsm")
+                .OrderByDescending(o => o)
+                .FirstOrDefault();
             if (fullName == null)
                 return null;
-            return new FileContentItem(fullName);
+            return FileContentItem.Create(fullName);
         }
 
-        public IEnumerable<ContentItemStats> GetMappingStats(string templateName = null)
+        public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)
         {
             var mappings = Directory.GetFiles(MappingsFolder, "*.xlsm")
                 .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], Name = a.NameParts[2], Version = a.NameParts[3] })
-                .Where(a => templateName == null || string.Equals(a.TemplateName, templateName, StringComparison.InvariantCultureIgnoreCase))
-                .GroupBy(a => a.Name)
-                .Select(ag => new { Name = ag.Key, FirstVersion = ag.OrderBy(o => o.Version).First() })
-                .Select(a => new { a.Name, Info = new FileInfo(a.FirstVersion.FullName) })
+                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], MappingName = a.NameParts[2], Version = a.NameParts[3] })
+                .Where(a => mappingName == null || string.Equals(a.MappingName, mappingName, StringComparison.InvariantCultureIgnoreCase))
+                .GroupBy(a => mappingName == null ? a.MappingName : a.TemplateName)
+                .Select(a => a.OrderBy(o => o.Version).First())
                 .Select(a => new ContentItemStats()
                 {
-                    Name = a.Name,
-                    CreationDate = a.Info.CreationTime,
-                    Templates = Directory.GetFiles(MappingsFolder, $"*_*_{a.Name}_*.xlsm")
+                    MappingName = a.MappingName,
+                    TemplateName = a.TemplateName,
+                    TimeStamp = new FileInfo(a.FullName).CreationTime,
+                    Templates = mappingName != null ? 1 : Directory.GetFiles(MappingsFolder, $"*_*_{a.MappingName}_*.xlsm")
                         .Select(o => Path.GetFileNameWithoutExtension(o).Split('_', 2).First())
                         .Distinct()
                         .Count(),
-                    Documents = Directory.GetFiles(DocumentsFolder, $"*_*_{a.Name}_*_*.docx")
+                    Documents = Directory.GetFiles(DocumentsFolder, $"{(mappingName == null ? "*" : a.TemplateName)}_*_{a.MappingName}_*_*.docx")
                         .Length
                 })
                 .ToList();

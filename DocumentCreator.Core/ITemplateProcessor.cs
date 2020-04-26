@@ -6,7 +6,7 @@ namespace DocumentCreator.Core
     public interface ITemplateProcessor
     {
         IEnumerable<Template> GetTemplates(string templateName = null);
-        Template GetTemplate(string templateName, string templateVersion = null);
-        Template CreateTemplate(TemplateData template, byte[] bytes);
+        TemplateDetails GetTemplate(string templateName, string templateVersion = null);
+        TemplateDetails CreateTemplate(TemplateData template, byte[] bytes);
     }
 }

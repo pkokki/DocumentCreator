@@ -2,7 +2,7 @@
 
 namespace DocumentCreator.Core.Model
 {
-    public abstract class PagingParams
+    public class PagingParams
     {
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;

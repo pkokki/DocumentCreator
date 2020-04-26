@@ -19,7 +19,10 @@ export class DocumentService {
         if (orderBy) params.push(`orderBy=${orderBy}`);
         if (isDesc) params.push(`descending=${isDesc}`);
         if (filters) {
-            params.push(Array.isArray(filters) ? [...filters] : filters);
+            if (Array.isArray(filters))
+                params.push(...filters);
+            else
+                params.push(filters);
         }
 
         const query = params.length ? '?' + params.join('&') : null;
@@ -40,11 +43,12 @@ export interface PagedResults<T> {
 }
 
 export interface Document {
-    id: string;
+    documentId: string;
     templateName: string;
     templateVersion: string;
     mappingName: string;
     mappingVersion: string;
     timestamp: Date;
     size: number;
+    fileName: string;
 }

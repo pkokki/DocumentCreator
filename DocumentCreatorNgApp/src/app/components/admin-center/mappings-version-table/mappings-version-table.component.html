@@ -4,17 +4,15 @@
     <mat-spinner *ngIf="isLoading"></mat-spinner>
 </div>
 
-<table mat-table matSort aria-label="Mappings" [dataSource]="pagedData">
+<table mat-table matSort [dataSource]="pagedData">
     <ng-container matColumnDef="mappingName">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
         <td mat-cell *matCellDef="let row">{{row.mappingName}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="templateName">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Template</th>
-        <td mat-cell *matCellDef="let row">
-            <a mat-button [routerLink]="['/admin/templates', row.templateName]">{{row.templateName}}</a>
-        </td>
+    <ng-container matColumnDef="mappingVersion">
+        <th mat-header-cell *matHeaderCellDef>Version</th>
+        <td mat-cell *matCellDef="let row">{{row.mappingVersion}}</td>
     </ng-container>
 
     <ng-container matColumnDef="timestamp">
@@ -23,21 +21,19 @@
             {{row.timestamp | date:'HH:mm:ss'}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="templates" [hidden]="mappingName">
-        <th mat-header-cell *matHeaderCellDef>Templates</th>
-        <td mat-cell *matCellDef="let row">{{row.templates}}</td>
+    <ng-container matColumnDef="templateName">
+        <th mat-header-cell *matHeaderCellDef>Template</th>
+        <td mat-cell *matCellDef="let row">{{row.templateName}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="documents">
-        <th mat-header-cell *matHeaderCellDef>Documents</th>
-        <td mat-cell *matCellDef="let row">{{row.documents}}</td>
+    <ng-container matColumnDef="templateVersion">
+        <th mat-header-cell *matHeaderCellDef>Template version</th>
+        <td mat-cell *matCellDef="let row">{{row.templateVersion}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="isActive">
-        <th mat-header-cell *matHeaderCellDef>Active</th>
-        <td mat-cell *matCellDef="let row">
-            <mat-slide-toggle color="primary" [checked]="true" [disabled]="false"></mat-slide-toggle>
-        </td>
+    <ng-container matColumnDef="size">
+        <th mat-header-cell *matHeaderCellDef>Size</th>
+        <td mat-cell *matCellDef="let row">{{row.size}}</td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
@@ -53,7 +49,16 @@
                         <span>Templates</span>
                     </button>
                 </div>
-                <button mat-menu-item [routerLink]="['./', mappingName ? row.templateName : row.mappingName, 'documents']">
+                <div [hidden]="mappingName">
+                    <button mat-menu-item [routerLink]="['./', row.mappingName, 'versions']">
+                        <svg width="24" viewBox="0 0 24 24">
+                            <path
+                                d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
+                        </svg>
+                        <span>Versions</span>
+                    </button>
+                </div>
+                <button mat-menu-item [routerLink]="['./', mappingName ? row.version : row.mappingName, 'documents']">
                     <mat-icon>folder_open</mat-icon>
                     <span>Documents</span>
                 </button>

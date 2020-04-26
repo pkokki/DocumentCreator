@@ -6,9 +6,18 @@ namespace DocumentCreator.Repository
 {
     public class FileContentItem : ContentItem
     {
-        public FileContentItem(string folderPath, string fileName)
-            : this(System.IO.Path.Combine(folderPath, fileName))
+        public static FileContentItem Create(string folderPath, string fileName)
         {
+            var path = System.IO.Path.Combine(folderPath, fileName);
+            if (File.Exists(path))
+                return new FileContentItem(path);
+            return null;
+        }
+        public static FileContentItem Create(string path)
+        {
+            if (File.Exists(path))
+                return new FileContentItem(path);
+            return null;
         }
 
         public FileContentItem(string path, byte[] contents)
@@ -17,10 +26,8 @@ namespace DocumentCreator.Repository
             Initialize(path, contents);
         }
 
-        public FileContentItem(string path)
+        private FileContentItem(string path)
         {
-            if (!File.Exists(path))
-                throw new ArgumentException();
             var contents = File.ReadAllBytes(path);
             Initialize(path, contents);
         }
