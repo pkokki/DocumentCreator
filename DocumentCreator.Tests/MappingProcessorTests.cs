@@ -48,14 +48,18 @@ namespace DocumentCreator
         [Fact]
         public void GetMappingStats_NoMappingName_OK()
         {
+            repository.Setup(r => r.GetMappingStats(null)).Returns(new List<ContentItemStats>() { new ContentItemStats() });
+
+            var result = processor.GetMappingStats(null);
+            Assert.NotEmpty(result);
         }
         [Fact]
         public void GetMappingStats_WithMappingName_OK()
         {
-        }
-        [Fact]
-        public void GetMappingStats_UnknownMappingName_Null()
-        {
+            repository.Setup(r => r.GetMappingStats("T01")).Returns(new List<ContentItemStats>() { new ContentItemStats() });
+
+            var result = processor.GetMappingStats("T01");
+            Assert.NotEmpty(result);
         }
 
 
