@@ -21,6 +21,9 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateTemplate(string templateName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+            
             var templateVersionName = $"{templateName}_{DateTime.Now.Ticks}";
             var templateFilename = Path.Combine(TemplatesFolder, $"{templateVersionName}.docx");
             return new FileContentItem(templateFilename, contents);
@@ -47,23 +50,38 @@ namespace DocumentCreator.Repository
 
         public ContentItem CreateMapping(string templateName, string mappingName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+
             var templateVersionName = GetLatestTemplateVersionName(templateName);
+            if (templateVersionName == null)
+                throw new ArgumentException($"Template {templateName} not found.");
             var mappingFileName = Path.Combine(MappingsFolder, $"{templateVersionName}_{mappingName}_{DateTime.Now.Ticks}.xlsm");
             return new FileContentItem(mappingFileName, contents);
         }
 
         public ContentItem CreateDocument(string templateName, string mappingName, byte[] contents)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+
             var templateVersionName = GetLatestTemplateVersionName(templateName);
-            var mappingVersionName = mappingName != null
-                ? GetLatestMappingVersionName($"{templateVersionName}_{mappingName}")
-                : $"{templateVersionName}__";
+            if (templateVersionName == null)
+                throw new ArgumentException($"Template {templateName} not found.");
+            var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
+            if (mappingVersionName == null)
+                throw new ArgumentException($"Mapping {mappingName} not found.");
+
             var documentFileName = Path.Combine(DocumentsFolder, $"{mappingVersionName}_{DateTime.Now.Ticks}.docx");
             return new FileContentItem(documentFileName, contents);
         }
 
         public ContentItem GetLatestTemplate(string templateName)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+
             var templateFileName = Directory
                 .GetFiles(TemplatesFolder, $"{templateName}_*.docx")
                 .OrderByDescending(o => o)
@@ -75,12 +93,24 @@ namespace DocumentCreator.Repository
 
         public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
         {
-            var templateVersionName = templateVersion == null 
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            var templateVersionName = string.IsNullOrEmpty(templateVersion) 
                 ? GetLatestTemplateVersionName(templateName)
-                : $"{templateName}_{templateVersion}";
+                : GetExistingTemplateName(templateName, templateVersion);
+            if (string.IsNullOrEmpty(templateVersionName)) throw new ArgumentException(nameof(templateName));
+
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
             return GetTemplateMapping(mappingVersionName);
         }
+
+        private string GetExistingTemplateName(string templateName, string templateVersion)
+        {
+            var name = $"{templateName}_{templateVersion}";
+            if (File.Exists(Path.Combine(TemplatesFolder, name + ".docx")))
+                return name;
+            throw new ArgumentException($"Template {templateName} version {templateVersion} not found.");
+        }
+
         public ContentItem GetTemplateMapping(string mappingVersionName)
         {
             if (mappingVersionName == null)
