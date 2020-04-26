@@ -32,7 +32,7 @@ namespace DocumentCreator
             return items;
         }
 
-        public IEnumerable<Mapping> GetMappings(string templateName, string templateVersion, string mappingName = null)
+        public IEnumerable<Mapping> GetMappings(string templateName = null, string templateVersion = null, string mappingName = null)
         {
             var items = repository.GetMappings(templateName, templateVersion, mappingName);
             return items.Select(o => Transform(o)).ToList();
@@ -128,7 +128,7 @@ namespace DocumentCreator
             mapping.TemplateVersion = parts[1];
             mapping.MappingName = parts[2];
             mapping.MappingVersion = parts[3];
-            mapping.Timestamp = new DateTime(long.Parse(parts[3]));
+            mapping.Timestamp = content.Timestamp;
             mapping.Size = content.Size;
         }
 

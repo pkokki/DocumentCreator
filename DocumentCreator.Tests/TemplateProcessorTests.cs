@@ -179,28 +179,28 @@ namespace DocumentCreator
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateData_Fails()
+        public void CreateTemplate_NoTemplateData_Throws()
         {
             Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(null, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
 
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateName_Fails()
+        public void CreateTemplate_NoTemplateName_Throws()
         {
             var templateData = new TemplateData() { TemplateName = null };
             Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateBuffer_Fails()
+        public void CreateTemplate_NoTemplateBuffer_Throws()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
             Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, null));
         }
 
         [Fact]
-        public void CreateTemplate_TemplateBufferNotWord_Fails()
+        public void CreateTemplate_TemplateBufferNotWord_Throws()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
             Assert.Throws<ArgumentException>(() => processor.CreateTemplate(templateData, Encoding.ASCII.GetBytes("Not WORD")));
