@@ -23,7 +23,7 @@
             {{row.timestamp | date:'HH:mm:ss'}}</td>
     </ng-container>
 
-    <ng-container matColumnDef="templates" [hidden]="mappingName">
+    <ng-container matColumnDef="templates">
         <th mat-header-cell *matHeaderCellDef>Templates</th>
         <td mat-cell *matCellDef="let row">{{row.templates}}</td>
     </ng-container>
