@@ -1,6 +1,8 @@
 # Document Creator
 An opinionated C# solution for creating documents from JSON objects (API payloads) based on Word templates and Excel formula configuration.
 
+![.NET Core](https://github.com/pkokki/DocumentCreator/workflows/.NET%20Core/badge.svg?branch=master)
+
 ## Description
 TBD
 
