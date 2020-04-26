@@ -12,6 +12,7 @@ import { TemplatesTableComponent } from './templates-table/templates-table.compo
 import { MappingsTableComponent } from './mappings-table/mappings-table.component';
 import { DocumentsTableComponent } from './documents-table/documents-table.component';
 import { MappingsDetailComponent } from './mappings-detail/mappings-detail.component';
+import { MappingsVersionTableComponent } from './mappings-version-table/mappings-version-table.component';
 
 const adminCenterRoutes: Routes = [
     {
@@ -25,12 +26,12 @@ const adminCenterRoutes: Routes = [
                 { path: 'templates/:templateName', component: TemplateDetailComponent },
                 { path: 'templates/:templateName/versions', component: TemplatesTableComponent },
                 { path: 'templates/:templateName/versions/:templateVersion', component: TemplateDetailComponent },
-                { path: 'templates/:templateName/versions/:templateVersion/mappings', component: MappingsTableComponent },
+                { path: 'templates/:templateName/versions/:templateVersion/mappings', component: MappingsVersionTableComponent },
                 { path: 'templates/:templateName/versions/:templateVersion/mappings/:mappingName/documents', component: DocumentsTableComponent }, // 1, 2, 3
-                // 1, 2, 3, 4 
+                { path: 'templates/:templateName/versions/:templateVersion/mappings/:mappingName/versions/:mappingVersion/documents', component: DocumentsTableComponent }, // 1, 2, 3, 4
                 { path: 'templates/:templateName/versions/:templateVersion/documents', component: DocumentsTableComponent }, // 1, 2
-                { path: 'templates/:templateName/mappings', component: MappingsTableComponent },
-                { path: 'templates/:templateName/mappings/:mappingName/versions', component: MappingsTableComponent },
+                { path: 'templates/:templateName/mappings', component: MappingsVersionTableComponent },
+                { path: 'templates/:templateName/mappings/:mappingName/versions', component: MappingsVersionTableComponent },
                 { path: 'templates/:templateName/mappings/:mappingName/versions/:mappingVersion', component: MappingsDetailComponent },
                 { path: 'templates/:templateName/mappings/:mappingName/versions/:mappingVersion/documents', component: DocumentsTableComponent }, // 1, 3, 4
                 { path: 'templates/:templateName/mappings/:mappingName/documents', component: DocumentsTableComponent }, // 1, 3
@@ -38,14 +39,12 @@ const adminCenterRoutes: Routes = [
                 
                 { path: 'mappings', component: MappingsTableComponent },
                 { path: 'mappings/:mappingName', component: MappingsDetailComponent },
-                { path: 'mappings/:mappingName/versions', component: MappingsTableComponent },
-                { path: 'mappings/:mappingName/versions/:mappingVersion', component: MappingsDetailComponent },
-                { path: 'mappings/:mappingName/versions/:mappingVersion/documents', component: DocumentsTableComponent }, // 3, 4
+                { path: 'mappings/:mappingName/templates', component: MappingsTableComponent },
+                { path: 'mappings/:mappingName/templates/:templateName/documents', component: DocumentsTableComponent }, // 3, 1
                 { path: 'mappings/:mappingName/documents', component: DocumentsTableComponent }, // 3
                 
                 { path: 'documents', component: DocumentsTableComponent },  // 0
                 
-                { path: 'mappings/:mappingName/templates', component: TemplatesTableComponent },
         ], 
     }
 ];
@@ -58,7 +57,8 @@ const adminCenterRoutes: Routes = [
       TemplatesTableComponent,
       MappingsTableComponent,
       MappingsDetailComponent,
-      DocumentsTableComponent
+      DocumentsTableComponent,
+      MappingsVersionTableComponent
     ],
     imports: [
       CommonModule,

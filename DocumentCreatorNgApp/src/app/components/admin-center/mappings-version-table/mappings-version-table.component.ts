@@ -1,16 +1,16 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { TemplateService, Template } from 'src/app/services/template/template.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable } from 'rxjs';
+import { MappingsService, MappingVersion } from 'src/app/services/mappings/mappings.service';
 
 @Component({
-  selector: 'app-templates-table',
-  templateUrl: './templates-table.component.html',
-  styleUrls: ['./templates-table.component.css']
+  selector: 'app-mappings-version-table',
+  templateUrl: './mappings-version-table.component.html',
+  styleUrls: ['./mappings-version-table.component.css']
 })
-export class TemplatesTableComponent implements OnInit, AfterViewInit {
+export class MappingsVersionTableComponent implements OnInit, AfterViewInit {
   isLoading = true;
   sourceDataCount = 0;
 
@@ -20,31 +20,34 @@ export class TemplatesTableComponent implements OnInit, AfterViewInit {
   // ---------------------------------------------------------------------
   title: string;
   templateName: string;
+  templateVersion: string;
   mappingName: string;
 
-  source: Observable<Template[]>;
-  sourceData: Template[] = null;
-  pagedData: Template[] = [];
+  source: Observable<MappingVersion[]>;
+  sourceData: MappingVersion[] = null;
+  pagedData: MappingVersion[] = [];
 
-  displayedColumns = ['templateName', 'version', 'timestamp', 'size', 'isActive', 'actions'];
+  displayedColumns = ['mappingName', 'mappingVersion', 'templateName', 'templateVersion', 'timestamp', 'size', 'actions'];
 
   constructor(
     private route: ActivatedRoute,
-    private templateService: TemplateService
+    private mappingsService: MappingsService
   ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.route.paramMap.subscribe((params: ParamMap) => {
       this.templateName = params.get('templateName');
+      this.templateVersion = params.get('templateVersion');
       this.mappingName = params.get('mappingName');
-      this.title = this.templateName ? 
-        `Versions of template ${this.templateName}` : 
-        this.mappingName ?
-          `Templates available for ${this.mappingName}` :
-          'All templates (latest versions)';
-      this.source =  this.templateService.getTemplates(this.templateName, this.mappingName);
+      this.title = this.templateName 
+        ? `Mappings associated with template ${this.templateName}` + (this.templateVersion ? ' - version ' + this.templateVersion : '')
+        : this.mappingName
+        ? `Versions of mapping ${this.mappingName}`
+        : 'All mappings';
+      this.source = this.mappingsService.getMappingVersions(this.templateName, this.templateVersion, this.mappingName);
     });
   }
+
   // ---------------------------------------------------------------------
 
   ngAfterViewInit() {
@@ -85,5 +88,3 @@ export class TemplatesTableComponent implements OnInit, AfterViewInit {
     });
   }
 }
-
-

@@ -5,8 +5,8 @@
 export const environment = {
   production: false,
   endpoints: [
-    { "name": "docker", "url": "http://localhost:6001/api" },
     { "name": "iisexpress", "url": "https://localhost:44381/api" },
+    { "name": "docker", "url": "http://localhost:6001/api" },
     { "name": "standalone", "url": "https://localhost:5001/api" }
   ]
 };

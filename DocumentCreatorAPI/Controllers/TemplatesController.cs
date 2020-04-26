@@ -1,6 +1,7 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System.IO;
 
 namespace DocumentCreatorAPI.Controllers
@@ -41,8 +42,12 @@ namespace DocumentCreatorAPI.Controllers
 
         [HttpPost, DisableRequestSizeLimit]
         [Route("")]
-        public IActionResult CreateTemplate([FromBody]TemplateData templateData)
+        public IActionResult CreateTemplate()
         {
+            var templateData = new TemplateData()
+            {
+                TemplateName = Request.Form["name"]
+            };
             var formFile = Request.Form.Files[0];
             if (formFile.Length > 0)
             {

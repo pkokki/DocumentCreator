@@ -12,7 +12,7 @@ import { DocumentService, Document, PagedResults } from 'src/app/services/docume
   styleUrls: ['./documents-table.component.css']
 })
 export class DocumentsTableComponent implements AfterViewInit {
-  displayedColumns = ['id', 'timestamp', 'templateName', 'templateVersion', 'mappingName', 'mappingVersion', 'size', 'link'];
+  displayedColumns = ['documentId', 'timestamp', 'templateName', 'templateVersion', 'mappingName', 'mappingVersion', 'size', 'link'];
   criteria: string;
 
   templateName: string;
@@ -85,7 +85,7 @@ export class DocumentsTableComponent implements AfterViewInit {
       .subscribe(data => this.documents = data);
   }
   
-  refresh(orderBy: string = "id", sortDirection: string, pageIndex: number, pageSize: number): Observable<PagedResults<Document>> {
+  refresh(orderBy: string = "documentId", sortDirection: string, pageIndex: number, pageSize: number): Observable<PagedResults<Document>> {
     const isDesc = sortDirection == "desc";
 
     return this.documentService.getDocuments(
