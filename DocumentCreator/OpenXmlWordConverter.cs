@@ -24,14 +24,14 @@ namespace DocumentCreator
             return ConvertToHtml(ms, templateVersionName, documentName);
         }
 
-        public static HtmlConversion ConvertToHtml(MemoryStream ms, string templateVersionName, string documentName = null)
+        public static HtmlConversion ConvertToHtml(Stream ms, string templateVersionName, string documentName = null)
         {
             using var doc = WordprocessingDocument.Open(ms, true);
             return ConvertToHtml(doc, templateVersionName, documentName);
         }
 
         // https://github.com/OfficeDev/Open-Xml-PowerTools/blob/2f9134bd5abe0547fcf3d803b40b1401d6e58020/OpenXmlPowerToolsExamples/HtmlConverter01/HtmlConverter01.cs
-        public static HtmlConversion ConvertToHtml(WordprocessingDocument wDoc, string templateVersionName, string documentName = null)
+        private static HtmlConversion ConvertToHtml(WordprocessingDocument wDoc, string templateVersionName, string documentName = null)
         {
             var htmlConversion = new HtmlConversion();
             int imageCounter = 0;

@@ -1,5 +1,4 @@
 ﻿using DocumentCreator.Core.Model;
-using Newtonsoft.Json.Linq;
 
 namespace DocumentCreator.Core
 {

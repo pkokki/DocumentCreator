@@ -1,7 +1,4 @@
-﻿using DocumentCreator.Core.Model;
-using DocumentFormat.OpenXml.Packaging;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -12,23 +9,19 @@ namespace DocumentCreator
         [Fact]
         public void CanGetTemplateFieldExpressions()
         {
-            using var ms = new MemoryStream(File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm"));
-            using var doc = SpreadsheetDocument.Open(ms, false);
-
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<MappingSource>());
-
-            Assert.NotEmpty(templateFieldExpressions);
+            var bytes = File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm");
+            var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
+            Assert.NotEmpty(info.Expressions);
         }
 
         [Fact]
         public void CanUseForwardOwnCellValues()
         {
-            using var ms = new MemoryStream(File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm"));
-            using var doc = SpreadsheetDocument.Open(ms, false);
+            var bytes = File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm");
 
-            var expressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(doc, new List<MappingSource>());
+            var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
             var processor = new ExpressionEvaluator();
-            var results = processor.Evaluate(expressions, null);
+            var results = processor.Evaluate(info.Expressions, info.Sources);
 
             Assert.True(results.All(r => r.Error == null));
             Assert.Equal("22", results.First(o => o.Name == "F01").Text);

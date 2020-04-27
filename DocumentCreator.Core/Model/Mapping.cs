@@ -27,6 +27,12 @@ namespace DocumentCreator.Core.Model
         public IEnumerable<MappingSource> Sources { get; set; }
     }
 
+    public class MappingInfo
+    {
+        public IEnumerable<MappingExpression> Expressions { get; set; }
+        public IEnumerable<MappingSource> Sources { get; set; }
+    }
+
     public class MappingExpression
     {
         public string Name { get; set; }

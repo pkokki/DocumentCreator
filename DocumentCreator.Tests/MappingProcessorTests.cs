@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -39,11 +38,10 @@ namespace DocumentCreator
             var emptyMapping = File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm");
             var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
 
-            var bytes = processor.CreateMappingForTemplate(emptyMapping, "T01", "M01", "http://localhost/api", templateBytes);
+            var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, "T01", "M01", "http://localhost/api");
 
             Assert.NotEmpty(bytes);
         }
-
 
         [Fact]
         public void GetMappingStats_NoMappingName_OK()
