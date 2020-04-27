@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Xunit.Abstractions;
 
-namespace DocumentCreator.ExcelFormula
+namespace DocumentCreator.ExcelFormulaParser
 {
     public class Operators : BaseTest
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DocumentCreator.Core.Model
 {
@@ -9,7 +10,20 @@ namespace DocumentCreator.Core.Model
         public IEnumerable<MappingSource> Sources { get; set; }
     }
 
-    public class Evaluation
+    public class EvaluationInput
+    {
+        public IEnumerable<TemplateField> Fields { get; set; }
+        public IEnumerable<MappingExpression> Expressions { get; set; }
+        public IEnumerable<MappingSource> Sources { get; set; }
+    }
+
+    public class ExpressionEvaluationInput
+    {
+        public IEnumerable<string> Expressions { get; set; }
+        public JObject Payload { get; set; }
+    }
+
+    public class EvaluationOutput
     {
         public int Total { get; set; }
         public int Errors { get; set; }

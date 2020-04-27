@@ -56,7 +56,7 @@ namespace DocumentCreator
                     Name = ResolveTemplateFieldName(sdtProperties),
                     IsCollection = sdtProperties.Elements<SdtRepeatedSection>().Any(),
                     Content = sdt.Elements<SdtContentBlock>().FirstOrDefault()?.InnerText,
-                    Type = sdt.GetType().Name
+                    //Type = sdt.GetType().Name
                 };
                 var parent = sdt.Ancestors<SdtElement>()
                     .FirstOrDefault(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any());

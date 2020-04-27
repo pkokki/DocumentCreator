@@ -70,7 +70,7 @@ namespace DocumentCreator
             return excelBytes;
         }
 
-        public Evaluation Evaluate(EvaluationRequest request)
+        public EvaluationOutput Evaluate(EvaluationRequest request)
         {
             IEnumerable<TemplateField> templateFields = null;
             if (!string.IsNullOrEmpty(request.TemplateName))
@@ -82,7 +82,13 @@ namespace DocumentCreator
             }
 
             var processor = new ExpressionEvaluator();
-            var response = processor.Evaluate(request, templateFields);
+            var input = new EvaluationInput()
+            {
+                Fields = templateFields,
+                Expressions = request.Expressions,
+                Sources = request.Sources
+            };
+            var response = processor.Evaluate(input);
             return response;
         }
 
