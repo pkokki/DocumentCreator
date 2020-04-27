@@ -1,0 +1,34 @@
+<mat-card>
+    <h2>Evaluate expressions</h2>
+
+    <mat-list role="list">
+        <mat-list-item role="listitem" *ngFor="let x of expressions2; let i = index">
+            <mat-form-field floatLabel="never">
+                <input matInput placeholder="expression" [(ngModel)]="expressions[i]">
+            </mat-form-field>
+            <div [hidden]="results[i].error">
+                =<strong>{{viewType.value != "2" ? results[i].value : results[i].text}}</strong>
+            </div>
+            <div style="color: red;" [hidden]="!results[i].error">
+                ={{results[i].error}}
+            </div>
+        </mat-list-item>
+        <mat-list-item role="listitem">
+            <div style="width:50%">
+                <button mat-raised-button color="primary" (click)="evaluate()">Evaluate expressions</button>
+            </div>
+            <mat-button-toggle-group #viewType="matButtonToggleGroup">
+                <mat-button-toggle value="1">view value results</mat-button-toggle>
+                <mat-button-toggle value="2">view text results</mat-button-toggle>
+            </mat-button-toggle-group>
+        </mat-list-item>
+    </mat-list>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Payload</mat-label>
+        <textarea matInput [(ngModel)]="payload" rows="8"></textarea>
+    </mat-form-field>
+
+
+
+</mat-card>

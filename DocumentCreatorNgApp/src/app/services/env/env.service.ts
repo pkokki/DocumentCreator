@@ -37,6 +37,12 @@ export class EnvService {
       url = '/' + url;
     return this.http.get<T>(`${this.env.baseUrl}${url}`);
   }
+
+  post<T>(url: string, body: {}): Observable<T> {
+    if (!url.startsWith('/'))
+      url = '/' + url;
+    return this.http.post<T>(`${this.env.baseUrl}${url}`, body);
+  }
 }
 
 export interface Env {
