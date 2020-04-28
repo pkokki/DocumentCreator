@@ -30,7 +30,8 @@ namespace DocumentCreatorAPI
             services.AddScoped<IRepository>(sp => new FileRepository(Env.ContentRootPath));
             services.AddScoped<ITemplateProcessor, TemplateProcessor>();
             services.AddScoped<IMappingProcessor, MappingProcessor>();
-            services.AddScoped<IDocumentProcessor, DocumentProcessor>();
+            services.AddScoped<IDocumentProcessor, DocumentProcessor>(); 
+            services.AddScoped<IExpressionEvaluator, ExpressionEvaluator>();
 
             services.AddCors(options =>
             {

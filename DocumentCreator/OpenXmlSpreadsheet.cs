@@ -13,23 +13,107 @@ namespace DocumentCreator
 {
     public static class OpenXmlSpreadsheet
     {
-        public static IEnumerable<MappingExpression> GetTemplateFieldExpressions(byte[] mappingBytes, ICollection<MappingSource> sources)
+        public static MappingInfo GetMappingInfo(byte[] mappingBytes, IEnumerable<MappingSource> externalSources)
         {
             using var mappingsStream = new MemoryStream(mappingBytes);
             using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
-            var templateFieldExpressions = GetTemplateFieldExpressions(mappingsDoc, sources);
-            return templateFieldExpressions;
+            return GetMappingInfo(mappingsDoc, externalSources);
         }
 
-        public static Worksheet GetFirstWorkSheet(SpreadsheetDocument mappingsDoc)
+        public static byte[] FillMappingsSheet(byte[] mappingBytes, IEnumerable<TemplateField> templateFields, string templateName, string mappingName, string testUrl)
         {
-            var wbPart = mappingsDoc.WorkbookPart;
-            var sheet = wbPart.Workbook.Descendants<Sheet>().First();
-            var worksheet = ((WorksheetPart)wbPart.GetPartById(sheet.Id)).Worksheet;
-            return worksheet;
+            using var mappingsStream = new MemoryStream();
+            mappingsStream.Write(mappingBytes, 0, mappingBytes.Length);
+            using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
+            {
+                FillMappingsSheet(mappingsDoc, templateName, mappingName, templateFields, testUrl);
+            }
+            return mappingsStream.ToArray();
         }
 
-        public static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, string templateName, string mappingName, IEnumerable<TemplateField> templateFields, string testUrl)
+        public static MappingInfo BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, IEnumerable<MappingSource> sources)
+        {
+            var sourceName = sources?.FirstOrDefault()?.Name ?? "X";
+            var expressions = templateFields.Select((o, index) => new MappingExpression()
+            {
+                Name = o.Name,
+                Cell = o.Name,
+                Content = o.Content,
+                IsCollection = o.IsCollection,
+                Parent = o.Parent,
+                Expression = $"=SOURCE(\"{sourceName}\",{o.Name})"
+            });
+            return new MappingInfo()
+            {
+                Expressions = expressions,
+                Sources = sources
+            };
+        }
+
+        private static MappingInfo GetMappingInfo(SpreadsheetDocument doc, IEnumerable<MappingSource> externalSources)
+        {
+            var templateFieldExpressions = new List<MappingExpression>();
+            var worksheet = GetFirstWorkSheet(doc);
+            var stringTablePart = GetSharedStringTablePart(doc);
+            var rowIndex = 3U;
+            string name;
+            do
+            {
+                name = GetCellValue(worksheet, stringTablePart, $"A{rowIndex}");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    var templateFieldExpression = new MappingExpression()
+                    {
+                        Name = name,
+                        Parent = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}"),
+                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"C{rowIndex}"),
+                        Content = GetCellValue(worksheet, stringTablePart, $"D{rowIndex}"),
+                        Expression = GetCellFormula(worksheet, $"F{rowIndex}"),
+                        Cell = $"F{rowIndex}"
+                    };
+                    templateFieldExpressions.Add(templateFieldExpression);
+                    ++rowIndex;
+                }
+            } while (!string.IsNullOrEmpty(name));
+
+            templateFieldExpressions = ReorderExpressionsWithCalcChain(doc.WorkbookPart, templateFieldExpressions);
+
+            var sources = new List<MappingSource>();
+            if (externalSources != null)
+                sources.AddRange(externalSources);
+            rowIndex = 3U;
+            do
+            {
+                name = GetCellValue(worksheet, stringTablePart, $"M{rowIndex}");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    var existing = sources.FirstOrDefault(o => string.Equals(name, o.Name, StringComparison.InvariantCultureIgnoreCase));
+                    if (existing != null)
+                    {
+                        existing.Cell = $"N{rowIndex}";
+                    }
+                    else 
+                    {
+                        var payload = GetCellValue(worksheet, stringTablePart, $"N{rowIndex}");
+                        sources.Add(new MappingSource()
+                        {
+                            Name = name,
+                            Cell = $"N{rowIndex}",
+                            Payload = JObject.Parse(payload)
+                        });
+                    }
+                    ++rowIndex;
+                }
+            } while (!string.IsNullOrEmpty(name));
+            return new MappingInfo()
+            {
+                Expressions = templateFieldExpressions,
+                Sources = sources
+            };
+        }
+
+
+        private static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, string templateName, string mappingName, IEnumerable<TemplateField> templateFields, string testUrl)
         {
             var worksheet = GetFirstWorkSheet(mappingsDoc);
             var stringTablePart = GetSharedStringTablePart(mappingsDoc);
@@ -59,6 +143,14 @@ namespace DocumentCreator
             UpdateCellText(stringTablePart, worksheet, 15, "N", templateName);
             UpdateCellText(stringTablePart, worksheet, 16, "N", mappingName);
             UpdateCellText(stringTablePart, worksheet, 17, "N", testUrl);
+        }
+
+        private static Worksheet GetFirstWorkSheet(SpreadsheetDocument mappingsDoc)
+        {
+            var wbPart = mappingsDoc.WorkbookPart;
+            var sheet = wbPart.Workbook.Descendants<Sheet>().First();
+            var worksheet = ((WorksheetPart)wbPart.GetPartById(sheet.Id)).Worksheet;
+            return worksheet;
         }
 
         private static string GetCustomDocumentProperty(SpreadsheetDocument doc, string propName)
@@ -105,7 +197,7 @@ namespace DocumentCreator
             return index;
         }
 
-        public static void UpdateCellValue(Worksheet worksheet, uint rowIndex, string columnName, string value, CellValues? valueType = null, uint? styleIndex = null)
+        private static void UpdateCellValue(Worksheet worksheet, uint rowIndex, string columnName, string value, CellValues? valueType = null, uint? styleIndex = null)
         {
             var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
             if (string.IsNullOrEmpty(value))
@@ -122,28 +214,28 @@ namespace DocumentCreator
                 cell.StyleIndex = styleIndex;
         }
 
-        public static void UpdateCellText(SharedStringTablePart stringTablePart, Worksheet worksheet, uint rowIndex, string column, string text, uint? styleIndex = null)
+        private static void UpdateCellText(SharedStringTablePart stringTablePart, Worksheet worksheet, uint rowIndex, string column, string text, uint? styleIndex = null)
         {
             text = InsertSharedStringItem(stringTablePart, text).ToString();
             UpdateCellValue(worksheet, rowIndex, column, text, CellValues.SharedString, styleIndex);
         }
 
 
-        public static void UpdateCellFormula(Worksheet worksheet, uint rowIndex, string columnName, string text, CellValues? dataType = null)
-        {
-            var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
-            var cellFormula = new CellFormula(text)
-            {
-                CalculateCell = true
-            };
+        //private static void UpdateCellFormula(Worksheet worksheet, uint rowIndex, string columnName, string text, CellValues? dataType = null)
+        //{
+        //    var cell = GetCell(GetRow(worksheet, rowIndex), $"{columnName}{rowIndex}");
+        //    var cellFormula = new CellFormula(text)
+        //    {
+        //        CalculateCell = true
+        //    };
 
-            if (dataType.HasValue)
-                cell.DataType = dataType.Value;
-            cell.CellValue = new CellValue();
-            cell.CellFormula = cellFormula;
-        }
+        //    if (dataType.HasValue)
+        //        cell.DataType = dataType.Value;
+        //    cell.CellValue = new CellValue();
+        //    cell.CellFormula = cellFormula;
+        //}
 
-        public static Row GetRow(Worksheet worksheet, uint rowIndex)
+        private static Row GetRow(Worksheet worksheet, uint rowIndex)
         {
             var sheetData = worksheet.GetFirstChild<SheetData>();
             var queryRow = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex >= rowIndex);
@@ -161,7 +253,7 @@ namespace DocumentCreator
                 return row;
             }
         }
-        public static Cell GetCell(Row row, string cellRef)
+        private static Cell GetCell(Row row, string cellRef)
         {
             // Cells must be in sequential order according to CellReference. Determine where to insert the new cell.
             var queryCell = row
@@ -180,61 +272,6 @@ namespace DocumentCreator
                     row.InsertBefore(targetCell, queryCell);
                 return targetCell;
             }
-        }
-
-        public static IEnumerable<MappingExpression> GetTemplateFieldExpressions(SpreadsheetDocument doc, ICollection<MappingSource> sources)
-        {
-            var templateFieldExpressions = new List<MappingExpression>();
-            var worksheet = GetFirstWorkSheet(doc);
-            var stringTablePart = GetSharedStringTablePart(doc);
-            var rowIndex = 3U;
-            string name;
-            do
-            {
-                name = GetCellValue(worksheet, stringTablePart, $"A{rowIndex}");
-                if (!string.IsNullOrEmpty(name))
-                {
-                    var templateFieldExpression = new MappingExpression()
-                    {
-                        Name = name,
-                        Parent = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}"),
-                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"C{rowIndex}"),
-                        Content = GetCellValue(worksheet, stringTablePart, $"D{rowIndex}"),
-                        Expression = GetCellFormula(worksheet, $"F{rowIndex}"),
-                        Cell = $"F{rowIndex}"
-                    };
-                    templateFieldExpressions.Add(templateFieldExpression);
-                    ++rowIndex;
-                }
-            } while (!string.IsNullOrEmpty(name));
-
-            templateFieldExpressions = ReorderExpressionsWithCalcChain(doc.WorkbookPart, templateFieldExpressions);
-
-            rowIndex = 3U;
-            do
-            {
-                name = GetCellValue(worksheet, stringTablePart, $"M{rowIndex}");
-                if (!string.IsNullOrEmpty(name))
-                {
-                    var payload = GetCellValue(worksheet, stringTablePart, $"N{rowIndex}");
-                    var source = sources.FirstOrDefault(o => o.Name == name);
-                    if (source != null)
-                    {
-                        source.Cell = $"N{rowIndex}";
-                    }
-                    else
-                    {
-                        sources.Add(new MappingSource()
-                        {
-                            Name = name,
-                            Cell = $"N{rowIndex}",
-                            Payload = JObject.Parse(payload)
-                        });
-                    }
-                    ++rowIndex;
-                }
-            } while (!string.IsNullOrEmpty(name));
-            return templateFieldExpressions;
         }
 
         private static List<MappingExpression> ReorderExpressionsWithCalcChain(WorkbookPart workbookPart,

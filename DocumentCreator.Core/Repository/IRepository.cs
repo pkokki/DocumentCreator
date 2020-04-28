@@ -23,6 +23,7 @@ namespace DocumentCreator.Core.Repository
 
         IEnumerable<ContentItemSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null);
         ContentItem CreateDocument(string templateName, string mappingName, byte[] contents);
+        ContentItem GetDocument(string documentId);
         void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images);
     }
 }

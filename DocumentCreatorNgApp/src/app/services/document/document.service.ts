@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { EnvService } from '../env/env.service';
 import { tap } from 'rxjs/operators';
+import { HttpResponse, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root'
@@ -11,6 +12,12 @@ export class DocumentService {
     constructor(
         private envService: EnvService,
     ) { }
+
+    downloadDocument(documentId: string): void {
+        if (!documentId)
+            throw throwError("invalid documentId");
+        this.envService.download('/documents/' + documentId);
+    }
 
     getDocuments(filters?: string | string[], page?: number, pageSize?: number, orderBy?: string, isDesc?: boolean): Observable<PagedResults<Document>> {
         const params = [];
@@ -51,4 +58,5 @@ export interface Document {
     timestamp: Date;
     size: number;
     fileName: string;
+    url: string;
 }

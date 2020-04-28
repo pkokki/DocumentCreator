@@ -1,13 +1,15 @@
-﻿using DocumentCreator.Core.Model;
+﻿using DocumentCreator.Core;
+using DocumentCreator.Core.Model;
 using DocumentCreator.ExcelFormulaParser;
 using DocumentCreator.ExcelFormulaParser.Languages;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DocumentCreator
 {
-    public class ExpressionEvaluator
+    public class ExpressionEvaluator : IExpressionEvaluator
     {
         private readonly Language inputLang, outputLang;
 
@@ -21,14 +23,47 @@ namespace DocumentCreator
             this.outputLang = outputLang;
         }
 
-        public Evaluation Evaluate(EvaluationRequest request, IEnumerable<TemplateField> templateFields)
+        public IEnumerable<EvaluationResult> Evaluate(ExpressionEvaluationInput input) 
         {
-            var expressions = new List<MappingExpression>(request.Expressions);
-            PreEvaluate(expressions, templateFields);
-            var results = Evaluate(expressions, request.Sources);
+            var expressions = input.Expressions ?? new string[0];
+            var sourcePayload = input.Payload ?? new JObject();
+            var sourceName = "inp";
+            var sources = new List<MappingSource>() { new MappingSource() { Name = sourceName, Cell = "N3", Payload = sourcePayload } };
+            var results = new List<EvaluationResult>();
+            var scope = new ExpressionScope(Language.Invariant, Language.ElGr, sources);
+            var helper = new JsonExpressionHelper();
+            var index = 1;
+            foreach (var expression in expressions)
+            {
+                var exprName = $"__A{index}";
+                var cell = exprName;
+                var tokens = helper.Parse(sourcePayload, expression);
+                var result = Evaluate(exprName, cell, tokens, scope);
+                var translatedResult = helper.TranslateResult(result);
+                results.Add(translatedResult);
+                ++index;
+            }
+            return results;
+        }
+
+        public EvaluationResult Evaluate(string expression, JObject payload)
+        {
+            var results = Evaluate(new ExpressionEvaluationInput() 
+            {
+                Expressions = new List<string>() { expression }, 
+                Payload = payload
+            });
+            return results.Last();
+        }
+
+        public EvaluationOutput Evaluate(EvaluationInput input)
+        {
+            var expressions = new List<MappingExpression>(input.Expressions);
+            PreEvaluate(expressions, input.Fields);
+            var results = Evaluate(expressions, input.Sources);
             PostEvaluate(expressions, results);
 
-            var response = new Evaluation()
+            var response = new EvaluationOutput()
             {
                 Total = expressions.Count(o => !string.IsNullOrEmpty(o.Expression)),
                 Errors = results.Count(o => !string.IsNullOrEmpty(o.Error)),
@@ -72,6 +107,10 @@ namespace DocumentCreator
                 expression = "=" + expression;
             var excelFormula = new ExcelFormulaParser.ExcelFormula(expression, scope.InLanguage);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
+            return Evaluate(exprName, cell, tokens, scope);
+        }
+        private EvaluationResult Evaluate(string exprName, string cell, IEnumerable<ExcelFormulaToken> tokens, ExpressionScope scope)
+        {
             var result = new EvaluationResult()
             {
                 Name = exprName

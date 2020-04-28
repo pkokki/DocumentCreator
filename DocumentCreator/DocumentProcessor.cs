@@ -3,12 +3,9 @@ using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
 using DocumentCreator.ExcelFormulaParser;
 using DocumentCreator.ExcelFormulaParser.Languages;
-using DocumentFormat.OpenXml.Packaging;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
@@ -32,6 +29,12 @@ namespace DocumentCreator
                 .CreatePagedResults(query.Page, query.PageSize, orderBy, !query.Descending);
         }
 
+        public DocumentDetails GetDocument(string documentId)
+        {
+            var document = repository.GetDocument(documentId);
+            return TransformFull(document);
+        }
+
         public DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload)
         {
             var template = repository.GetLatestTemplate(templateName);
@@ -53,64 +56,21 @@ namespace DocumentCreator
 
         public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
         {
-            var sources = payload?.Sources != null ? new List<MappingSource>(payload.Sources) : new List<MappingSource>();
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
-            var templateFieldExpressions = mappingBytes != null
-                ? OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingBytes, sources)
-                : BuildIdentityExpressions(templateFields, payload);
-            var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
+            MappingInfo mappingInfo;
+            if (mappingBytes != null)
+                mappingInfo = OpenXmlSpreadsheet.GetMappingInfo(mappingBytes, payload.Sources);
+            else
+                mappingInfo = OpenXmlSpreadsheet.BuildIdentityExpressions(templateFields, payload.Sources);
+            var results = CreateDocumentInternal(templateFields, mappingInfo.Expressions, mappingInfo.Sources);
             var contentControlData = BuildContentControlData(templateFields, results);
-            return MergeTemplateWithMappings(contentControlData, templateBytes);
+            return OpenXmlWordProcessing.MergeTemplateWithMappings(contentControlData, templateBytes);
         }
-
-        private IEnumerable<MappingExpression> BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, DocumentPayload payload)
-        {
-            var sourceName = payload?.Sources?.FirstOrDefault()?.Name ?? "X";
-            return templateFields.Select((o, index) => new MappingExpression()
-            {
-                Name = o.Name,
-                Cell = o.Name,
-                Content = o.Content,
-                IsCollection = o.IsCollection,
-                Parent = o.Parent,
-                Expression = $"=SOURCE(\"{sourceName}\",{o.Name})"
-            });
-        }
-
-        public IEnumerable<EvaluationResult> CreateDocumentInMem(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
-        {
-            var sources = payload?.Sources != null ? new List<MappingSource>(payload.Sources) : new List<MappingSource>();
-            var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
-            var templateFieldExpressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(mappingBytes, sources);
-            var results = CreateDocumentInternal(templateFields, templateFieldExpressions, sources);
-            var contentControlData = BuildContentControlData(templateFields, results);
-            MergeTemplateWithMappings(contentControlData, templateBytes);
-            return results;
-        }
-
-        private byte[] MergeTemplateWithMappings(IEnumerable<ContentControlData> data, byte[] templateBytes)
-        {
-            using var ms = new MemoryStream();
-            ms.Write(templateBytes, 0, templateBytes.Length);
-            using (var doc = WordprocessingDocument.Open(ms, true))
-            {
-                foreach (var item in data)
-                {
-                    if (item.IsRepeatingSection)
-                        OpenXmlWordProcessing.ProcessRepeatingSection(doc, item.Name, item.SectionItems);
-                    else
-                        OpenXmlWordProcessing.SetContentControlContent(doc, item.Name, item.Text);
-                }
-            }
-            var documentBytes = ms.ToArray();
-            return documentBytes;
-        }
-
+        
         private IEnumerable<EvaluationResult> CreateDocumentInternal(IEnumerable<TemplateField> templateFields,
             IEnumerable<MappingExpression> templateFieldExpressions,
             IEnumerable<MappingSource> sources)
         {
-
             var expressions = new List<MappingExpression>();
             foreach (var templateField in templateFields)
             {
@@ -160,7 +120,6 @@ namespace DocumentCreator
             }
             return contentControlData;
         }
-
 
         private Document Transform(ContentItemSummary content)
         {

@@ -1,10 +1,8 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
-using DocumentFormat.OpenXml.Packaging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
@@ -55,7 +53,7 @@ namespace DocumentCreator
                 return null;
             var emptyMappingBuffer = repository.GetEmptyMapping();
 
-            var bytes = CreateMappingForTemplate(emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl, template.Buffer);
+            var bytes = CreateMappingForTemplate(template.Buffer, emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl);
             return CreateMapping(templateName, mappingName, bytes);
         }
 
@@ -65,23 +63,14 @@ namespace DocumentCreator
             return TransformFull(content);
         }
 
-        public byte[] CreateMappingForTemplate(byte[] emptyMapping, string templateName, string mappingsName, string testUrl, byte[] templateBytes)
+        public byte[] CreateMappingForTemplate(byte[] templateBytes, byte[] mappingBytes, string templateName, string mappingsName, string testUrl)
         {
-            using var ms = new MemoryStream(templateBytes);
-            using var templateDoc = WordprocessingDocument.Open(ms, false);
-            var templateFields = OpenXmlWordProcessing.GetTemplateFields(templateDoc);
-
-            using var mappingsStream = new MemoryStream();
-            mappingsStream.Write(emptyMapping, 0, emptyMapping.Length);
-            using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
-            {
-                OpenXmlSpreadsheet.FillMappingsSheet(mappingsDoc, templateName, mappingsName, templateFields, testUrl);
-            }
-            var excelBytes = mappingsStream.ToArray();
+            var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
+            var excelBytes = OpenXmlSpreadsheet.FillMappingsSheet(mappingBytes, templateFields, templateName, mappingsName, testUrl);
             return excelBytes;
         }
 
-        public Evaluation Evaluate(EvaluationRequest request)
+        public EvaluationOutput Evaluate(EvaluationRequest request)
         {
             IEnumerable<TemplateField> templateFields = null;
             if (!string.IsNullOrEmpty(request.TemplateName))
@@ -93,7 +82,13 @@ namespace DocumentCreator
             }
 
             var processor = new ExpressionEvaluator();
-            var response = processor.Evaluate(request, templateFields);
+            var input = new EvaluationInput()
+            {
+                Fields = templateFields,
+                Expressions = request.Expressions,
+                Sources = request.Sources
+            };
+            var response = processor.Evaluate(input);
             return response;
         }
 
@@ -108,13 +103,12 @@ namespace DocumentCreator
         {
             if (content != null)
             {
-                var sources = new List<MappingSource>();
-                var expressions = OpenXmlSpreadsheet.GetTemplateFieldExpressions(content.Buffer, sources);
+                var info = OpenXmlSpreadsheet.GetMappingInfo(content.Buffer, null);
                 var mapping = new MappingDetails();
                 Transform(content, mapping);
                 mapping.Buffer = content.Buffer;
-                mapping.Expressions = expressions.Select(o => Transform(o));
-                mapping.Sources = sources.Select(o => Transform(o));
+                mapping.Expressions = info.Expressions;
+                mapping.Sources = info.Sources;
                 return mapping;
             }
             return null;
@@ -130,29 +124,6 @@ namespace DocumentCreator
             mapping.MappingVersion = parts[3];
             mapping.Timestamp = content.Timestamp;
             mapping.Size = content.Size;
-        }
-
-        private MappingSource Transform(MappingSource source)
-        {
-            return new MappingSource()
-            {
-                Name = source.Name,
-                Cell = source.Cell,
-                Payload = source.Payload
-            };
-        }
-
-        private MappingExpression Transform(MappingExpression source)
-        {
-            return new MappingExpression()
-            {
-                Name = source.Name,
-                Cell = source.Cell,
-                Expression = source.Expression,
-                Parent = source.Parent,
-                IsCollection = source.IsCollection,
-                Content = source.Content,
-            };
         }
     }
 }

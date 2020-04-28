@@ -7,9 +7,14 @@
   </a>
   <span>{{ title }}</span>
   <div class="spacer"></div>
-  <button mat-flat-button color="primary" routerLink="/quickstart" routerLinkActive="active">quickstart</button>
+  <button mat-flat-button color="primary" [matMenuTriggerFor]="toolbarMenu">quickstart</button>
   <button mat-flat-button color="primary" routerLink="/admin" routerLinkActive="active">admin center</button>
 </mat-toolbar>
+
+<mat-menu color="primary" #toolbarMenu="matMenu">
+  <button mat-menu-item routerLink="/quickstart">getting started</button>
+  <button mat-menu-item routerLink="/expressions">expressions</button>
+</mat-menu>
 
 <router-outlet class="mat-single-row"></router-outlet>
 

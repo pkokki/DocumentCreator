@@ -19,7 +19,27 @@ namespace DocumentCreator
             return GetTemplateFields(doc);
         }
 
-        public static IEnumerable<TemplateField> GetTemplateFields(WordprocessingDocument doc)
+        public static byte[] MergeTemplateWithMappings(IEnumerable<ContentControlData> data, byte[] templateBytes)
+        {
+            using var ms = new MemoryStream();
+            ms.Write(templateBytes, 0, templateBytes.Length);
+            using (var doc = WordprocessingDocument.Open(ms, true))
+            {
+                foreach (var item in data)
+                {
+                    if (item.IsRepeatingSection)
+                        ProcessRepeatingSection(doc, item.Name, item.SectionItems);
+                    else
+                        SetContentControlContent(doc, item.Name, item.Text);
+                }
+            }
+            var documentBytes = ms.ToArray();
+            return documentBytes;
+        }
+
+
+
+        private static IEnumerable<TemplateField> GetTemplateFields(WordprocessingDocument doc)
         {
             var sdts = doc.MainDocumentPart.Document.Body
                 .Descendants<SdtElement>()
@@ -36,7 +56,7 @@ namespace DocumentCreator
                     Name = ResolveTemplateFieldName(sdtProperties),
                     IsCollection = sdtProperties.Elements<SdtRepeatedSection>().Any(),
                     Content = sdt.Elements<SdtContentBlock>().FirstOrDefault()?.InnerText,
-                    Type = sdt.GetType().Name
+                    //Type = sdt.GetType().Name
                 };
                 var parent = sdt.Ancestors<SdtElement>()
                     .FirstOrDefault(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any());
@@ -70,7 +90,7 @@ namespace DocumentCreator
             return sdtContent;
         }
 
-        public static void RemoveContentControlContent(WordprocessingDocument doc, string name)
+        private static void RemoveContentControlContent(WordprocessingDocument doc, string name)
         {
             var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
 
@@ -78,7 +98,7 @@ namespace DocumentCreator
                 sdt.Remove();
         }
 
-        public static string ShowContentControlContent(WordprocessingDocument doc, string name)
+        private static string ShowContentControlContent(WordprocessingDocument doc, string name)
         {
             var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
             if (sdt != null)
@@ -97,7 +117,7 @@ namespace DocumentCreator
                 .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
         }
 
-        public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
+        private static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
             Dictionary<string, IEnumerable<string>> sectionItems)
         {
             var parentSdt = FindSdt(doc.MainDocumentPart.Document.Body, parentName);
@@ -125,7 +145,7 @@ namespace DocumentCreator
             }
         }
 
-        public static void SetTextElement(OpenXmlCompositeElement elem, string name, string text)
+        private static void SetTextElement(OpenXmlCompositeElement elem, string name, string text)
         {
             var textElem = elem.Descendants<Text>().FirstOrDefault();
             if (textElem == null && elem.ChildElements.Count > 0)
@@ -142,7 +162,7 @@ namespace DocumentCreator
             textElem.Text = text;
         }
 
-        public static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
+        private static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
         {
             if (text == "#HIDE_CONTENT#")
             {
