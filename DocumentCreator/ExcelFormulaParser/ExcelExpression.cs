@@ -20,9 +20,7 @@ namespace DocumentCreator.ExcelFormulaParser
             EvaluateTextOperators();
             PerformComparisons();
 
-            var value = this.Single().Value;
-            //if (value is string && decimal.TryParse((string)value, NumberStyles.Any, culture, out decimal d))
-            //    value = d;
+            var value = this.Any() ? this.Single().Value : ExcelValue.NA;
             return new ExcelExpressionPart(value);
         }
 

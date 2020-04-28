@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DocumentCreator
 {
@@ -19,9 +20,11 @@ namespace DocumentCreator
             var tokens = new List<ExcelFormulaToken>();
             foreach (var sourceToken in sourceTokens)
             {
-                if (sourceToken.Type == ExcelFormulaTokenType.Operand && sourceToken.Subtype == ExcelFormulaTokenSubtype.Range)
-                {
                     var sourcePath = sourceToken.Value;
+                if (sourceToken.Type == ExcelFormulaTokenType.Operand 
+                    && sourceToken.Subtype == ExcelFormulaTokenSubtype.Range 
+                    && !Regex.IsMatch(sourcePath, "__[Aa][0-9]+"))
+                {
                     var jToken = sourcePayload.SelectToken(sourcePath);
                     if (jToken != null)
                     {
@@ -37,8 +40,9 @@ namespace DocumentCreator
                             tokens.AddRange(exprTokens);
                         else
                         {
-                            // Final resort: Add an empty text token (maybe it is an optional path)
-                            tokens.Add(new ExcelFormulaToken(string.Empty, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Text));
+                            // Not found
+                            tokens.Add(new ExcelFormulaToken("NA", ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Start));
+                            tokens.Add(new ExcelFormulaToken(null, ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Stop));
                         }
                     }
                 }

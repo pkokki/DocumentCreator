@@ -25,17 +25,17 @@ namespace DocumentCreator
 
         public IEnumerable<EvaluationResult> Evaluate(ExpressionEvaluationInput input) 
         {
-            var expressions = input.Expressions;
-            var sourcePayload = input.Payload;
+            var expressions = input.Expressions ?? new string[0];
+            var sourcePayload = input.Payload ?? new JObject();
             var sourceName = "inp";
             var sources = new List<MappingSource>() { new MappingSource() { Name = sourceName, Cell = "N3", Payload = sourcePayload } };
             var results = new List<EvaluationResult>();
             var scope = new ExpressionScope(Language.Invariant, Language.ElGr, sources);
             var helper = new JsonExpressionHelper();
-            var index = 3;
+            var index = 1;
             foreach (var expression in expressions)
             {
-                var exprName = $"J{index}";
+                var exprName = $"__A{index}";
                 var cell = exprName;
                 var tokens = helper.Parse(sourcePayload, expression);
                 var result = Evaluate(exprName, cell, tokens, scope);

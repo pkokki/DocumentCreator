@@ -322,6 +322,8 @@ namespace DocumentCreator.ExcelFormulaParser
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() + b.AsDecimal();
+            if (!value.HasValue)
+                return NA;
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
@@ -331,6 +333,8 @@ namespace DocumentCreator.ExcelFormulaParser
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() - b.AsDecimal();
+            if (!value.HasValue)
+                return NA;
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
@@ -340,6 +344,8 @@ namespace DocumentCreator.ExcelFormulaParser
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
             var value = a.AsDecimal() * b.AsDecimal();
+            if (!value.HasValue)
+                return NA;
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
@@ -356,6 +362,8 @@ namespace DocumentCreator.ExcelFormulaParser
             if (denominator == 0M)
                 return DIV0;
             var value = a.AsDecimal() / denominator;
+            if (!value.HasValue)
+                return NA;
             if (a is DateValue)
                 return new DateValue(value.Value, a.Language);
             else if (a is TimeValue)
