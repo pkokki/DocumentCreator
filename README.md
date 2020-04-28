@@ -3,9 +3,9 @@
 An opinionated solution for creating documents from JSON objects (API payloads) based on Word templates and Excel formula configuration.
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/pkokki/DocumentCreator/.NET%20Core/master) 
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/pkokki/DocumentCreator)
-![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/pkokki/DocumentCreator/v0.1-alpha/master?include_prereleases)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/pkokki/DocumentCreator)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/pkokki/DocumentCreator) 
+![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/pkokki/DocumentCreator/0.2.0-alpha/master?include_prereleases) 
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/pkokki/DocumentCreator) 
 ![GitHub issues](https://img.shields.io/github/issues/pkokki/DocumentCreator)
 
 ## Getting Started
