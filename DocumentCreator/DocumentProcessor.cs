@@ -29,6 +29,12 @@ namespace DocumentCreator
                 .CreatePagedResults(query.Page, query.PageSize, orderBy, !query.Descending);
         }
 
+        public DocumentDetails GetDocument(string documentId)
+        {
+            var document = repository.GetDocument(documentId);
+            return TransformFull(document);
+        }
+
         public DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload)
         {
             var template = repository.GetLatestTemplate(templateName);

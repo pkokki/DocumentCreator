@@ -18,6 +18,7 @@ namespace DocumentCreator.Core.Model
         public DateTime Timestamp { get; set; }
         public long Size { get; set; }
         public string FileName { get; set; }
+        public string Url { get; set; }
     }
 
     public class DocumentDetails : Document

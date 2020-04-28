@@ -16,19 +16,30 @@
         </mat-list-item>
     </mat-list>
 
-    <div style="width:50%">
-        <button mat-raised-button color="primary" (click)="evaluate()">Evaluate expressions</button>
-        <span>&nbsp;&nbsp;</span>
-        <mat-slide-toggle color="primary" [(ngModel)]="viewValues">
-            view values
-        </mat-slide-toggle>
+    <div class="row">
+        <div class="column">
+            <button mat-raised-button color="primary" (click)="evaluate()">Evaluate expressions</button>
+        </div>
+        <div class="column">
+            <mat-slide-toggle color="primary" [(ngModel)]="viewValues">
+                view values
+            </mat-slide-toggle>     
+        </div>
     </div>
 
-    <mat-form-field appearance="fill">
-        <mat-label>Payload</mat-label>
-        <textarea matInput [(ngModel)]="payload" rows="8"></textarea>
-    </mat-form-field>
-
-
+    <div class="row">
+        <div class="column">
+            <mat-form-field>
+                <mat-label>Request</mat-label>
+                <textarea matInput [(ngModel)]="payload" rows="12"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="column">
+            <mat-form-field>
+                <mat-label>Response</mat-label>
+                <textarea matInput [readonly]="true"  rows="12" [value]="responsePayload | json"></textarea>
+            </mat-form-field>
+        </div>
+    </div>
 
 </mat-card>

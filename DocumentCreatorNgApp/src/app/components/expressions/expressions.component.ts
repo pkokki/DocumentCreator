@@ -11,13 +11,13 @@ export class ExpressionsComponent implements OnInit {
   expressions = [
     '8 / 2 * (2 + 2)',
 		'x1 * x2 - x1 / x2',
-		'UPPER(CONCATENATE(x3.name, " ", x3.surname))',
+		'CONCATENATE(x3.name, " ", x3.surname)',
     'SUM(x4) * 24%',
     'x4',
-    'REPLACE(x5.y1, SEARCH(x5.y2, x5.y1), LEN(x5.y2), x5.y3)',
+    'PROPER(REPLACE(x5.y1, SEARCH(x5.y2, x5.y1), LEN(x5.y2), x5.y3))',
     'IF(x1 + IFNA(missing.path, x2) > 10, ">10", "<=10")',
     'NOW() + x5.y4[1]',
-    '__A1 + __A2'
+    'IF(__A1 > __A2, UPPER(__A3), "?")'
   ];
   expressions2 = Array(this.expressions.length).fill(0);
   results = Array(this.expressions.length).fill({name: null, value: null, text: null, error: null});
@@ -34,6 +34,7 @@ export class ExpressionsComponent implements OnInit {
     }
   }`;
   viewValues = true;
+  responsePayload: any = {};
 
   constructor(
     private envService: EnvService
@@ -51,6 +52,7 @@ export class ExpressionsComponent implements OnInit {
       console.log(response);
       response.forEach(o => o.value = JSON.stringify(o.value));
       this.results = response;
+      this.responsePayload = response;
     })
   }
 }

@@ -275,5 +275,18 @@ namespace DocumentCreator.Repository
             var pathPattern = $"{templateName ?? "*"}_{templateVersion ?? "*"}_{mappingsName ?? "*"}_{mappingsVersion ?? "*"}_*.docx";
             return Directory.GetFiles(DocumentsFolder, pathPattern).Select(path => new FileContentItemSummary(path));
         }
+
+        public ContentItem GetDocument(string documentId)
+        {
+            if (string.IsNullOrEmpty(documentId))
+                throw new ArgumentNullException(nameof(documentId));
+            var pathPattern = $"*_{documentId}.docx";
+            var documentFileName = Directory
+                .GetFiles(DocumentsFolder, pathPattern)
+                .FirstOrDefault();
+            if (documentFileName == null)
+                return null;
+            return FileContentItem.Create(documentFileName);
+        }
     }
 }

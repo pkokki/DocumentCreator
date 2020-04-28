@@ -96,4 +96,8 @@ export class DocumentsTableComponent implements AfterViewInit {
       isDesc
     );
   }
+
+  downloadFile(documentId: string) {
+    this.documentService.downloadDocument(documentId);
+  }
 }
