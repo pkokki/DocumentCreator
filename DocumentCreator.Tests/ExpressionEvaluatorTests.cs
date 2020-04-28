@@ -20,7 +20,7 @@ namespace DocumentCreator
             Assert.True(output.Error == null, output.Error);
             Assert.Equal(7, output.Value);
             Assert.Equal("7", output.Text);
-            Assert.Equal("J3", output.Name);
+            Assert.Equal("__A1", output.Name);
         }
 
         [Fact]
