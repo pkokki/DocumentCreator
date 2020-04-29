@@ -14,6 +14,8 @@ Create Word documents and HTML pages by combining Word templates (documents with
 
 ## Transformation examples
 
+![Nuget](https://img.shields.io/nuget/v/JsonExcelExpressions)
+
 Given the data
 
 ```json
