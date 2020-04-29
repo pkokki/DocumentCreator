@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JsonExcelExpressions;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -37,6 +38,6 @@ namespace DocumentCreator.Core.Model
 
     public class DocumentPayload
     {
-        public IEnumerable<MappingSource> Sources { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 }

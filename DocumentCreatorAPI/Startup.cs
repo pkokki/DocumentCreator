@@ -31,7 +31,7 @@ namespace DocumentCreatorAPI
             services.AddScoped<ITemplateProcessor, TemplateProcessor>();
             services.AddScoped<IMappingProcessor, MappingProcessor>();
             services.AddScoped<IDocumentProcessor, DocumentProcessor>(); 
-            services.AddScoped<IExpressionEvaluator, ExpressionEvaluator>();
+            services.AddScoped<IMappingExpressionEvaluator, MappingExpressionEvaluator>();
 
             services.AddCors(options =>
             {

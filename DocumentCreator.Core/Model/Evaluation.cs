@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using JsonExcelExpressions;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace DocumentCreator.Core.Model
@@ -7,14 +8,14 @@ namespace DocumentCreator.Core.Model
     {
         public string TemplateName { get; set; }
         public IEnumerable<MappingExpression> Expressions { get; set; }
-        public IEnumerable<MappingSource> Sources { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 
     public class EvaluationInput
     {
         public IEnumerable<TemplateField> Fields { get; set; }
         public IEnumerable<MappingExpression> Expressions { get; set; }
-        public IEnumerable<MappingSource> Sources { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 
     public class ExpressionEvaluationInput
@@ -31,11 +32,4 @@ namespace DocumentCreator.Core.Model
         public IEnumerable<EvaluationResult> Results { get; set; }
     }
 
-    public class EvaluationResult
-    {
-        public string Name { get; set; }
-        public object Value { get; set; }
-        public string Text { get; set; }
-        public string Error { get; set; }
-    }
 }

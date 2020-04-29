@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DocumentCreator.Core\DocumentCreator.Core.csproj" />
+    <ProjectReference Include="..\JsonExcelExpressions\JsonExcelExpressions.csproj" />
   </ItemGroup>
 
 </Project>

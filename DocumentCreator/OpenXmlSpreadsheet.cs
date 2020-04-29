@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.CustomProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using JsonExcelExpressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace DocumentCreator
 {
     public static class OpenXmlSpreadsheet
     {
-        public static MappingInfo GetMappingInfo(byte[] mappingBytes, IEnumerable<MappingSource> externalSources)
+        public static MappingInfo GetMappingInfo(byte[] mappingBytes, IEnumerable<EvaluationSource> externalSources)
         {
             using var mappingsStream = new MemoryStream(mappingBytes);
             using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
@@ -31,7 +32,7 @@ namespace DocumentCreator
             return mappingsStream.ToArray();
         }
 
-        public static MappingInfo BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, IEnumerable<MappingSource> sources)
+        public static MappingInfo BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, IEnumerable<EvaluationSource> sources)
         {
             var sourceName = sources?.FirstOrDefault()?.Name ?? "X";
             var expressions = templateFields.Select((o, index) => new MappingExpression()
@@ -50,7 +51,7 @@ namespace DocumentCreator
             };
         }
 
-        private static MappingInfo GetMappingInfo(SpreadsheetDocument doc, IEnumerable<MappingSource> externalSources)
+        private static MappingInfo GetMappingInfo(SpreadsheetDocument doc, IEnumerable<EvaluationSource> externalSources)
         {
             var templateFieldExpressions = new List<MappingExpression>();
             var worksheet = GetFirstWorkSheet(doc);
@@ -78,7 +79,7 @@ namespace DocumentCreator
 
             templateFieldExpressions = ReorderExpressionsWithCalcChain(doc.WorkbookPart, templateFieldExpressions);
 
-            var sources = new List<MappingSource>();
+            var sources = new List<EvaluationSource>();
             if (externalSources != null)
                 sources.AddRange(externalSources);
             rowIndex = 3U;
@@ -95,7 +96,7 @@ namespace DocumentCreator
                     else 
                     {
                         var payload = GetCellValue(worksheet, stringTablePart, $"N{rowIndex}");
-                        sources.Add(new MappingSource()
+                        sources.Add(new EvaluationSource()
                         {
                             Name = name,
                             Cell = $"N{rowIndex}",

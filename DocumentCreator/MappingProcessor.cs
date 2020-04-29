@@ -81,7 +81,7 @@ namespace DocumentCreator
                 templateFields = OpenXmlWordProcessing.FindTemplateFields(template.Buffer);
             }
 
-            var processor = new ExpressionEvaluator();
+            var processor = new MappingExpressionEvaluator();
             var input = new EvaluationInput()
             {
                 Fields = templateFields,
