@@ -39,13 +39,13 @@ namespace JsonExcelExpressions.Eval
 
         internal static ExcelValue Create(ExcelFormulaToken token, ExpressionScope scope)
         {
-            return token.Subtype switch
+            switch(token.Subtype)
             {
-                ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, scope.OutLanguage),
-                ExcelFormulaTokenSubtype.Number => new DecimalValue(decimal.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage),
-                ExcelFormulaTokenSubtype.Logical => new BooleanValue(bool.Parse(token.Value)),
-                ExcelFormulaTokenSubtype.Range => new RangeValue(token.Value),
-                _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
+                case ExcelFormulaTokenSubtype.Text: return new TextValue(token.Value, scope.OutLanguage);
+                case ExcelFormulaTokenSubtype.Number: return new DecimalValue(decimal.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage);
+                case ExcelFormulaTokenSubtype.Logical: return new BooleanValue(bool.Parse(token.Value));
+                case ExcelFormulaTokenSubtype.Range: return new RangeValue(token.Value);
+                default: throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}");
             };
         }
 

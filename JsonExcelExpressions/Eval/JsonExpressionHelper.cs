@@ -69,8 +69,8 @@ namespace JsonExcelExpressions.Eval
                 arrayPathQueue.Enqueue(pathPart);
                 if (currentToken is JArray)
                 {
-                    var arrayPath = string.Join('.', arrayPathQueue);
-                    var objectPath = string.Join('.', partsQueue);
+                    var arrayPath = string.Join(".", arrayPathQueue);
+                    var objectPath = string.Join(".", partsQueue);
                     tokens = PrepareMapItemCall(PrepareMapValueCall("N3", arrayPath), objectPath);
                     return true;
                 }

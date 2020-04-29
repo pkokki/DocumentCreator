@@ -21,8 +21,8 @@ namespace JsonExcelExpressions.Lang
             var value = base.ToLower(text).Replace("σ ", "ς");
             if (text.Length > 1)
             {
-                if (value[^1] == 'σ')
-                    value = value.Remove(value.Length - 1) + 'ς';
+                if (value.EndsWith("σ"))
+                    value = value.Remove(value.Length - 1) + "ς";
             }
             return value;
         }

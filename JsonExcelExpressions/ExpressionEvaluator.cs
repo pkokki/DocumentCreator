@@ -152,7 +152,7 @@ namespace JsonExcelExpressions
                 }
                 else
                 {
-                    activeArg ??= new ExcelExpression();
+                    if (activeArg == null) activeArg = new ExcelExpression();
                     activeArg.Add(item);
                 }
             }
