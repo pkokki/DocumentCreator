@@ -53,12 +53,12 @@ namespace JsonExcelExpressions.Lang
 
         public virtual string ToString(DateTime value, string format = null)
         {
-            format ??= culture.DateTimeFormat.ShortDatePattern;
+            if (format == null) format = culture.DateTimeFormat.ShortDatePattern;
             return value.ToString(format, culture);
         }
         public virtual string ToTimeString(DateTime value, string format = null)
         {
-            format ??= culture.DateTimeFormat.ShortTimePattern;
+            if (format == null) format = culture.DateTimeFormat.ShortTimePattern;
             return value.ToString(format, culture);
         }
 
