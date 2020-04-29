@@ -1,31 +1,29 @@
-﻿using DocumentCreator.Core.Model;
-using DocumentCreator.ExcelFormulaParser;
-using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using JsonExcelExpressions.Lang;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocumentCreator
+namespace JsonExcelExpressions.Eval
 {
     public class ExpressionScope
     {
-        private readonly IEnumerable<MappingSource> sources;
+        private readonly IEnumerable<EvaluationSource> sources;
         private readonly IDictionary<string, ExcelValue> sourceValues;
         private readonly IDictionary<string, ExcelValue> values;
 
-        public ExpressionScope(Language inLanguage, Language outLanguage, IEnumerable<MappingSource> sources)
+        public ExpressionScope(Language inLanguage, Language outLanguage, IEnumerable<EvaluationSource> sources)
         {
             sourceValues = new Dictionary<string, ExcelValue>();
             values = new Dictionary<string, ExcelValue>();
             OutLanguage = outLanguage;
             InLanguage = inLanguage;
-            this.sources = sources ?? new List<MappingSource>();
+            this.sources = sources ?? new List<EvaluationSource>();
         }
 
         public Language OutLanguage { get; }
         public Language InLanguage { get; }
-        public string ParentName { get; internal set; }
+        public string ParentName { get; set; }
 
         public void Set(string key, ExcelValue value)
         {

@@ -4,6 +4,7 @@ using System.IO;
 using Xunit;
 using DocumentCreator.Core.Model;
 using Newtonsoft.Json.Linq;
+using JsonExcelExpressions;
 
 namespace DocumentCreator
 {
@@ -16,9 +17,9 @@ namespace DocumentCreator
             var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
             var payload = new DocumentPayload()
             {
-                Sources = new List<MappingSource>()
+                Sources = new List<EvaluationSource>()
                 {
-                    new MappingSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
+                    new EvaluationSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
                 }
             };
 

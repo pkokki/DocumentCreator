@@ -1,14 +1,13 @@
 ﻿using DocumentCreator.Core.Model;
+using JsonExcelExpressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
 namespace DocumentCreator.Core
 {
-    public interface IExpressionEvaluator
+    public interface IMappingExpressionEvaluator : IExpressionEvaluator
     {
         EvaluationOutput Evaluate(EvaluationInput input);
-        IEnumerable<EvaluationResult> Evaluate(ExpressionEvaluationInput input);
-        EvaluationResult Evaluate(string expression, JObject payload);
     }
 }

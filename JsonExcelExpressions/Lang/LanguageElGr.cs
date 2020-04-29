@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace DocumentCreator.ExcelFormulaParser.Languages
+namespace JsonExcelExpressions.Lang
 {
     public class LanguageElGr : Language
     {

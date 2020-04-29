@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace DocumentCreator.ExcelFormulaParser.Languages
+namespace JsonExcelExpressions.Lang
 {
     public class LanguageInvariant : Language
     {

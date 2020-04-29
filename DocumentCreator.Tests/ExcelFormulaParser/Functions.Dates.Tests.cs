@@ -1,4 +1,4 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using JsonExcelExpressions.Lang;
 using System;
 using System.Globalization;
 using Xunit;
@@ -20,7 +20,7 @@ namespace DocumentCreator.ExcelFormulaParser
             AssertExpression("=DATE(2020,4,18)+0.42", "18/4/2020");
             AssertExpression("=DATE(2020,4,18)*0.42", "10/7/1950");
 
-            var enProcessor = new ExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
+            var enProcessor = new MappingExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
             var result = enProcessor.Evaluate("F01", "F1", "=DATE(2020,4,18)", null);
             Assert.Null(result.Error);
             Assert.Equal("4/18/2020", result.Text);
@@ -37,7 +37,7 @@ namespace DocumentCreator.ExcelFormulaParser
             AssertExpression("=TIME(11,6,43)*4.32", "12:00 πμ");
             AssertExpression("=TIME(11,6,43)+4.32", "6:47 μμ");
 
-            var enProcessor = new ExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
+            var enProcessor = new MappingExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
             var result = enProcessor.Evaluate("F01", "F1", "=TIME(11,6,43)", null);
             Assert.Null(result.Error);
             Assert.Equal("11:06 AM", result.Text);

@@ -1,9 +1,9 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using JsonExcelExpressions.Lang;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions.Eval
 {
     public static class Extensions
     {

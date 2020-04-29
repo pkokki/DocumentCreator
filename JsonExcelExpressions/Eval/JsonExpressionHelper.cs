@@ -1,6 +1,4 @@
-﻿using DocumentCreator.Core.Model;
-using DocumentCreator.ExcelFormulaParser;
-using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using JsonExcelExpressions.Lang;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -8,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace DocumentCreator
+namespace JsonExcelExpressions.Eval
 {
     public class JsonExpressionHelper
     {
@@ -16,7 +14,7 @@ namespace DocumentCreator
         {
             if (!expression.StartsWith("="))
                 expression = "=" + expression;
-            var sourceTokens = new ExcelFormulaParser.ExcelFormula(expression, Language.ElGr).ToList();
+            var sourceTokens = new ExcelFormula(expression, Language.ElGr).ToList();
             var tokens = new List<ExcelFormulaToken>();
             foreach (var sourceToken in sourceTokens)
             {
@@ -82,19 +80,23 @@ namespace DocumentCreator
 
         private IEnumerable<ExcelFormulaToken> PrepareMapValueCall(string sourceCell, string sourcePath)
         {
-            var tokens = new List<ExcelFormulaToken>();
-            tokens.Add(new ExcelFormulaToken("MAPVALUE", ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Start));
-            tokens.Add(new ExcelFormulaToken(sourceCell, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Range));
-            tokens.Add(new ExcelFormulaToken(",", ExcelFormulaTokenType.Argument));
-            tokens.Add(new ExcelFormulaToken(sourcePath, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Text));
-            tokens.Add(new ExcelFormulaToken(null, ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Stop));
+            var tokens = new List<ExcelFormulaToken>
+            {
+                new ExcelFormulaToken("MAPVALUE", ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Start),
+                new ExcelFormulaToken(sourceCell, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Range),
+                new ExcelFormulaToken(",", ExcelFormulaTokenType.Argument),
+                new ExcelFormulaToken(sourcePath, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Text),
+                new ExcelFormulaToken(null, ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Stop)
+            };
             return tokens;
         }
 
         private IEnumerable<ExcelFormulaToken> PrepareMapItemCall(IEnumerable<ExcelFormulaToken> parentTokens, string sourcePath)
         {
-            var tokens = new List<ExcelFormulaToken>();
-            tokens.Add(new ExcelFormulaToken("MAPITEM", ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Start));
+            var tokens = new List<ExcelFormulaToken>
+            {
+                new ExcelFormulaToken("MAPITEM", ExcelFormulaTokenType.Function, ExcelFormulaTokenSubtype.Start)
+            };
             tokens.AddRange(parentTokens);
             tokens.Add(new ExcelFormulaToken(",", ExcelFormulaTokenType.Argument));
             tokens.Add(new ExcelFormulaToken(sourcePath, ExcelFormulaTokenType.Operand, ExcelFormulaTokenSubtype.Text));

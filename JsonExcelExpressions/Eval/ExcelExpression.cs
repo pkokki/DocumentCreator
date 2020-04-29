@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions.Eval
 {
     internal class ExcelExpression : List<ExcelExpressionPart>
     {

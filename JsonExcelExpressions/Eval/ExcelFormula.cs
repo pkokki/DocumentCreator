@@ -1,10 +1,10 @@
-﻿using DocumentCreator.ExcelFormulaParser.Languages;
+﻿using JsonExcelExpressions.Lang;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions.Eval
 {
     /// <summary>
     /// Source: https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html

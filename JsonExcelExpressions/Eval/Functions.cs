@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using static DocumentCreator.ExcelFormulaParser.ExcelValue;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions.Eval
 {
     public partial class Functions
     {
@@ -76,21 +75,21 @@ namespace DocumentCreator.ExcelFormulaParser
         public ExcelValue NOW(List<ExcelValue> args, ExpressionScope scope)
         {
             var now = DateTime.Now;
-            return new DateValue(now.Year, now.Month, now.Day, scope.OutLanguage);
+            return new ExcelValue.DateValue(now.Year, now.Month, now.Day, scope.OutLanguage);
         }
         public ExcelValue DATE(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.NotInteger(0, null, out int year)) return ExcelValue.NA;
             if (args.NotInteger(1, null, out int month)) return ExcelValue.NA;
             if (args.NotInteger(2, null, out int day)) return ExcelValue.NA;
-            return new DateValue(year, month, day, scope.OutLanguage);
+            return new ExcelValue.DateValue(year, month, day, scope.OutLanguage);
         }
         public ExcelValue TIME(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.NotInteger(0, null, out int hours)) return ExcelValue.NA;
             if (args.NotInteger(1, null, out int minutes)) return ExcelValue.NA;
             if (args.NotInteger(2, null, out int seconds)) return ExcelValue.NA;
-            return new TimeValue(hours, minutes, seconds, scope.OutLanguage);
+            return new ExcelValue.TimeValue(hours, minutes, seconds, scope.OutLanguage);
         }
     }
 }

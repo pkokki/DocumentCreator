@@ -1,8 +1,9 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
-using DocumentCreator.ExcelFormulaParser;
-using DocumentCreator.ExcelFormulaParser.Languages;
+using JsonExcelExpressions;
+using JsonExcelExpressions.Eval;
+using JsonExcelExpressions.Lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -69,7 +70,7 @@ namespace DocumentCreator
         
         private IEnumerable<EvaluationResult> CreateDocumentInternal(IEnumerable<TemplateField> templateFields,
             IEnumerable<MappingExpression> templateFieldExpressions,
-            IEnumerable<MappingSource> sources)
+            IEnumerable<EvaluationSource> sources)
         {
             var expressions = new List<MappingExpression>();
             foreach (var templateField in templateFields)
@@ -78,7 +79,7 @@ namespace DocumentCreator
                 if (expression != null)
                     expressions.Add(expression);
             }
-            var processor = new ExpressionEvaluator(Language.Invariant, Language.ElGr);
+            var processor = new MappingExpressionEvaluator(Language.Invariant, Language.ElGr);
             var results = processor.Evaluate(expressions, sources);
             return results;
         }

@@ -20,7 +20,7 @@ namespace DocumentCreator
             var bytes = File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm");
 
             var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
-            var processor = new ExpressionEvaluator();
+            var processor = new MappingExpressionEvaluator();
             var results = processor.Evaluate(info.Expressions, info.Sources);
 
             Assert.True(results.All(r => r.Error == null));

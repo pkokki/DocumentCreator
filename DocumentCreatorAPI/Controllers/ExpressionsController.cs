@@ -9,9 +9,9 @@ namespace DocumentCreatorAPI.Controllers
     [Route("api/[controller]")]
     public class ExpressionsController : ControllerBase
     {
-        private readonly IExpressionEvaluator processor;
+        private readonly IMappingExpressionEvaluator processor;
 
-        public ExpressionsController(IExpressionEvaluator processor)
+        public ExpressionsController(IMappingExpressionEvaluator processor)
         {
             this.processor = processor;
         }
@@ -19,7 +19,7 @@ namespace DocumentCreatorAPI.Controllers
         [HttpPost]
         public IActionResult EvaluateExpressions([FromBody]ExpressionEvaluationInput input)
         {
-            var response = processor.Evaluate(input);
+            var response = processor.Evaluate(input.Expressions, input.Payload);
             return Ok(response);
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace DocumentCreator.ExcelFormulaParser
+﻿namespace JsonExcelExpressions.Eval
 {
     /// <summary>
     /// Source: https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html

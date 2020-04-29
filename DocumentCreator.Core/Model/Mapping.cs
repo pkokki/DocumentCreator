@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using JsonExcelExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -24,13 +25,13 @@ namespace DocumentCreator.Core.Model
         [JsonIgnore]
         public byte[] Buffer { get; set; }
         public IEnumerable<MappingExpression> Expressions { get; set; }
-        public IEnumerable<MappingSource> Sources { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 
     public class MappingInfo
     {
         public IEnumerable<MappingExpression> Expressions { get; set; }
-        public IEnumerable<MappingSource> Sources { get; set; }
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 
     public class MappingExpression
@@ -43,12 +44,6 @@ namespace DocumentCreator.Core.Model
         public string Content { get; set; }
     }
 
-    public class MappingSource
-    {
-        public string Name { get; set; }
-        public string Cell { get; set; }
-        public JObject Payload { get; set; }
-    }
 
     public class MappingStats
     {
