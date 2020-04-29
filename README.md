@@ -2,11 +2,11 @@
 
 An opinionated solution for creating documents from JSON objects (API payloads) based on Word templates and Excel formula configuration.
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/pkokki/DocumentCreator/.NET%20Core/master) 
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/pkokki/DocumentCreator) 
-![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/pkokki/DocumentCreator/0.2.0-alpha/master?include_prereleases) 
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/pkokki/DocumentCreator) 
-![GitHub issues](https://img.shields.io/github/issues/pkokki/DocumentCreator)
+[![.NET Core](https://github.com/pkokki/DocumentCreator/workflows/.NET%20Core/badge.svg)](https://github.com/pkokki/DocumentCreator/actions?query=workflow%3A%22.NET+Core%22)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/pkokki/DocumentCreator)](https://github.com/pkokki/DocumentCreator/releases) 
+[![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/pkokki/DocumentCreator/0.2.0-alpha/master?include_prereleases)](https://github.com/pkokki/DocumentCreator/commits/master) 
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/pkokki/DocumentCreator)](https://github.com/pkokki/DocumentCreator) 
+[![GitHub issues](https://img.shields.io/github/issues/pkokki/DocumentCreator)](https://github.com/pkokki/DocumentCreator/issues)
 
 ## Getting Started
 
@@ -14,7 +14,7 @@ Create Word documents and HTML pages by combining Word templates (documents with
 
 ## Transformation examples
 
-![Nuget](https://img.shields.io/nuget/v/JsonExcelExpressions)
+[![Nuget](https://img.shields.io/nuget/v/JsonExcelExpressions)](https://www.nuget.org/packages/JsonExcelExpressions/)
 
 Given the data
 
