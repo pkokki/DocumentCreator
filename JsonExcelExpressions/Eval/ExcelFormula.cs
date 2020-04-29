@@ -9,17 +9,15 @@ namespace JsonExcelExpressions.Eval
     /// <summary>
     /// Source: https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html
     /// </summary>
-    public class ExcelFormula : IList<ExcelFormulaToken>
+    internal class ExcelFormula : IList<ExcelFormulaToken>
     {
         private readonly string formula;
-        private readonly Language inputLanguage;
         private List<ExcelFormulaToken> tokens;
 
         private ExcelFormula() { }
 
-        public ExcelFormula(string formula, Language inputLanguage)
+        public ExcelFormula(string formula)
         {
-            this.inputLanguage = inputLanguage;
             if (formula == null) throw new ArgumentNullException("formula");
             this.formula = formula.Trim();
             tokens = new List<ExcelFormulaToken>();
@@ -579,7 +577,7 @@ namespace JsonExcelExpressions.Eval
 
                 if ((token.Type == ExcelFormulaTokenType.Operand) && (token.Subtype == ExcelFormulaTokenSubtype.Nothing))
                 {
-                    bool isNumber = inputLanguage.TryParseDecimal(token.Value, out _);
+                    bool isNumber = decimal.TryParse(token.Value, out _);
                     if (!isNumber)
                         if ((token.Value == "TRUE") || (token.Value == "FALSE"))
                             token.Subtype = ExcelFormulaTokenSubtype.Logical;

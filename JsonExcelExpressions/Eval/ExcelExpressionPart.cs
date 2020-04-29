@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace JsonExcelExpressions.Eval
 {
-    public class ExcelExpressionPart
+    internal class ExcelExpressionPart
     {
         private readonly ExcelFormulaToken originalToken;
         private readonly ExpressionScope scope;

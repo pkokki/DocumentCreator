@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace JsonExcelExpressions.Eval
 {
-    public static class Extensions
+    internal static class Extensions
     {
         public static bool ContainErrorValues(this List<ExcelValue> args)
         {

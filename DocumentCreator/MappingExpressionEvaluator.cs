@@ -6,6 +6,7 @@ using JsonExcelExpressions.Lang;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace DocumentCreator
@@ -16,7 +17,7 @@ namespace DocumentCreator
         {
         }
 
-        public MappingExpressionEvaluator(Language inputLang, Language outputLang): base(inputLang, outputLang)
+        public MappingExpressionEvaluator(CultureInfo culture) : base(culture)
         {
         }
 
@@ -38,15 +39,16 @@ namespace DocumentCreator
 
         public IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
         {
-            return Evaluate(templateFieldExpressions, new ExpressionScope(inputLang, outputLang, sources));
+            return Evaluate(templateFieldExpressions, CreateExpressionScope(sources));
         }
 
 
         public EvaluationResult Evaluate(string exprName, string cell, string expression, IEnumerable<EvaluationSource> sources)
         {
-            return Evaluate(exprName, cell, expression, new ExpressionScope(inputLang, outputLang, sources));
+            return Evaluate(exprName, cell, expression, CreateExpressionScope(sources));
         }
 
+        
         private IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, ExpressionScope scope)
         {
             var results = new List<EvaluationResult>();
@@ -65,14 +67,7 @@ namespace DocumentCreator
             return results;
         }
 
-        private EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
-        {
-            if (!expression.StartsWith("="))
-                expression = "=" + expression;
-            var excelFormula = new JsonExcelExpressions.Eval.ExcelFormula(expression, scope.InLanguage);
-            var tokens = excelFormula.OfType<ExcelFormulaToken>();
-            return Evaluate(exprName, cell, tokens, scope);
-        }
+        
 
 
         private void PreEvaluate(List<MappingExpression> expressions, IEnumerable<TemplateField> templateFields)

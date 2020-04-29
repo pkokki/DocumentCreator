@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace JsonExcelExpressions.Eval
@@ -22,7 +23,7 @@ namespace JsonExcelExpressions.Eval
 
         #region Factories
 
-        public static ExcelValue Create(JToken token, Language language)
+        internal static ExcelValue Create(JToken token, Language language)
         {
             switch (token.Type)
             {
@@ -36,13 +37,13 @@ namespace JsonExcelExpressions.Eval
             }
         }
 
-        public static ExcelValue Create(ExcelFormulaToken token, ExpressionScope scope)
+        internal static ExcelValue Create(ExcelFormulaToken token, ExpressionScope scope)
         {
             return token.Subtype switch
             {
                 ExcelFormulaTokenSubtype.Text => new TextValue(token.Value, scope.OutLanguage),
-                ExcelFormulaTokenSubtype.Number => new DecimalValue(scope.InLanguage.ToDecimal(token.Value), scope.OutLanguage),
-                ExcelFormulaTokenSubtype.Logical => new BooleanValue(scope.InLanguage.ToBoolean(token.Value)),
+                ExcelFormulaTokenSubtype.Number => new DecimalValue(decimal.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage),
+                ExcelFormulaTokenSubtype.Logical => new BooleanValue(bool.Parse(token.Value)),
                 ExcelFormulaTokenSubtype.Range => new RangeValue(token.Value),
                 _ => throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}"),
             };
@@ -104,14 +105,14 @@ namespace JsonExcelExpressions.Eval
 
         #region Constructor 
 
-        protected ExcelValue(object value, string text, Language language)
+        internal ExcelValue(object value, string text, Language language)
         {
             this.InnerValue = value;
             this.Text = text ?? string.Empty;
             this.Language = language;
         }
 
-        protected ExcelValue(IEnumerable<ExcelValue> value, Language language)
+        internal ExcelValue(IEnumerable<ExcelValue> value, Language language)
         {
             this.InnerValue = value;
             this.Text = new JArray(value.Select(o => o.Text)).ToString(Formatting.None).Replace("\"", "'");
@@ -122,7 +123,7 @@ namespace JsonExcelExpressions.Eval
 
         #region Properties
 
-        protected Language Language { get; }
+        internal Language Language { get; }
         public object InnerValue { get; }
         public string Text { get; }
 
@@ -132,7 +133,7 @@ namespace JsonExcelExpressions.Eval
 
         protected internal abstract bool? AsBoolean();
         protected internal abstract decimal? AsDecimal();
-        public abstract string ToString(Language language);
+        internal abstract string ToString(Language language);
 
         #endregion
 
@@ -143,7 +144,7 @@ namespace JsonExcelExpressions.Eval
             {
             }
 
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
 
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
@@ -154,7 +155,7 @@ namespace JsonExcelExpressions.Eval
             public NullValue() : base(null, null, Language.Invariant)
             {
             }
-            public override string ToString(Language language) { return null; }
+            internal override string ToString(Language language) { return null; }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
         }
@@ -171,7 +172,7 @@ namespace JsonExcelExpressions.Eval
                     return v;
                 return null;
             }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
         }
 
         internal class JsonObjectValue : ExcelValue
@@ -181,7 +182,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
         }
 
         internal class ArrayValue : ExcelValue
@@ -207,7 +208,7 @@ namespace JsonExcelExpressions.Eval
 
             protected internal override bool? AsBoolean() { return asBoolean; }
             protected internal override decimal? AsDecimal() { return asDecimal; }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
             public override ExcelValue ElementAt(int index)
             {
                 return values.ElementAt(index);
@@ -221,7 +222,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
         }
 
         internal class BooleanValue : ExcelValue
@@ -231,7 +232,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
             protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
         }
 
         internal class RangeValue : ExcelValue
@@ -241,7 +242,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            public override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language) { return Text; }
         }
 
         internal class DateValue : DecimalValue
@@ -267,7 +268,7 @@ namespace JsonExcelExpressions.Eval
                 return ts.Days + 1;
             }
 
-            public override string ToString(Language language)
+            internal override string ToString(Language language)
             {
                 return language.ToString(Date);
             }
@@ -293,7 +294,7 @@ namespace JsonExcelExpressions.Eval
                 return (hours * 3600M + minutes * 60M + seconds) / 86400M;
             }
 
-            public override string ToString(Language language)
+            internal override string ToString(Language language)
             {
                 return language.ToTimeString(Time);
             }
@@ -312,7 +313,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
             protected internal override decimal? AsDecimal() { return (decimal)InnerValue; }
-            public override string ToString(Language language) { return language.ToString((decimal)InnerValue, decimals, commas); }
+            internal override string ToString(Language language) { return language.ToString((decimal)InnerValue, decimals, commas); }
         }
 
         #endregion

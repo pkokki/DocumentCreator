@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentCreator.Core", "Doc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonExcelExpressions", "JsonExcelExpressions\JsonExcelExpressions.csproj", "{7CDCCC00-F436-4008-A590-A80816575717}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonExcelExpressions.Tests", "JsonExcelExpressions.Tests\JsonExcelExpressions.Tests.csproj", "{3FF7021F-3395-49B0-97DB-FAC83CD38538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{7CDCCC00-F436-4008-A590-A80816575717}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CDCCC00-F436-4008-A590-A80816575717}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CDCCC00-F436-4008-A590-A80816575717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF7021F-3395-49B0-97DB-FAC83CD38538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF7021F-3395-49B0-97DB-FAC83CD38538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF7021F-3395-49B0-97DB-FAC83CD38538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF7021F-3395-49B0-97DB-FAC83CD38538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,7 +3,7 @@
     /// <summary>
     /// Source: https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html
     /// </summary>
-    public class ExcelFormulaToken
+    internal class ExcelFormulaToken
     {
 
         private string value;

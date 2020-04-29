@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace JsonExcelExpressions.Eval
@@ -12,17 +13,19 @@ namespace JsonExcelExpressions.Eval
         private readonly IDictionary<string, ExcelValue> sourceValues;
         private readonly IDictionary<string, ExcelValue> values;
 
-        public ExpressionScope(Language inLanguage, Language outLanguage, IEnumerable<EvaluationSource> sources)
+        public ExpressionScope(CultureInfo culture, IEnumerable<EvaluationSource> sources) 
+            : this(Language.Create(culture), sources)
+        {
+        }
+        internal ExpressionScope(Language outLanguage, IEnumerable<EvaluationSource> sources)
         {
             sourceValues = new Dictionary<string, ExcelValue>();
             values = new Dictionary<string, ExcelValue>();
             OutLanguage = outLanguage;
-            InLanguage = inLanguage;
             this.sources = sources ?? new List<EvaluationSource>();
         }
 
-        public Language OutLanguage { get; }
-        public Language InLanguage { get; }
+        internal Language OutLanguage { get; }
         public string ParentName { get; set; }
 
         public void Set(string key, ExcelValue value)

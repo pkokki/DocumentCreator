@@ -5,7 +5,7 @@ using System.Text;
 
 namespace JsonExcelExpressions.Lang
 {
-    public class Language
+    internal class Language
     {
         private readonly CultureInfo culture;
 
@@ -17,15 +17,15 @@ namespace JsonExcelExpressions.Lang
                 return new LanguageInvariant(CultureInfo.InvariantCulture);
             }
         }
-        public static Language ElGr
-        {
-            get
-            {
-                return new LanguageElGr(CultureInfo.GetCultureInfo("el-GR"));
-            }
-        }
 
-        public Language(CultureInfo culture)
+        public static Language Create(CultureInfo culture)
+        {
+            if (culture.Name == "el" || culture.Parent?.Name == "el")
+                return new LanguageEl(culture);
+            else
+                return new Language(culture);
+        }
+        protected Language(CultureInfo culture)
         {
             this.culture = culture;
             EmptyText = new ExcelValue.TextValue(string.Empty, this);

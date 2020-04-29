@@ -2,7 +2,7 @@
 
 namespace JsonExcelExpressions.Lang
 {
-    public class LanguageInvariant : Language
+    internal class LanguageInvariant : Language
     {
         public LanguageInvariant(CultureInfo culture) : base(culture)
         {

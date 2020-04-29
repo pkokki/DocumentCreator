@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace JsonExcelExpressions.Eval
 {
-    public partial class Functions
+    internal partial class Functions
     {
         public static readonly Functions INSTANCE = new Functions();
 

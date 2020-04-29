@@ -4,7 +4,7 @@ using System.Globalization;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions
 {
     public class Dates : BaseTest
     {
@@ -20,8 +20,8 @@ namespace DocumentCreator.ExcelFormulaParser
             AssertExpression("=DATE(2020,4,18)+0.42", "18/4/2020");
             AssertExpression("=DATE(2020,4,18)*0.42", "10/7/1950");
 
-            var enProcessor = new MappingExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
-            var result = enProcessor.Evaluate("F01", "F1", "=DATE(2020,4,18)", null);
+            var enProcessor = new ExpressionEvaluator(CultureInfo.GetCultureInfo("en-US"));
+            var result = enProcessor.Evaluate("=DATE(2020,4,18)");
             Assert.Null(result.Error);
             Assert.Equal("4/18/2020", result.Text);
         }
@@ -37,8 +37,8 @@ namespace DocumentCreator.ExcelFormulaParser
             AssertExpression("=TIME(11,6,43)*4.32", "12:00 πμ");
             AssertExpression("=TIME(11,6,43)+4.32", "6:47 μμ");
 
-            var enProcessor = new MappingExpressionEvaluator(Language.Invariant, new Language(CultureInfo.GetCultureInfo("en-US")));
-            var result = enProcessor.Evaluate("F01", "F1", "=TIME(11,6,43)", null);
+            var enProcessor = new ExpressionEvaluator(CultureInfo.GetCultureInfo("en-US"));
+            var result = enProcessor.Evaluate("=TIME(11,6,43)");
             Assert.Null(result.Error);
             Assert.Equal("11:06 AM", result.Text);
         }

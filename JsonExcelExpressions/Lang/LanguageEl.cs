@@ -3,14 +3,14 @@ using System.Globalization;
 
 namespace JsonExcelExpressions.Lang
 {
-    public class LanguageElGr : Language
+    internal class LanguageEl : Language
     {
         private static readonly char[] UpperAccent = new[] { 'Ά', 'Έ', 'Ή', 'Ί', 'Ϊ', 'Ό', 'Ύ', 'Ϋ', 'Ώ' };
         private static readonly char[] UpperNoAccent = new[] { 'Α', 'Ε', 'Η', 'Ι', 'Ι', 'Ο', 'Υ', 'Υ', 'Ω' };
         //private static readonly char[] LowerAccent = new[]      { 'ά', 'έ', 'ή', 'ί', 'ϊ', 'ό', 'ύ', 'ϋ', 'ώ' };
         //private static readonly char[] LowerNoAccent = new[]    { 'α', 'ε', 'η', 'ι', 'ι', 'ο', 'υ', 'υ', 'ω' };
 
-        public LanguageElGr(CultureInfo culture) : base(culture)
+        public LanguageEl(CultureInfo culture) : base(culture)
         {
         }
 

@@ -79,7 +79,7 @@ namespace DocumentCreator
                 if (expression != null)
                     expressions.Add(expression);
             }
-            var processor = new MappingExpressionEvaluator(Language.Invariant, Language.ElGr);
+            var processor = new MappingExpressionEvaluator();
             var results = processor.Evaluate(expressions, sources);
             return results;
         }

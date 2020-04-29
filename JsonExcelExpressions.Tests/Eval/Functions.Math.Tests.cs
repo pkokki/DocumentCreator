@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Xunit.Abstractions;
 
-namespace DocumentCreator.ExcelFormulaParser
+namespace JsonExcelExpressions
 {
     public class Math : BaseTest
     {

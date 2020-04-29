@@ -8,13 +8,13 @@ using System.Text.RegularExpressions;
 
 namespace JsonExcelExpressions.Eval
 {
-    public class JsonExpressionHelper
+    internal class JsonExpressionHelper
     {
         public IEnumerable<ExcelFormulaToken> Parse(JObject sourcePayload, string expression)
         {
             if (!expression.StartsWith("="))
                 expression = "=" + expression;
-            var sourceTokens = new ExcelFormula(expression, Language.ElGr).ToList();
+            var sourceTokens = new ExcelFormula(expression).ToList();
             var tokens = new List<ExcelFormulaToken>();
             foreach (var sourceToken in sourceTokens)
             {

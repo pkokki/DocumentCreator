@@ -3,42 +3,46 @@ using JsonExcelExpressions.Lang;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace JsonExcelExpressions
 {
     public class ExpressionEvaluator : IExpressionEvaluator
     {
-        protected readonly Language inputLang, outputLang;
+        private readonly Language outputLang;
 
-        public ExpressionEvaluator() : this(Language.Invariant, Language.ElGr)
+        public ExpressionEvaluator() : this(CultureInfo.CurrentCulture)
         {
         }
 
-        public ExpressionEvaluator(Language inputLang, Language outputLang)
+        public ExpressionEvaluator(CultureInfo culture) : this(Language.Create(culture))
         {
-            this.inputLang = inputLang;
-            this.outputLang = outputLang;
         }
 
-        public EvaluationResult Evaluate(string expression)
+        private ExpressionEvaluator(Language outputLang)
         {
-            return Evaluate(expression, new JObject());
+            this.outputLang = outputLang ?? Language.Invariant;
         }
 
-        public EvaluationResult Evaluate(string expression, JObject source)
+        public EvaluationResult Evaluate(string expression, CultureInfo culture = null)
         {
-            var results = Evaluate(new List<string>() { expression }, source);
+            return Evaluate(expression, new JObject(), culture);
+        }
+
+        public EvaluationResult Evaluate(string expression, JObject source, CultureInfo culture = null)
+        {
+            var results = Evaluate(new List<string>() { expression }, source, culture);
             return results.Last();
         }
 
-        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<string> expressions, JObject source)
+        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<string> expressions, JObject source, CultureInfo culture = null)
         {
             var sourcePayload = source ?? new JObject();
             var sourceName = "inp";
             var sources = new List<EvaluationSource>() { new EvaluationSource() { Name = sourceName, Cell = "N3", Payload = sourcePayload } };
             var results = new List<EvaluationResult>();
-            var scope = new ExpressionScope(inputLang, outputLang, sources);
+            var scope = new ExpressionScope(culture == null ? outputLang : Language.Create(culture), sources);
             var helper = new JsonExpressionHelper();
             var index = 1;
             foreach (var expression in expressions)
@@ -54,7 +58,16 @@ namespace JsonExcelExpressions
             return results;
         }
 
-        protected EvaluationResult Evaluate(string exprName, string cell, IEnumerable<ExcelFormulaToken> tokens, ExpressionScope scope)
+        protected EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
+        {
+            if (!expression.StartsWith("="))
+                expression = "=" + expression;
+            var excelFormula = new ExcelFormula(expression);
+            var tokens = excelFormula.OfType<ExcelFormulaToken>();
+            return Evaluate(exprName, cell, tokens, scope);
+        }
+
+        internal EvaluationResult Evaluate(string exprName, string cell, IEnumerable<ExcelFormulaToken> tokens, ExpressionScope scope)
         {
             var result = new EvaluationResult()
             {
@@ -77,6 +90,8 @@ namespace JsonExcelExpressions
             finally { }
             return result;
         }
+
+        
 
         private void TraverseExpression(ExcelExpression expression, Queue<ExcelFormulaToken> tokens, ExpressionScope scope)
         {
@@ -144,5 +159,12 @@ namespace JsonExcelExpressions
             if (activeArg != null) args.Add(activeArg.Evaluate(scope));
             return args;
         }
+
+        protected ExpressionScope CreateExpressionScope(IEnumerable<EvaluationSource> sources)
+        {
+            return new ExpressionScope(outputLang, sources);
+        }
+
+
     }
 }
