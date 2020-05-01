@@ -1,7 +1,9 @@
-﻿using DocumentCreator.Core;
+﻿using DocumentCreator;
+using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -59,10 +61,10 @@ namespace DocumentCreatorAPI.Controllers
             [FromBody] DocumentPayload payload)
         {
             var document = processor.CreateDocument(templateName, mappingName, payload);
-
+            var fileContents = document.Buffer.ToMemoryStream();
             var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
-            return new FileContentResult(document.Buffer, contentType)
+            return new FileContentResult(fileContents.ToArray(), contentType)
             {
                 FileDownloadName = document.FileName
             };

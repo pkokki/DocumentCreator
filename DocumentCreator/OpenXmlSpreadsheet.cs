@@ -14,22 +14,20 @@ namespace DocumentCreator
 {
     public static class OpenXmlSpreadsheet
     {
-        public static MappingInfo GetMappingInfo(byte[] mappingBytes, IEnumerable<EvaluationSource> externalSources)
+        public static MappingInfo GetMappingInfo(Stream mappingsStream, IEnumerable<EvaluationSource> externalSources)
         {
-            using var mappingsStream = new MemoryStream(mappingBytes);
             using var mappingsDoc = SpreadsheetDocument.Open(mappingsStream, false);
             return GetMappingInfo(mappingsDoc, externalSources);
         }
 
-        public static byte[] FillMappingsSheet(byte[] mappingBytes, IEnumerable<TemplateField> templateFields, string templateName, string mappingName, string testUrl)
+        public static Stream FillMappingsSheet(Stream mappingBytes, IEnumerable<TemplateField> templateFields, string templateName, string mappingName, string testUrl)
         {
-            using var mappingsStream = new MemoryStream();
-            mappingsStream.Write(mappingBytes, 0, mappingBytes.Length);
+            using var mappingsStream = mappingBytes.ToMemoryStream();
             using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
             {
                 FillMappingsSheet(mappingsDoc, templateName, mappingName, templateFields, testUrl);
             }
-            return mappingsStream.ToArray();
+            return mappingsStream.ToMemoryStream();
         }
 
         public static MappingInfo BuildIdentityExpressions(IEnumerable<TemplateField> templateFields, IEnumerable<EvaluationSource> sources)

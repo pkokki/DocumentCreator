@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace DocumentCreator
@@ -91,7 +92,7 @@ namespace DocumentCreator
                 Path = "/files/T01A.docx",
                 Size = 42,
                 Timestamp = MockData.Timestamp(1),
-                Buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx")
+                Buffer = new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))
             });
 
             var result = processor.GetTemplate("T01");
@@ -102,7 +103,7 @@ namespace DocumentCreator
             Assert.Equal("V01", result.Version);
             Assert.Equal(MockData.Timestamp(1), result.Timestamp);
             Assert.Equal(42, result.Size);
-            Assert.NotEmpty(result.Buffer);
+            Assert.NotEqual(0, result.Buffer.Length);
             Assert.NotEmpty(result.Fields);
         }
 
@@ -116,7 +117,7 @@ namespace DocumentCreator
                 Path = "/files/T01A.docx",
                 Size = 42,
                 Timestamp = MockData.Timestamp(1),
-                Buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx")
+                Buffer = new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))
             });
 
             var result = processor.GetTemplate("T01", "V01");
@@ -127,7 +128,7 @@ namespace DocumentCreator
             Assert.Equal("V01", result.Version);
             Assert.Equal(MockData.Timestamp(1), result.Timestamp);
             Assert.Equal(42, result.Size);
-            Assert.NotEmpty(result.Buffer);
+            Assert.NotEqual(0, result.Buffer.Length);
             Assert.NotEmpty(result.Fields);
         }
 
@@ -152,10 +153,10 @@ namespace DocumentCreator
         }
 
         [Fact]
-        public void CreateTemplate_OK()
+        public async Task CreateTemplate_OK()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
-            repository.Setup(r => r.CreateTemplate("T01", It.IsAny<byte[]>())).Returns((string _, byte[] bytes) => new ContentItem() 
+            repository.Setup(r => r.CreateTemplate("T01", It.IsAny<Stream>())).Returns((string _, Stream bytes) => Task.FromResult(new ContentItem() 
             {
                 Name = "T01_V01",
                 FileName = "T01A.docx",
@@ -163,9 +164,9 @@ namespace DocumentCreator
                 Size = 42,
                 Timestamp = MockData.Timestamp(1),
                 Buffer = bytes
-            });
+            }));
 
-            var result = processor.CreateTemplate(templateData, File.ReadAllBytes("./Resources/FindTemplateFields001.docx"));
+            var result = await processor.CreateTemplate(templateData, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
 
             Assert.NotNull(result);
             Assert.Equal("T01", result.TemplateName);
@@ -173,36 +174,36 @@ namespace DocumentCreator
             Assert.Equal("V01", result.Version);
             Assert.Equal(MockData.Timestamp(1), result.Timestamp);
             Assert.Equal(42, result.Size);
-            Assert.NotEmpty(result.Buffer);
+            Assert.NotEqual(0, result.Buffer.Length);
             Assert.NotEmpty(result.Fields);
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateData_Throws()
+        public async Task CreateTemplate_NoTemplateData_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(null, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(null, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))));
 
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateName_Throws()
+        public async Task CreateTemplate_NoTemplateName_Throws()
         {
             var templateData = new TemplateData() { TemplateName = null };
-            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(templateData, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))));
         }
 
         [Fact]
-        public void CreateTemplate_NoTemplateBuffer_Throws()
+        public async Task CreateTemplate_NoTemplateBuffer_Throws()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
-            Assert.Throws<ArgumentNullException>(() => processor.CreateTemplate(templateData, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(templateData, null));
         }
 
         [Fact]
-        public void CreateTemplate_TemplateBufferNotWord_Throws()
+        public async Task CreateTemplate_TemplateBufferNotWord_Throws()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
-            Assert.Throws<ArgumentException>(() => processor.CreateTemplate(templateData, Encoding.ASCII.GetBytes("Not WORD")));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await processor.CreateTemplate(templateData, new MemoryStream(Encoding.ASCII.GetBytes("Not WORD"))));
         }
     }
 }

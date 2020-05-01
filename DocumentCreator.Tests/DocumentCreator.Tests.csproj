@@ -87,6 +87,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocumentCreator.Core.Azure\DocumentCreator.Core.Azure.csproj" />
     <ProjectReference Include="..\DocumentCreator\DocumentCreator.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,9 @@
-﻿namespace DocumentCreator.Core.Repository
+﻿using System.IO;
+
+namespace DocumentCreator.Core.Repository
 {
     public class ContentItem : ContentItemSummary
     {
-        public byte[] Buffer { get; set; }
+        public Stream Buffer { get; set; }
     }
 }

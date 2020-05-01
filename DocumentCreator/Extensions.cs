@@ -1,5 +1,6 @@
 ﻿using DocumentCreator.Core.Model;
 using System;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -7,6 +8,14 @@ namespace DocumentCreator
 {
     public static class Extensions
     {
+        public static MemoryStream ToMemoryStream(this Stream source)
+        {
+            var ms = new MemoryStream();
+            source.Position = 0;
+            source.CopyTo(ms);
+            return ms;
+        }
+
         /// <summary>
         /// Creates a paged set of results.
         /// </summary>

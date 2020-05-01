@@ -12,17 +12,15 @@ namespace DocumentCreator
 {
     public static class OpenXmlWordProcessing
     {
-        public static IEnumerable<TemplateField> FindTemplateFields(byte[] buffer)
+        public static IEnumerable<TemplateField> FindTemplateFields(Stream buffer)
         {
-            using var ms = new MemoryStream(buffer);
-            using var doc = WordprocessingDocument.Open(ms, false);
+            using var doc = WordprocessingDocument.Open(buffer, false);
             return GetTemplateFields(doc);
         }
 
-        public static byte[] MergeTemplateWithMappings(IEnumerable<ContentControlData> data, byte[] templateBytes)
+        public static Stream MergeTemplateWithMappings(IEnumerable<ContentControlData> data, Stream templateStream)
         {
-            using var ms = new MemoryStream();
-            ms.Write(templateBytes, 0, templateBytes.Length);
+            var ms = templateStream.ToMemoryStream();
             using (var doc = WordprocessingDocument.Open(ms, true))
             {
                 foreach (var item in data)
@@ -33,8 +31,7 @@ namespace DocumentCreator
                         SetContentControlContent(doc, item.Name, item.Text);
                 }
             }
-            var documentBytes = ms.ToArray();
-            return documentBytes;
+            return ms;
         }
 
 

@@ -1,6 +1,7 @@
 ﻿using JsonExcelExpressions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json.Serialization;
 
 namespace DocumentCreator.Core.Model
@@ -25,7 +26,7 @@ namespace DocumentCreator.Core.Model
     public class DocumentDetails : Document
     {
         [JsonIgnore]
-        public byte[] Buffer { get; set; }
+        public Stream Buffer { get; set; }
     }
 
     public class DocumentQuery : PagingParams

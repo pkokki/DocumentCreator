@@ -35,12 +35,12 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateMappingForTemplate()
         {
-            var emptyMapping = File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm");
-            var templateBytes = File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx");
+            var emptyMapping = new MemoryStream(File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm"));
+            var templateBytes = new MemoryStream(File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx"));
 
             var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, "T01", "M01", "http://localhost/api");
 
-            Assert.NotEmpty(bytes);
+            Assert.NotEqual(0, bytes.Length);
         }
 
         [Fact]

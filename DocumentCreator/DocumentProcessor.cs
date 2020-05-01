@@ -7,6 +7,7 @@ using JsonExcelExpressions.Lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
@@ -40,7 +41,7 @@ namespace DocumentCreator
         {
             var template = repository.GetLatestTemplate(templateName);
 
-            byte[] mappingBytes = null;
+            Stream mappingBytes = null;
             if (mappingName != null)
             {
                 var mapping = repository.GetLatestMapping(templateName, null, mappingName);
@@ -55,7 +56,7 @@ namespace DocumentCreator
             return TransformFull(document);
         }
 
-        public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
+        public Stream CreateDocument(Stream templateBytes, Stream mappingBytes, DocumentPayload payload)
         {
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
             MappingInfo mappingInfo;

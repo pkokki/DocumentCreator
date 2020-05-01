@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DocumentCreator.Repository
 {
@@ -19,14 +20,15 @@ namespace DocumentCreator.Repository
             this.rootPath = rootPath;
         }
 
-        public ContentItem CreateTemplate(string templateName, byte[] contents)
+        public Task<ContentItem> CreateTemplate(string templateName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
-            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+            if (contents == null || contents.Length == 0) throw new ArgumentNullException(nameof(contents));
             
             var templateVersionName = $"{templateName}_{DateTime.Now.Ticks}";
             var templateFilename = Path.Combine(TemplatesFolder, $"{templateVersionName}.docx");
-            return new FileContentItem(templateFilename, contents);
+            ContentItem result = new FileContentItem(templateFilename, contents);
+            return Task.FromResult(result);
         }
 
         public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
@@ -48,11 +50,11 @@ namespace DocumentCreator.Repository
             }
         }
 
-        public ContentItem CreateMapping(string templateName, string mappingName, byte[] contents)
+        public ContentItem CreateMapping(string templateName, string mappingName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
-            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+            if (contents == null || contents.Length == 0) throw new ArgumentNullException(nameof(contents));
 
             var templateVersionName = GetLatestTemplateVersionName(templateName);
             if (templateVersionName == null)
@@ -61,11 +63,11 @@ namespace DocumentCreator.Repository
             return new FileContentItem(mappingFileName, contents);
         }
 
-        public ContentItem CreateDocument(string templateName, string mappingName, byte[] contents)
+        public ContentItem CreateDocument(string templateName, string mappingName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
-            if (contents == null || !contents.Any()) throw new ArgumentNullException(nameof(contents));
+            if (contents == null || contents.Length <= 0) throw new ArgumentNullException(nameof(contents));
 
             var templateVersionName = GetLatestTemplateVersionName(templateName);
             if (templateVersionName == null)
@@ -119,7 +121,7 @@ namespace DocumentCreator.Repository
             return FileContentItem.Create(mappingFileName);
         }
 
-        public byte[] GetEmptyMapping()
+        public Stream GetEmptyMapping()
         {
             var emptyMappingPath = Path.Combine(rootPath, "dcfs", "empty_mappings_prod.xlsm");
             if (!File.Exists(emptyMappingPath))
@@ -127,7 +129,7 @@ namespace DocumentCreator.Repository
                 var masterMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
                 File.Copy(masterMappingPath, emptyMappingPath);
             }
-            var contents = File.ReadAllBytes(emptyMappingPath);
+            var contents = FileContentItem.Create(emptyMappingPath).Buffer;
             return contents;
         }
 

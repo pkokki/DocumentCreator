@@ -20,15 +20,24 @@ namespace DocumentCreator.Repository
             return null;
         }
 
-        public FileContentItem(string path, byte[] contents)
+        public FileContentItem(string path, Stream contents)
         {
-            File.WriteAllBytes(path, contents);
-            Initialize(path, contents);
+            contents.Position = 0;
+            using (FileStream output = File.OpenWrite(path))
+            {
+                contents.CopyTo(output);
+            }
+            Initialize(path, contents.ToMemoryStream());
         }
 
         private FileContentItem(string path)
         {
-            var contents = File.ReadAllBytes(path);
+            var contents = new MemoryStream();
+            using (FileStream input = File.OpenRead(path))
+            {
+                input.CopyTo(contents);
+            }
+            contents.Position = 0;
             Initialize(path, contents);
         }
 
@@ -36,12 +45,12 @@ namespace DocumentCreator.Repository
         {
         }
 
-        private void Initialize(string path, byte[] contents)
+        private void Initialize(string path, Stream contents)
         {
             Name = System.IO.Path.GetFileNameWithoutExtension(path);
             FileName = System.IO.Path.GetFileName(path);
             Path = path;
-            Size = contents.Length;
+            Size = (int)contents.Length;
             Timestamp = new FileInfo(path).CreationTime;
             Buffer = contents;
         }

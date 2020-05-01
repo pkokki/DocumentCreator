@@ -55,7 +55,7 @@ namespace DocumentCreator
         {
             var json = JObject.Parse(File.ReadAllText("./Resources/EvaluateForExcelExample01.json"));
             var request = json.ToObject<EvaluationRequest>();
-            var templateBytes = File.ReadAllBytes("./Resources/EvaluateForExcelExample01.docx");
+            var templateBytes = new MemoryStream(File.ReadAllBytes("./Resources/EvaluateForExcelExample01.docx"));
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
 
             var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));

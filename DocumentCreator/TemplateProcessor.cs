@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentCreator
 {
@@ -34,7 +35,7 @@ namespace DocumentCreator
             return template;
         }
 
-        public TemplateDetails CreateTemplate(TemplateData templateData, byte[] bytes)
+        public async Task<TemplateDetails> CreateTemplate(TemplateData templateData, Stream bytes)
         {
             templateData = templateData ?? throw new ArgumentNullException(nameof(templateData));
             var templateName = templateData.TemplateName ?? throw new ArgumentNullException(nameof(templateData.TemplateName));
@@ -48,7 +49,7 @@ namespace DocumentCreator
             {
                 throw new ArgumentException(nameof(bytes));
             }
-            var content = repository.CreateTemplate(templateName, bytes);
+            var content = await repository.CreateTemplate(templateName, bytes);
             var conversion = OpenXmlWordConverter.ConvertToHtml(bytes, content.Name);
             repository.SaveHtml(content.Name, null, conversion.Images);
             return TransformFull(content, fields);

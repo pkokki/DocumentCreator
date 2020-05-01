@@ -9,7 +9,7 @@ namespace DocumentCreator
         [Fact]
         public void CanGetTemplateFieldExpressions()
         {
-            var bytes = File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm");
+            var bytes = new MemoryStream(File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm"));
             var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
             Assert.NotEmpty(info.Expressions);
         }
@@ -17,7 +17,7 @@ namespace DocumentCreator
         [Fact]
         public void CanUseForwardOwnCellValues()
         {
-            var bytes = File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm");
+            var bytes = new MemoryStream(File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm"));
 
             var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
             var processor = new MappingExpressionEvaluator();

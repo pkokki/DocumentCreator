@@ -3,6 +3,7 @@ using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DocumentCreator
@@ -57,13 +58,13 @@ namespace DocumentCreator
             return CreateMapping(templateName, mappingName, bytes);
         }
 
-        public MappingDetails CreateMapping(string templateName, string mappingName, byte[] bytes)
+        public MappingDetails CreateMapping(string templateName, string mappingName, Stream bytes)
         {
             var content = repository.CreateMapping(templateName, mappingName, bytes);
             return TransformFull(content);
         }
 
-        public byte[] CreateMappingForTemplate(byte[] templateBytes, byte[] mappingBytes, string templateName, string mappingsName, string testUrl)
+        public Stream CreateMappingForTemplate(Stream templateBytes, Stream mappingBytes, string templateName, string mappingsName, string testUrl)
         {
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
             var excelBytes = OpenXmlSpreadsheet.FillMappingsSheet(mappingBytes, templateFields, templateName, mappingsName, testUrl);

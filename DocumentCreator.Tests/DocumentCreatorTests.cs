@@ -13,8 +13,8 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
+            var wordBytes = new MemoryStream(File.ReadAllBytes("./Resources/CreateDocument.docx"));
+            var excelBytes = new MemoryStream(File.ReadAllBytes("./Resources/CreateDocument.xlsm"));
             var payload = new DocumentPayload()
             {
                 Sources = new List<EvaluationSource>()
@@ -24,10 +24,12 @@ namespace DocumentCreator
             };
 
             var processor = new DocumentProcessor(null);
-            var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
+            var docStream = processor.CreateDocument(wordBytes, excelBytes, payload);
 
-            Assert.NotEmpty(docBytes);
-            File.WriteAllBytes("./Output/CreateDocumentTest.docx", docBytes);
+            
+            Assert.NotEqual(0, docStream.Length);
+            using FileStream output = File.OpenWrite("./Output/CreateDocumentTest.docx");
+            docStream.CopyTo(output);
         }
 
         

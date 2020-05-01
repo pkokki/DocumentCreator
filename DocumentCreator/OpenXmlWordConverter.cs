@@ -17,13 +17,6 @@ namespace DocumentCreator
             public Dictionary<string, byte[]> Images { get; } = new Dictionary<string, byte[]>();
         }
 
-        public static HtmlConversion ConvertToHtml(byte[] documentBytes, string templateVersionName, string documentName = null)
-        {
-            using var ms = new MemoryStream();
-            ms.Write(documentBytes, 0, documentBytes.Length);
-            return ConvertToHtml(ms, templateVersionName, documentName);
-        }
-
         public static HtmlConversion ConvertToHtml(Stream ms, string templateVersionName, string documentName = null)
         {
             using var doc = WordprocessingDocument.Open(ms, true);

@@ -1,5 +1,7 @@
 ﻿using DocumentCreator.Core.Model;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace DocumentCreator.Core
 {
@@ -7,6 +9,6 @@ namespace DocumentCreator.Core
     {
         IEnumerable<Template> GetTemplates(string templateName = null);
         TemplateDetails GetTemplate(string templateName, string templateVersion = null);
-        TemplateDetails CreateTemplate(TemplateData template, byte[] bytes);
+        Task<TemplateDetails> CreateTemplate(TemplateData template, Stream bytes);
     }
 }
