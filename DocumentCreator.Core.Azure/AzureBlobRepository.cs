@@ -104,7 +104,8 @@ namespace DocumentCreator.Core.Azure
         public IEnumerable<ContentItemSummary> GetTemplates()
         {
             var containerClient = GetTemplatesContainer();
-            return containerClient.GetBlobs(BlobTraits.Metadata)
+            var blobs = containerClient.GetBlobs(BlobTraits.Metadata);
+            return blobs
                 .Select(o => new BlobContentItemSummary(containerClient.Uri, o))
                 .ToList();
         }
@@ -389,7 +390,10 @@ namespace DocumentCreator.Core.Azure
         {
             var blobClient = blobContainerClient.GetBlobClient(blobFileName);
 
-            var blobDownloadInfo = blobClient.Download().Value;
+            var response = blobClient.Download();
+            if (response == null)
+                return null;
+            var blobDownloadInfo = response.Value;
             return new BlobContentItem(blobContainerClient.Uri, blobFileName, blobDownloadInfo);
         }
 

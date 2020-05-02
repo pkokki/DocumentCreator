@@ -6,6 +6,7 @@ using Xunit;
 using Moq;
 using DocumentCreator.Core.Repository;
 using DocumentCreator.Core.Model;
+using DocumentCreator.Properties;
 
 namespace DocumentCreator
 {
@@ -35,8 +36,8 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateMappingForTemplate()
         {
-            var emptyMapping = new MemoryStream(File.ReadAllBytes("./Resources/CreateMappingForTemplate.xlsm"));
-            var templateBytes = new MemoryStream(File.ReadAllBytes("./Resources/CreateMappingForTemplate.docx"));
+            var emptyMapping = new MemoryStream(Resources.CreateMappingForTemplate_xlsm);
+            var templateBytes = new MemoryStream(Resources.CreateMappingForTemplate_docx);
 
             var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, "T01", "M01", "http://localhost/api");
 

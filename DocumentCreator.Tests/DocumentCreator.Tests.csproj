@@ -12,62 +12,10 @@
 
   <ItemGroup>
     <None Remove="Output\.copy" />
-    <None Remove="Resources\CanEvaluateMapAndGetUDF.json" />
-    <None Remove="Resources\ConvertTemplateWithImages.docx" />
-    <None Remove="Resources\CreateDocument.docx" />
-    <None Remove="Resources\CreateDocument.json" />
-    <None Remove="Resources\CreateDocument.xlsm" />
-    <None Remove="Resources\CreateMappingForTemplate.docx" />
-    <None Remove="Resources\CreateMappingForTemplate.xlsm" />
-    <None Remove="Resources\EvaluateForExcelExample01.docx" />
-    <None Remove="Resources\EvaluateForExcelExample01.json" />
-    <None Remove="Resources\FindTemplateFields001.docx" />
-    <None Remove="Resources\FindTemplateFields002.docx" />
-    <None Remove="Resources\OpenXmlSpreadsheetTests001.xlsm" />
-    <None Remove="Resources\UseForwardOwnCellValues.xlsm" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Output\.copy">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CanEvaluateMapAndGetUDF.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\ConvertTemplateWithImages.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CreateDocument.xlsm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CreateMappingForTemplate.xlsm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CreateDocument.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CreateDocument.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\EvaluateForExcelExample01.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\EvaluateForExcelExample01.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\OpenXmlSpreadsheetTests001.xlsm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\CreateMappingForTemplate.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\FindTemplateFields001.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\FindTemplateFields002.docx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\UseForwardOwnCellValues.xlsm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -89,6 +37,57 @@
   <ItemGroup>
     <ProjectReference Include="..\DocumentCreator.Core.Azure\DocumentCreator.Core.Azure.csproj" />
     <ProjectReference Include="..\DocumentCreator\DocumentCreator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\CanEvaluateMapAndGetUDF.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ConvertTemplateWithImages.docx">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\CreateDocument.docx">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\CreateDocument.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\CreateDocument.xlsm">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\CreateMappingForTemplate.docx">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\CreateMappingForTemplate.xlsm">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\FindTemplateFields001.docx">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\FindTemplateFields002.docx">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\OpenXmlSpreadsheetTests001.xlsm">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UseForwardOwnCellValues.xlsm">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

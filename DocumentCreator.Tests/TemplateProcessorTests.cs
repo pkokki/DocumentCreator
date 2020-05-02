@@ -1,5 +1,6 @@
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
+using DocumentCreator.Properties;
 using Moq;
 using Newtonsoft.Json.Linq;
 using System;
@@ -92,7 +93,7 @@ namespace DocumentCreator
                 Path = "/files/T01A.docx",
                 Size = 42,
                 Timestamp = MockData.Timestamp(1),
-                Buffer = new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))
+                Buffer = new MemoryStream(Resources.FindTemplateFields001_docx)
             });
 
             var result = processor.GetTemplate("T01");
@@ -117,7 +118,7 @@ namespace DocumentCreator
                 Path = "/files/T01A.docx",
                 Size = 42,
                 Timestamp = MockData.Timestamp(1),
-                Buffer = new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))
+                Buffer = new MemoryStream(Resources.FindTemplateFields001_docx)
             });
 
             var result = processor.GetTemplate("T01", "V01");
@@ -166,7 +167,7 @@ namespace DocumentCreator
                 Buffer = bytes
             }));
 
-            var result = await processor.CreateTemplate(templateData, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx")));
+            var result = await processor.CreateTemplate(templateData, new MemoryStream(Resources.FindTemplateFields001_docx));
 
             Assert.NotNull(result);
             Assert.Equal("T01", result.TemplateName);
@@ -181,7 +182,7 @@ namespace DocumentCreator
         [Fact]
         public async Task CreateTemplate_NoTemplateData_Throws()
         {
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(null, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(null, new MemoryStream(Resources.FindTemplateFields001_docx)));
 
         }
 
@@ -189,7 +190,7 @@ namespace DocumentCreator
         public async Task CreateTemplate_NoTemplateName_Throws()
         {
             var templateData = new TemplateData() { TemplateName = null };
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(templateData, new MemoryStream(File.ReadAllBytes("./Resources/FindTemplateFields001.docx"))));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await processor.CreateTemplate(templateData, new MemoryStream(Resources.FindTemplateFields001_docx)));
         }
 
         [Fact]
