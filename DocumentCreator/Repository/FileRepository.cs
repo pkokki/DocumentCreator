@@ -50,7 +50,7 @@ namespace DocumentCreator.Repository
             }
         }
 
-        public ContentItem CreateMapping(string templateName, string mappingName, Stream contents)
+        public Task<ContentItem> CreateMapping(string templateName, string mappingName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
@@ -60,10 +60,11 @@ namespace DocumentCreator.Repository
             if (templateVersionName == null)
                 throw new ArgumentException($"Template {templateName} not found.");
             var mappingFileName = Path.Combine(MappingsFolder, $"{templateVersionName}_{mappingName}_{DateTime.Now.Ticks}.xlsm");
-            return new FileContentItem(mappingFileName, contents);
+            var result = new FileContentItem(mappingFileName, contents);
+            return Task.FromResult<ContentItem>(result);
         }
 
-        public ContentItem CreateDocument(string templateName, string mappingName, Stream contents)
+        public Task<ContentItem> CreateDocument(string templateName, string mappingName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
@@ -77,7 +78,7 @@ namespace DocumentCreator.Repository
                 throw new ArgumentException($"Mapping {mappingName} not found.");
 
             var documentFileName = Path.Combine(DocumentsFolder, $"{mappingVersionName}_{DateTime.Now.Ticks}.docx");
-            return new FileContentItem(documentFileName, contents);
+            return Task.FromResult<ContentItem>(new FileContentItem(documentFileName, contents));
         }
 
         public ContentItem GetLatestTemplate(string templateName)
@@ -96,10 +97,11 @@ namespace DocumentCreator.Repository
         public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
             var templateVersionName = string.IsNullOrEmpty(templateVersion) 
                 ? GetLatestTemplateVersionName(templateName)
                 : GetExistingTemplateName(templateName, templateVersion);
-            if (string.IsNullOrEmpty(templateVersionName)) throw new ArgumentException(nameof(templateName));
+            if (string.IsNullOrEmpty(templateVersionName)) throw new ArgumentNullException(nameof(templateName));
 
             var mappingVersionName = GetLatestMappingVersionName($"{templateVersionName}_{mappingName}");
             return GetTemplateMapping(mappingVersionName);

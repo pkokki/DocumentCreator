@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentCreator
 {
@@ -37,7 +38,7 @@ namespace DocumentCreator
             return TransformFull(document);
         }
 
-        public DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload)
+        public async Task<DocumentDetails> CreateDocument(string templateName, string mappingName, DocumentPayload payload)
         {
             var template = repository.GetLatestTemplate(templateName);
 
@@ -48,7 +49,7 @@ namespace DocumentCreator
                 mappingBytes = mapping.Buffer;
             }
             var documentBytes = CreateDocument(template.Buffer, mappingBytes, payload);
-            var document = repository.CreateDocument(templateName, mappingName, documentBytes);
+            var document = await repository.CreateDocument(templateName, mappingName, documentBytes);
 
             var templateVersionName = template.Name;
             var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, templateVersionName, document.Name);

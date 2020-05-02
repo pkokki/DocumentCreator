@@ -9,7 +9,7 @@ namespace DocumentCreator
 {
     public class FileRepositoryTests : IRepositoryTests
     {
-        private const string TEST_DIR = "./test_root";
+        private static readonly string TEST_DIR = $".{Path.DirectorySeparatorChar}test_root";
 
         static FileRepositoryTests()
         {

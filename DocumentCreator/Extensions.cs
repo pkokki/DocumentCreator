@@ -11,7 +11,8 @@ namespace DocumentCreator
         public static MemoryStream ToMemoryStream(this Stream source)
         {
             var ms = new MemoryStream();
-            source.Position = 0;
+            if (source.Position != 0)
+                source.Position = 0;
             source.CopyTo(ms);
             return ms;
         }

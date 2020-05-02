@@ -156,7 +156,7 @@ namespace DocumentCreator
         public async Task CreateTemplate_OK()
         {
             var templateData = new TemplateData() { TemplateName = "T01" };
-            repository.Setup(r => r.CreateTemplate("T01", It.IsAny<Stream>())).Returns((string _, Stream bytes) => Task.FromResult(new ContentItem() 
+            repository.Setup(r => r.CreateTemplate("T01", It.IsAny<Stream>())).Returns((string _, Stream bytes) => Task.FromResult<ContentItem>(new ContentItem() 
             {
                 Name = "T01_V01",
                 FileName = "T01A.docx",

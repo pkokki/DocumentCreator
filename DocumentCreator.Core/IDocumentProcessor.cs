@@ -1,11 +1,12 @@
 ﻿using DocumentCreator.Core.Model;
+using System.Threading.Tasks;
 
 namespace DocumentCreator.Core
 {
     public interface IDocumentProcessor
     {
         PagedResults<Document> GetDocuments(DocumentQuery query);
-        DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload);
+        Task<DocumentDetails> CreateDocument(string templateName, string mappingName, DocumentPayload payload);
         DocumentDetails GetDocument(string documentId);
     }
 }

@@ -36,6 +36,10 @@ namespace DocumentCreator
             return new AzureBlobRepository(blobServiceClient);
         }
 
+        protected override string TemplateFilePattern => "[A-Za-z0-9]+.docx";
+
+        protected override string MappingFilePattern => "[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+.xlsm";
+
         private BlobServiceClient MockBlobServiceClient()
         {
             var client = new Mock<BlobServiceClient>();

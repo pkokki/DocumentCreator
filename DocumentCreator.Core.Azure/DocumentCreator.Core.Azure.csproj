@@ -12,8 +12,4 @@
     <ProjectReference Include="..\DocumentCreator.Core\DocumentCreator.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Shared\" />
-  </ItemGroup>
-
 </Project>

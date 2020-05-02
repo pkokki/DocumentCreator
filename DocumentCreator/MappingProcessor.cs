@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentCreator
 {
@@ -47,7 +48,7 @@ namespace DocumentCreator
             return TransformFull(content);
         }
 
-        public MappingDetails CreateMapping(string templateName, string mappingName, string testEvaluationsUrl)
+        public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, string testEvaluationsUrl)
         {
             var template = repository.GetLatestTemplate(templateName);
             if (template == null)
@@ -55,12 +56,12 @@ namespace DocumentCreator
             var emptyMappingBuffer = repository.GetEmptyMapping();
 
             var bytes = CreateMappingForTemplate(template.Buffer, emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl);
-            return CreateMapping(templateName, mappingName, bytes);
+            return await CreateMapping(templateName, mappingName, bytes);
         }
 
-        public MappingDetails CreateMapping(string templateName, string mappingName, Stream bytes)
+        public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, Stream bytes)
         {
-            var content = repository.CreateMapping(templateName, mappingName, bytes);
+            var content = await repository.CreateMapping(templateName, mappingName, bytes);
             return TransformFull(content);
         }
 
