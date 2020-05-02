@@ -1,6 +1,7 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
+using DocumentCreator.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,7 +54,8 @@ namespace DocumentCreator
             var template = repository.GetLatestTemplate(templateName);
             if (template == null)
                 return null;
-            var emptyMappingBuffer = repository.GetEmptyMapping();
+
+            var emptyMappingBuffer = new MemoryStream(Resources.empty_mappings_prod_xlsm);
 
             var bytes = CreateMappingForTemplate(template.Buffer, emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl);
             return await CreateMapping(templateName, mappingName, bytes);

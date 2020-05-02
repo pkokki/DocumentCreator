@@ -123,18 +123,6 @@ namespace DocumentCreator.Repository
             return FileContentItem.Create(mappingFileName);
         }
 
-        public Stream GetEmptyMapping()
-        {
-            var emptyMappingPath = Path.Combine(rootPath, "dcfs", "empty_mappings_prod.xlsm");
-            if (!File.Exists(emptyMappingPath))
-            {
-                var masterMappingPath = Path.Combine(rootPath, "resources", "empty_mappings.xlsm");
-                File.Copy(masterMappingPath, emptyMappingPath);
-            }
-            var contents = FileContentItem.Create(emptyMappingPath).Buffer;
-            return contents;
-        }
-
         private string GetLatestTemplateVersionName(string templateName)
         {
             return Directory

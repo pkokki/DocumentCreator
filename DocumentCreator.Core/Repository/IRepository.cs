@@ -16,7 +16,7 @@ namespace DocumentCreator.Core.Repository
         IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null);
         IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null);
         Task<ContentItem> CreateMapping(string templateName, string mappingName, Stream contents);
-        Stream GetEmptyMapping();
+        //Stream GetEmptyMapping();
         ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName);
         ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion);
 

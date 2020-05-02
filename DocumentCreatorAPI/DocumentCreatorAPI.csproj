@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="dcfs\empty_mappings_prod.xlsm" />
     <None Remove="dcfs\files\documents\.gitkeep" />
     <None Remove="dcfs\files\html\.gitkeep" />
     <None Remove="dcfs\files\mappings\.gitkeep" />
@@ -21,9 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="dcfs\empty_mappings_prod.xlsm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="dcfs\files\documents\.gitkeep">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

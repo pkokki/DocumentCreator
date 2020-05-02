@@ -21,6 +21,7 @@ namespace DocumentCreator.Core.Azure
     /// <seealso cref="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet"/> 
     public class AzureBlobRepository : IRepository
     {
+
         #region Fields
 
         /// <summary>
@@ -234,11 +235,6 @@ namespace DocumentCreator.Core.Azure
                 Size = (int)contents.Length,
                 Buffer = contents
             };
-        }
-
-        public Stream GetEmptyMapping()
-        {
-            throw new NotImplementedException();
         }
 
         public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)

@@ -238,6 +238,8 @@ namespace DocumentCreator
             await Assert.ThrowsAsync<ArgumentNullException>(() => Repository.CreateDocument("XXX", "XXX", CreateZeroStream(0)));
         }
 
+        
+
 
         protected virtual string PathPattern => @"([a-zA-Z]:|\.)?[\\\/](?:[a-zA-Z0-9]+[\\\/])*([A-Za-z0-9_]+)\.[A-Za-z]+";
         protected virtual string TemplateNamePattern => "[A-Za-z0-9]+_[0-9]+";
