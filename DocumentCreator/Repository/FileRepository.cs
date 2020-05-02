@@ -228,14 +228,17 @@ namespace DocumentCreator.Repository
                     .Select(a => new FileContentItemSummary(a.FullName));
         }
 
-        public ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
+        public Task<ContentItem> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
         {
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+
             var fullName = Directory.GetFiles(MappingsFolder, $"{templateName}_{templateVersion ?? "*"}_{mappingName}_{mappingVersion ?? "*"}.xlsm")
                 .OrderByDescending(o => o)
                 .FirstOrDefault();
             if (fullName == null)
                 return null;
-            return FileContentItem.Create(fullName);
+            return Task.FromResult<ContentItem>(FileContentItem.Create(fullName));
         }
 
         public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)

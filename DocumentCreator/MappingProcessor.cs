@@ -39,13 +39,13 @@ namespace DocumentCreator
             return items.Select(o => Transform(o)).ToList();
         }
 
-        public MappingDetails GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
+        public async Task<MappingDetails> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
         {
             ContentItem content;
             if (mappingVersion == null)
                 content = repository.GetLatestMapping(templateName, templateVersion, mappingName);
             else
-                content = repository.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
+                content = await repository.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
             return TransformFull(content);
         }
 

@@ -206,6 +206,66 @@ namespace DocumentCreator
             Assert.Throws<ArgumentNullException>(() => Repository.GetLatestMapping("XXX", "XXX", null));
         }
 
+        [Fact]
+        public async Task GetMapping_OK()
+        {
+            var template = await Repository.CreateTemplate("T2003", CreateStream(2));
+            var templateVersion = template.Name.Split('_')[1];
+            await Repository.CreateMapping("T2003", "M2003", CreateStream(2));
+            await Repository.CreateMapping("T2003", "M2003", CreateStream(3));
+
+            var result = await Repository.GetMapping("T2003", templateVersion, "M2003", null);
+            AssertMapping(result, CreateBytes(3));
+        }
+        [Fact]
+        public async Task GetMapping_WithMappingversion_OK()
+        {
+            var template = await Repository.CreateTemplate("T2004", CreateStream(2));
+            var templateVersion = template.Name.Split('_')[1];
+            var mappingV1 = await Repository.CreateMapping("T2004", "M2004", CreateStream(2));
+            var mappingVersion = mappingV1.Name.Split('_')[3];
+            await Repository.CreateMapping("T2004", "M2004", CreateStream(3));
+
+            var result = await Repository.GetMapping("T2004", templateVersion, "M2004", mappingVersion);
+            AssertMapping(result, CreateBytes(2));
+        }
+        [Fact]
+        public async Task GetMapping_WithoutTemplateVersion_OK()
+        {
+            await Repository.CreateTemplate("T2007", CreateStream(2));
+            await Repository.CreateMapping("T2007", "M2007", CreateStream(2));
+            await Repository.CreateMapping("T2007", "M2007", CreateStream(3));
+
+            var result = await Repository.GetMapping("T2007", null, "M2007", null);
+            AssertMapping(result, CreateBytes(3));
+        }
+        [Fact]
+        public async Task GetMapping_NotExists_Null()
+        {
+            var template = await Repository.CreateTemplate("T2005", CreateStream(2));
+            var templateVersion = template.Name.Split('_')[1];
+            var mappingV1 = await Repository.CreateMapping("T2005", "M2005", CreateStream(2));
+            var mappingVersion = mappingV1.Name.Split('_')[3];
+
+            Assert.Null(await Repository.GetMapping("T2005", templateVersion, "XXX", null));
+            Assert.Null(await Repository.GetMapping("T2005", "XXX", "M2005", null));
+            Assert.Null(await Repository.GetMapping("XXX", templateVersion, "M2005", null));
+            Assert.Null(await Repository.GetMapping("T2005", templateVersion, "XXX", mappingVersion));
+            Assert.Null(await Repository.GetMapping("T2005", "XXX", "M2005", mappingVersion));
+            Assert.Null(await Repository.GetMapping("XXX", templateVersion, "M2005", mappingVersion));
+        }
+        [Fact]
+        public async Task GetMapping_NullParams_Throws()
+        {
+            var template = await Repository.CreateTemplate("T2006", CreateStream(2));
+            var templateVersion = template.Name.Split('_')[1];
+            var mappingV1 = await Repository.CreateMapping("T2006", "M2006", CreateStream(2));
+            var mappingVersion = mappingV1.Name.Split('_')[3];
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() => Repository.GetMapping(null, templateVersion, "M2006", mappingVersion));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => Repository.GetMapping("T2006", templateVersion, null, mappingVersion));
+        }
+
 
         [Fact]
         public async Task CreateDocument_OK()
@@ -239,7 +299,6 @@ namespace DocumentCreator
         }
 
         
-
 
         protected virtual string PathPattern => @"([a-zA-Z]:|\.)?[\\\/](?:[a-zA-Z0-9]+[\\\/])*([A-Za-z0-9_]+)\.[A-Za-z]+";
         protected virtual string TemplateNamePattern => "[A-Za-z0-9]+_[0-9]+";

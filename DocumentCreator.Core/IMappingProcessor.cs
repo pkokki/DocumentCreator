@@ -9,7 +9,7 @@ namespace DocumentCreator.Core
     {
         IEnumerable<MappingStats> GetMappingStats(string mappingName = null);
         IEnumerable<Mapping> GetMappings(string templateName = null, string templateVersion = null, string mappingName = null);
-        MappingDetails GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null);
+        Task<MappingDetails> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null);
         Task<MappingDetails> CreateMapping(string templateName, string mappingName, Stream bytes);
         Task<MappingDetails> CreateMapping(string templateName, string mappingName, string testEvaluationsUrl);
         EvaluationOutput Evaluate(EvaluationRequest request);

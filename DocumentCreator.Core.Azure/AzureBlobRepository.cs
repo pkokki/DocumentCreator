@@ -259,9 +259,28 @@ namespace DocumentCreator.Core.Azure
             return null;
         }
 
-        public ContentItem GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
+        public async Task<ContentItem> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
+
+            if (string.IsNullOrEmpty(mappingVersion))
+            {
+                return GetLatestMapping(templateName, templateVersion, mappingName);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(templateVersion))
+                    templateVersion = await GetLatestTemplateVersion(templateName);
+                var prefix = $"{templateName}_{templateVersion}_{mappingName}";
+                var containerClient = GetMappingsContainer();
+                var blobItem = containerClient
+                    .GetBlobs(BlobTraits.Metadata, BlobStates.Snapshots, prefix)
+                    .FirstOrDefault(o => o.Metadata[VERSION_KEY] == mappingVersion);
+                if (blobItem == null)
+                    return null;
+                return DownloadContentItem(containerClient, blobItem);
+            }
         }
 
         public IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
