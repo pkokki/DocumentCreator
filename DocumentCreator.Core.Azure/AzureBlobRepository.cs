@@ -285,7 +285,24 @@ namespace DocumentCreator.Core.Azure
 
         public IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
+            
+            var prefix = templateName;
+            if (!string.IsNullOrEmpty(templateVersion))
+            {
+                prefix += "_" + templateVersion;
+                if (!string.IsNullOrEmpty(mappingName))
+                    prefix += "_" + mappingName;
+            }
+            var containerClient = GetMappingsContainer();
+            var blobs = containerClient.GetBlobs(BlobTraits.Metadata, BlobStates.None, prefix);
+            var items = blobs
+                .Select(o => new BlobContentItemSummary(containerClient.Uri, o));
+            if (string.IsNullOrEmpty(templateVersion) && !string.IsNullOrEmpty(mappingName))
+            {
+                items = items.Where(o => o.Name.EndsWith(mappingName));
+            }
+            return items;
         }
 
         public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)

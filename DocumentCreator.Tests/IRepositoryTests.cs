@@ -266,6 +266,38 @@ namespace DocumentCreator
             await Assert.ThrowsAsync<ArgumentNullException>(() => Repository.GetMapping("T2006", templateVersion, null, mappingVersion));
         }
 
+        [Fact]
+        public async Task GetMappings_TemplateNameOnly_OK()
+        {
+            await Repository.CreateTemplate("T2008", CreateStream(2));
+            await Repository.CreateMapping("T2008", "M2008A", CreateZeroStream(2));
+            await Repository.CreateMapping("T2008", "M2008B", CreateZeroStream(3));
+            await Repository.CreateMapping("T2008", "M2008C", CreateZeroStream(4));
+
+            var result = Repository.GetMappings("T2008", null);
+
+            Assert.Equal(3, result.Count());
+            var i = 2;
+            result.ToList().ForEach(o => AssertMapping(o, i++));
+        }
+
+        [Fact]
+        public async Task GetMappings_TemplateAndVersion_OK()
+        {
+            var template = await Repository.CreateTemplate("T2009", CreateStream(2));
+            var templateVersion = template.Name.Split('_')[1];
+            await Repository.CreateMapping("T2009", "M2009A", CreateZeroStream(2));
+            await Repository.CreateMapping("T2009", "M2009B", CreateZeroStream(3));
+
+            await Repository.CreateTemplate("T2009", CreateStream(3));
+            await Repository.CreateMapping("T2009", "M2009D", CreateZeroStream(4));
+
+            var result = Repository.GetMappings("T2009", templateVersion, null);
+            Assert.Equal(2, result.Count());
+            var i = 2;
+            result.ToList().ForEach(o => AssertMapping(o, i++));
+        }
+
 
         [Fact]
         public async Task CreateDocument_OK()
