@@ -65,10 +65,10 @@ namespace DocumentCreator
         [Fact]
         public void GetMappings_TemplateNameAndVersion_OK()
         {
-            repository.Setup(r => r.GetMappings("T01", "V01", null)).Returns(new List<ContentItemSummary>()
+            repository.Setup(r => r.GetMappings("T01", "V01", null)).Returns(new List<MappingContentSummary>()
             {
-                new ContentItemSummary() { Name = "T01_V01_M01_V03", FileName = "T01_V01_M01_V03.xlsm", Path = "/files/T01_V01_M01_V03.xlsm", Size = 42, Timestamp = MockData.Timestamp(1) },
-                new ContentItemSummary() { Name = "T02_V02_M02_V03", FileName = "T02_V02_M02_V03.xlsm", Path = "/files/T02_V02_M02_V03.xlsm", Size = 43, Timestamp = MockData.Timestamp(2) },
+                new MappingContentSummary() { Name = "T01_V01_M01_V03", TemplateName="T01", TemplateVersion ="V01", MappingName ="M01", MappingVersion ="V01", FileName = "T01_V01_M01_V03.xlsm", Path = "/files/T01_V01_M01_V03.xlsm", Size = 42, Timestamp = MockData.Timestamp(1) },
+                new MappingContentSummary() { Name = "T02_V02_M02_V03", TemplateName="T02", TemplateVersion ="V02", MappingName ="M02", MappingVersion ="V03", FileName = "T02_V02_M02_V03.xlsm", Path = "/files/T02_V02_M02_V03.xlsm", Size = 43, Timestamp = MockData.Timestamp(2) },
             });
 
             var result = processor.GetMappings("T01", "V01");
@@ -78,10 +78,10 @@ namespace DocumentCreator
         [Fact]
         public void GetMappings_All_OK()
         {
-            repository.Setup(r => r.GetMappings("T01", "V01", "M01")).Returns(new List<ContentItemSummary>()
+            repository.Setup(r => r.GetMappings("T01", "V01", "M01")).Returns(new List<MappingContentSummary>()
             {
-                new ContentItemSummary() { Name = "T01_V01_M01_V01", FileName = "T01_V01_M01_V01.xlsm", Path = "/files/T01_V01_M01_V01.xlsm", Size = 42, Timestamp = MockData.Timestamp(1) },
-                new ContentItemSummary() { Name = "T02_V02_M01_V02", FileName = "T02_V02_M01_V02.xlsm", Path = "/files/T02_V02_M01_V01.xlsm", Size = 43, Timestamp = MockData.Timestamp(2) },
+                new MappingContentSummary() { Name = "T01_V01_M01_V01", TemplateName="T01", TemplateVersion ="V01", MappingName ="M01", MappingVersion ="V01", FileName = "T01_V01_M01_V01.xlsm", Path = "/files/T01_V01_M01_V01.xlsm", Size = 42, Timestamp = MockData.Timestamp(1) },
+                new MappingContentSummary() { Name = "T02_V02_M01_V02", TemplateName="T02", TemplateVersion ="V02", MappingName ="M01", MappingVersion ="V02", FileName = "T02_V02_M01_V02.xlsm", Path = "/files/T02_V02_M01_V01.xlsm", Size = 43, Timestamp = MockData.Timestamp(2) },
             });
 
             var result = processor.GetMappings("T01", "V01", "M01");
@@ -91,8 +91,8 @@ namespace DocumentCreator
         [Fact]
         public void GetMappings_NotExistingParams_Empty()
         {
-            repository.Setup(r => r.GetMappings("XXX", "XXX", null)).Returns(new List<ContentItemSummary>());
-            repository.Setup(r => r.GetMappings("XXX", "XXX", "XXX")).Returns(new List<ContentItemSummary>());
+            repository.Setup(r => r.GetMappings("XXX", "XXX", null)).Returns(new List<MappingContentSummary>());
+            repository.Setup(r => r.GetMappings("XXX", "XXX", "XXX")).Returns(new List<MappingContentSummary>());
 
             Assert.Empty(processor.GetMappings("XXX", "XXX", null));
             Assert.Empty(processor.GetMappings("XXX", "XXX", "XXX"));

@@ -23,8 +23,10 @@ namespace DocumentCreator
             return new AzureBlobRepository(blobServiceClient);
         }
 
+        protected override string TemplateNamePattern => "[A-Za-z0-9]+";
         protected override string TemplateFilePattern => "[A-Za-z0-9]+.docx";
 
+        protected override string MappingNamePattern => "[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+";
         protected override string MappingFilePattern => "[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+.xlsm";
 
 

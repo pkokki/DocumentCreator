@@ -41,7 +41,7 @@ namespace DocumentCreator
 
         public async Task<MappingDetails> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
         {
-            ContentItem content;
+            MappingContent content;
             if (mappingVersion == null)
                 content = repository.GetLatestMapping(templateName, templateVersion, mappingName);
             else
@@ -96,14 +96,14 @@ namespace DocumentCreator
             return response;
         }
 
-        private Mapping Transform(ContentItemSummary content)
+        private Mapping Transform(MappingContentSummary content)
         {
             var mapping = new Mapping();
             Transform(content, mapping);
             return mapping;
         }
 
-        private MappingDetails TransformFull(ContentItem content)
+        private MappingDetails TransformFull(MappingContent content)
         {
             if (content != null)
             {
@@ -118,14 +118,13 @@ namespace DocumentCreator
             return null;
         }
 
-        private void Transform(ContentItemSummary content, Mapping mapping)
+        private void Transform(MappingContentSummary content, Mapping mapping)
         {
-            var parts = content.Name.Split('_');
             mapping.FileName = content.FileName;
-            mapping.TemplateName = parts[0];
-            mapping.TemplateVersion = parts[1];
-            mapping.MappingName = parts[2];
-            mapping.MappingVersion = parts[3];
+            mapping.TemplateName = content.TemplateName;
+            mapping.TemplateVersion = content.TemplateVersion;
+            mapping.MappingName = content.MappingName;
+            mapping.MappingVersion = content.MappingVersion;
             mapping.Timestamp = content.Timestamp;
             mapping.Size = content.Size;
         }

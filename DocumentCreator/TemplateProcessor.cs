@@ -55,7 +55,7 @@ namespace DocumentCreator
             return TransformFull(content, fields);
         }
 
-        private TemplateDetails TransformFull(ContentItem contentItem, IEnumerable<TemplateField> fields)
+        private TemplateDetails TransformFull(TemplateContent contentItem, IEnumerable<TemplateField> fields)
         {
             var template = new TemplateDetails();
             Transform(contentItem, template);
@@ -63,19 +63,18 @@ namespace DocumentCreator
             template.Fields = fields;
             return template;
         }
-        private Template Transform(ContentItemSummary contentItem)
+        private Template Transform(TemplateContentSummary contentItem)
         {
             var template = new Template();
             Transform(contentItem, template);
             return template;
         }
 
-        private void Transform(ContentItemSummary contentItem, Template template)
+        private void Transform(TemplateContentSummary contentItem, Template template)
         {
-            var parts = contentItem.Name.Split('_');
             template.FileName = contentItem.FileName;
-            template.TemplateName = parts[0];
-            template.Version = parts[1];
+            template.TemplateName = contentItem.TemplateName;
+            template.Version = contentItem.TemplateVersion;
             template.Timestamp = contentItem.Timestamp;
             template.Size = contentItem.Size;
         }

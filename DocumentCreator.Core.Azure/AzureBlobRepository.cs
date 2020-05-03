@@ -40,7 +40,11 @@ namespace DocumentCreator.Core.Azure
         /// <summary>
         /// The key used to store the version number in the blob metadata
         /// </summary>
-        internal const string VERSION_KEY = "DC_VERSION";
+        internal const string TEMPLATE_NAME_KEY = "dc-template-name";
+        internal const string TEMPLATE_VERSION_KEY = "dc-template-version";
+        internal const string MAPPING_NAME_KEY = "dc-mapping-name";
+        internal const string MAPPING_VERSION_KEY = "dc-mapping-version";
+        internal const string DOCUMENT_ID = "dc-document-id";
 
         /// <summary>
         /// The <see cref="BlobServiceClient"/> used to access the containers.
@@ -102,29 +106,33 @@ namespace DocumentCreator.Core.Azure
 
         #region Template-related interface methods
 
-        public IEnumerable<ContentItemSummary> GetTemplates()
+        public IEnumerable<TemplateContentSummary> GetTemplates()
         {
             var containerClient = GetTemplatesContainer();
             var blobs = containerClient.GetBlobs(BlobTraits.Metadata);
             return blobs
-                .Select(o => new BlobContentItemSummary(containerClient.Uri, o))
+                .Select(o => ContentItemFactory.BuildTemplateSummary($"{containerClient.Uri}/{o.Name}", o))
                 .ToList();
         }
 
-        public IEnumerable<ContentItemSummary> GetTemplateVersions(string templateName)
+        public IEnumerable<TemplateContentSummary> GetTemplateVersions(string templateName)
         {
             var containerClient = GetTemplatesContainer();
             return containerClient.GetBlobs(BlobTraits.Metadata, BlobStates.Snapshots, templateName)
-                .Select(o => new BlobContentItemSummary(containerClient.Uri, o))
+                .Select(o => ContentItemFactory.BuildTemplateSummary($"{containerClient.Uri}/{o.Name}", o))
                 .ToList();
         }
 
-        public ContentItem GetLatestTemplate(string templateName)
+        public TemplateContent GetLatestTemplate(string templateName)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             try
             {
-                return DownloadContentItem(GetTemplatesContainer(), $"{templateName}.docx");
+                var containerClient = GetTemplatesContainer();
+                var blobFileName = $"{templateName}.docx";
+                var blobClient = containerClient.GetBlobClient(blobFileName);
+                var blobDownloadInfo = DownloadContentItem(blobClient);
+                return ContentItemFactory.BuildTemplate(blobClient.Uri, blobDownloadInfo);
             }
             catch (RequestFailedException ex)
             {
@@ -134,7 +142,7 @@ namespace DocumentCreator.Core.Azure
             return null;
         }
 
-        public ContentItem GetTemplate(string templateName, string templateVersion = null)
+        public TemplateContent GetTemplate(string templateName, string templateVersion = null)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(templateVersion))
@@ -146,10 +154,12 @@ namespace DocumentCreator.Core.Azure
                 var containerClient = GetTemplatesContainer();
                 var blobItem = containerClient
                     .GetBlobs(BlobTraits.Metadata, BlobStates.Snapshots, templateName)
-                    .FirstOrDefault(o => o.Metadata[VERSION_KEY] == templateVersion);
+                    .FirstOrDefault(o => o.Metadata[TEMPLATE_VERSION_KEY] == templateVersion);
                 if (blobItem == null)
                     return null;
-                return DownloadContentItem(GetTemplatesContainer(), blobItem);
+                var blobClient = containerClient.GetBlobClient(blobItem.Name);
+                var contents = DownloadContentItem(blobClient, blobItem);
+                return ContentItemFactory.BuildTemplate(blobClient.Uri, blobItem, contents);
             }
         }
 
@@ -164,7 +174,7 @@ namespace DocumentCreator.Core.Azure
         /// An <see cref="ArgumentNullException"/> will be thrown if templateName or contents are null or empty.
         /// A <see cref="RequestFailedException"/> will be thrown if a failure occurs.
         /// </remarks>
-        public async Task<ContentItem> CreateTemplate(string templateName, Stream contents)
+        public async Task<TemplateContent> CreateTemplate(string templateName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (contents == null || contents.Length == 0) throw new ArgumentNullException(nameof(contents));
@@ -173,21 +183,18 @@ namespace DocumentCreator.Core.Azure
             var blobFileName = $"{templateName}.docx";
             var blobClient = containerClient.GetBlobClient(blobFileName);
 
-            var metadata = await CreateSnapshotAndVersionMetadata(blobClient);
-            var version = metadata[VERSION_KEY];
+            var templateVersion = await TryCreateSnapshot(blobClient, TEMPLATE_VERSION_KEY);
+
+            var metadata = new Dictionary<string, string>
+            {
+                [TEMPLATE_NAME_KEY] = templateName,
+                [TEMPLATE_VERSION_KEY] = templateVersion
+            };
+
             var response = await blobClient.UploadAsync(contents, metadata: metadata);
             var blobContentInfo = response.Value;
 
-            return new ContentItem()
-            {
-                Name = $"{templateName}_{version}",
-                FileName = blobFileName,
-                Path = blobClient.Uri.ToString(),
-                Timestamp = blobContentInfo.LastModified.LocalDateTime,
-                Size = (int)contents.Length,
-                Buffer = contents
-            };
-
+            return ContentItemFactory.BuildTemplate(blobClient.Uri, blobContentInfo, metadata, contents);
         }
 
         #endregion
@@ -206,7 +213,7 @@ namespace DocumentCreator.Core.Azure
         /// An <see cref="ArgumentNullException"/> will be thrown if any of the parameters are null or empty.
         /// A <see cref="RequestFailedException"/> will be thrown if a failure occurs.
         /// </remarks>
-        public async Task<ContentItem> CreateMapping(string templateName, string mappingName, Stream contents)
+        public async Task<MappingContent> CreateMapping(string templateName, string mappingName, Stream contents)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
@@ -220,24 +227,23 @@ namespace DocumentCreator.Core.Azure
             var blobFileName = $"{templateName}_{templateVersion}_{mappingName}.xlsm";
             var blobClient = containerClient.GetBlobClient(blobFileName);
 
-            var metadata = await CreateSnapshotAndVersionMetadata(blobClient);
-            var version = metadata[VERSION_KEY];
+            var mappingVersion = await TryCreateSnapshot(blobClient, MAPPING_VERSION_KEY);
+
+            var metadata = new Dictionary<string, string>
+            {
+                [TEMPLATE_NAME_KEY] = templateName,
+                [TEMPLATE_VERSION_KEY] = templateVersion,
+                [MAPPING_NAME_KEY] = mappingName,
+                [MAPPING_VERSION_KEY] = mappingVersion
+            };
+
             var response = await blobClient.UploadAsync(contents, metadata: metadata);
             var blobContentInfo = response.Value;
 
-            var name = $"{templateName}_{templateVersion}_{mappingName}_{version}";
-            return new ContentItem()
-            {
-                Name = name,
-                FileName = blobFileName,
-                Path = blobClient.Uri.ToString(),
-                Timestamp = blobContentInfo.LastModified.LocalDateTime,
-                Size = (int)contents.Length,
-                Buffer = contents
-            };
+            return ContentItemFactory.BuildMapping(blobClient.Uri, blobContentInfo, metadata, contents);
         }
 
-        public ContentItem GetLatestMapping(string templateName, string templateVersion, string mappingName)
+        public MappingContent GetLatestMapping(string templateName, string templateVersion, string mappingName)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
 
@@ -249,7 +255,11 @@ namespace DocumentCreator.Core.Azure
             var mappingVersionName = $"{templateName}_{templateVersion}_{mappingName}";
             try
             {
-                return DownloadContentItem(GetMappingsContainer(), $"{mappingVersionName}.xlsm");
+                var containerClient = GetMappingsContainer();
+                var blobFileName = $"{mappingVersionName}.xlsm";
+                var blobClient = containerClient.GetBlobClient(blobFileName);
+                var blobDownloadInfo = DownloadContentItem(blobClient);
+                return ContentItemFactory.BuildMapping(blobClient.Uri, blobDownloadInfo);
             }
             catch (RequestFailedException ex)
             {
@@ -259,7 +269,7 @@ namespace DocumentCreator.Core.Azure
             return null;
         }
 
-        public async Task<ContentItem> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
+        public async Task<MappingContent> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             if (string.IsNullOrEmpty(mappingName)) throw new ArgumentNullException(nameof(mappingName));
@@ -276,14 +286,16 @@ namespace DocumentCreator.Core.Azure
                 var containerClient = GetMappingsContainer();
                 var blobItem = containerClient
                     .GetBlobs(BlobTraits.Metadata, BlobStates.Snapshots, prefix)
-                    .FirstOrDefault(o => o.Metadata[VERSION_KEY] == mappingVersion);
+                    .FirstOrDefault(o => o.Metadata[MAPPING_VERSION_KEY] == mappingVersion);
                 if (blobItem == null)
                     return null;
-                return DownloadContentItem(containerClient, blobItem);
+                var blobClient = containerClient.GetBlobClient(blobItem.Name);
+                var contents = DownloadContentItem(blobClient, blobItem);
+                return ContentItemFactory.BuildMapping(blobClient.Uri, blobItem, contents);
             }
         }
 
-        public IEnumerable<ContentItemSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
+        public IEnumerable<MappingContentSummary> GetMappings(string templateName, string templateVersion, string mappingName = null)
         {
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
             
@@ -297,7 +309,7 @@ namespace DocumentCreator.Core.Azure
             var containerClient = GetMappingsContainer();
             var blobs = containerClient.GetBlobs(BlobTraits.Metadata, BlobStates.None, prefix);
             var items = blobs
-                .Select(o => new BlobContentItemSummary(containerClient.Uri, o));
+                .Select(o => ContentItemFactory.BuildMappingSummary($"{containerClient.Uri}/{o.Name}", o));
             if (string.IsNullOrEmpty(templateVersion) && !string.IsNullOrEmpty(mappingName))
             {
                 items = items.Where(o => o.Name.EndsWith(mappingName));
@@ -326,7 +338,7 @@ namespace DocumentCreator.Core.Azure
         /// An <see cref="ArgumentNullException"/> will be thrown if any of the parameters are null or empty.
         /// A <see cref="RequestFailedException"/> will be thrown if a failure occurs.
         /// </remarks>
-        public async Task<ContentItem> CreateDocument(string templateName, string mappingName, Stream contents)
+        public async Task<DocumentContent> CreateDocument(string templateName, string mappingName, Stream contents)
         {
             // Check
             if (string.IsNullOrEmpty(templateName)) throw new ArgumentNullException(nameof(templateName));
@@ -340,27 +352,28 @@ namespace DocumentCreator.Core.Azure
             if (mappingVersion == null)
                 throw new ArgumentException($"Mapping {mappingName} not found.");
 
-            var documentId = DateTime.Now.Ticks;
+            var documentId = DateTime.Now.Ticks.ToString();
             var containerClient = GetDocumentsContainer();
             var name = $"{templateName}_{templateVersion}_{mappingName}_{mappingVersion}_{documentId}";
             var blobFileName = $"{name}.docx";
             var blobClient = containerClient.GetBlobClient(blobFileName);
-            
+
+            var metadata = new Dictionary<string, string>
+            {
+                [TEMPLATE_NAME_KEY] = templateName,
+                [TEMPLATE_VERSION_KEY] = templateVersion,
+                [MAPPING_NAME_KEY] = mappingName,
+                [MAPPING_VERSION_KEY] = mappingVersion,
+                [DOCUMENT_ID] = documentId
+            };
+
             var response = await blobClient.UploadAsync(contents, metadata: null);
             var blobContentInfo = response.Value;
-            
-            return new ContentItem()
-            {
-                Name = name,
-                FileName = blobFileName,
-                Path = blobClient.Uri.ToString(),
-                Timestamp = blobContentInfo.LastModified.LocalDateTime,
-                Size = (int)contents.Length,
-                Buffer = contents
-            };
+
+            return ContentItemFactory.BuildDocument(blobClient.Uri, blobContentInfo, metadata, contents);
         }
 
-        public ContentItem GetDocument(string documentId)
+        public DocumentContent GetDocument(string documentId)
         {
             throw new NotImplementedException();
             //if (string.IsNullOrEmpty(documentId))
@@ -374,7 +387,7 @@ namespace DocumentCreator.Core.Azure
             //return FileContentItem.Create(documentFileName);
         }
 
-        public IEnumerable<ContentItemSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null)
+        public IEnumerable<DocumentContentSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null)
         {
             throw new NotImplementedException();
         }
@@ -418,41 +431,37 @@ namespace DocumentCreator.Core.Azure
             return mappingsContainer;
         }
 
-        private ContentItem DownloadContentItem(BlobContainerClient blobContainerClient, string blobFileName)
+        private BlobDownloadInfo DownloadContentItem(BlobClient blobClient)
         {
-            var blobClient = blobContainerClient.GetBlobClient(blobFileName);
 
             var response = blobClient.Download();
             if (response == null)
                 return null;
             var blobDownloadInfo = response.Value;
-            return new BlobContentItem(blobContainerClient.Uri, blobFileName, blobDownloadInfo);
+            return blobDownloadInfo;
         }
 
-        private ContentItem DownloadContentItem(BlobContainerClient blobContainerClient, BlobItem blobItem)
+        private Stream DownloadContentItem(BlobClient blobClient, BlobItem blobItem)
         {
-            var blobClient = blobContainerClient.GetBlobClient(blobItem.Name);
 
             var stream = new MemoryStream();
             if (string.IsNullOrEmpty(blobItem.Snapshot))
                 blobClient.DownloadTo(stream);
             else
                 blobClient.WithSnapshot(blobItem.Snapshot).DownloadTo(stream);
-
-            return new BlobContentItem(blobContainerClient.Uri, blobItem, stream);
+            return stream;
         }
 
-        private async Task<IDictionary<string, string>> CreateSnapshotAndVersionMetadata(BlobClient blobClient) 
+        private async Task<string> TryCreateSnapshot(BlobClient blobClient, string versionKey) 
         { 
             var version = 1;
-            IDictionary<string, string> metadata = new Dictionary<string, string>();
             try
             {
                 var propResponse = await blobClient.GetPropertiesAsync();
                 if (propResponse != null)
                 {
-                    metadata = propResponse.Value.Metadata;
-                    if (metadata.TryGetValue(VERSION_KEY, out string prevVersion))
+                    var metadata = propResponse.Value.Metadata;
+                    if (metadata.TryGetValue(versionKey, out string prevVersion))
                         version = int.Parse(prevVersion) + 1;
                     else
                         throw new InvalidOperationException("version not found in blob metadata");
@@ -464,8 +473,7 @@ namespace DocumentCreator.Core.Azure
                 if (ex.Status != 404)
                     throw ex;
             }
-            metadata[VERSION_KEY] = Convert.ToString(version);
-            return metadata;
+            return Convert.ToString(version);
         }
 
         private async Task<string> GetLatestTemplateVersion(string templateName)
@@ -479,7 +487,7 @@ namespace DocumentCreator.Core.Azure
                 if (propResponse != null)
                 {
                     var metadata = propResponse.Value.Metadata;
-                    if (metadata.TryGetValue(VERSION_KEY, out string version))
+                    if (metadata.TryGetValue(TEMPLATE_VERSION_KEY, out string version))
                         return version;
                 }
             }
@@ -502,7 +510,7 @@ namespace DocumentCreator.Core.Azure
                 if (propResponse != null)
                 {
                     var metadata = propResponse.Value.Metadata;
-                    if (metadata.TryGetValue(VERSION_KEY, out string version))
+                    if (metadata.TryGetValue(MAPPING_VERSION_KEY, out string version))
                         return version;
                 }
             }
