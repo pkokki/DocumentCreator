@@ -275,31 +275,46 @@ namespace DocumentCreator.Repository
 
         public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)
         {
-            var mappings = Directory.GetFiles(MappingsFolder, "*.xlsm")
-                .Select(f => new { FullName = f, NameParts = Path.GetFileNameWithoutExtension(f).Split('_', 4) })
-                .Select(a => new { a.FullName, TemplateName = a.NameParts[0], MappingName = a.NameParts[2], Version = a.NameParts[3] })
-                .Where(a => mappingName == null || string.Equals(a.MappingName, mappingName, StringComparison.InvariantCultureIgnoreCase))
-                .GroupBy(a => mappingName == null ? a.MappingName : a.TemplateName)
-                .Select(a => a.OrderBy(o => o.Version).First())
-                .Select(a => new ContentItemStats()
-                {
-                    MappingName = a.MappingName,
-                    TemplateName = a.TemplateName,
-                    TimeStamp = new FileInfo(a.FullName).CreationTime,
-                    Templates = mappingName != null ? 1 : Directory.GetFiles(MappingsFolder, $"*_*_{a.MappingName}_*.xlsm")
-                        .Select(o => Path.GetFileNameWithoutExtension(o).Split('_', 2).First())
-                        .Distinct()
-                        .Count(),
-                    Documents = Directory.GetFiles(DocumentsFolder, $"{(mappingName == null ? "*" : a.TemplateName)}_*_{a.MappingName}_*_*.docx")
-                        .Length
-                })
-                .ToList();
-            return mappings;
+            var searchPattern = mappingName == null ? "*.docx" : $"*_*_{mappingName}_*.docx";
+
+            var allDocuments = Directory.GetFiles(DocumentsFolder, searchPattern)
+                .Select(o => ContentItemFactory.BuildDocumentSummary(o));
+
+            var allMappings = Directory.GetFiles(MappingsFolder, "*.xlsm")
+                .Select(o => ContentItemFactory.BuildMappingSummary(o))
+                .GroupBy(o => new { o.TemplateName, o.TemplateVersion, o.MappingName })
+                .Select(o => o.OrderByDescending(o => o.TemplateVersion).First());
+
+            if (string.IsNullOrEmpty(mappingName))
+            {
+                return allMappings
+                    .GroupBy(o => o.MappingName)
+                    .Select(g => new ContentItemStats()
+                    {
+                        MappingName = g.Key,
+                        TemplateName = null,
+                        Templates = g.Select(o => o.TemplateName).Distinct().Count(),
+                        Documents = allDocuments.Count(d => d.MappingName == g.Key)
+                    });
+            }
+            else
+            {
+                return allMappings
+                    .Where(o => string.Equals(mappingName, o.MappingName, StringComparison.CurrentCultureIgnoreCase))
+                    .GroupBy(o => o.TemplateName)
+                    .Select(g => new ContentItemStats()
+                    {
+                        MappingName = mappingName,
+                        TemplateName = g.Key,
+                        Templates = 1,
+                        Documents = allDocuments.Count(d => d.MappingName == mappingName && d.TemplateName == g.Key)
+                    });
+            }
         }
 
-        public IEnumerable<DocumentContentSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null)
+        public IEnumerable<DocumentContentSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingName = null, string mappingVersion = null)
         {
-            var pathPattern = $"{templateName ?? "*"}_{templateVersion ?? "*"}_{mappingsName ?? "*"}_{mappingsVersion ?? "*"}_*.docx";
+            var pathPattern = $"{templateName ?? "*"}_{templateVersion ?? "*"}_{mappingName ?? "*"}_{mappingVersion ?? "*"}_*.docx";
             return Directory.GetFiles(DocumentsFolder, pathPattern).Select(path => ContentItemFactory.BuildDocumentSummary(path));
         }
 
@@ -313,7 +328,8 @@ namespace DocumentCreator.Repository
                 .FirstOrDefault();
             if (documentFileName == null)
                 return null;
-            return ContentItemFactory.BuildDocument(documentFileName);
+
+            return ContentItemFactory.BuildDocument(documentFileName, ReadContents(documentFileName));
         }
     }
 }

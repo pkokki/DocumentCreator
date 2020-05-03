@@ -2,6 +2,7 @@
 using DocumentCreator.Core.Azure;
 using DocumentCreator.Core.Repository;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -29,7 +30,10 @@ namespace DocumentCreator
         protected override string MappingNamePattern => "[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+";
         protected override string MappingFilePattern => "[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+.xlsm";
 
+        protected override string DocumentNamePattern => "[A-Za-z0-9]+";
+        protected override string DocumentFilePattern => "[A-Za-z0-9]+.docx";
 
+        
         //private readonly Dictionary<Tuple<string, string>, Tuple<BlobItem, BlobProperties, Stream>> mockItems
         //    = new Dictionary<Tuple<string, string>, Tuple<BlobItem, BlobProperties, Stream>>();
         //private readonly Dictionary<Tuple<string, string>, List<Tuple<BlobItem, BlobProperties, Stream>>> mockSnapshots 
@@ -108,12 +112,12 @@ namespace DocumentCreator
         //    client.Setup(c => c.GetPropertiesAsync(null, default))
         //        .Callback(() => responseBlobProperties = CallbackMockResponseBlobProperties(containerName, blobName))
         //        .Returns(() => Task.FromResult(responseBlobProperties));
-            
+
         //    Response<BlobDownloadInfo> responseBlobDownloadInfo = null;
         //    client.Setup(c => c.Download())
         //        .Callback(() => responseBlobDownloadInfo = CallbackMockDownloadResponse(containerName, blobName))
         //        .Returns(() => responseBlobDownloadInfo);
-            
+
         //    return client.Object;
         //}
 
@@ -205,6 +209,6 @@ namespace DocumentCreator
         //        );
         //}
 
-        
+
     }
 }

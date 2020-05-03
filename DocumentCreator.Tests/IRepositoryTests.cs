@@ -286,6 +286,47 @@ namespace DocumentCreator
             result.ToList().ForEach(o => AssertMapping(o, i++));
         }
 
+        [Fact]
+        public async Task GetMappingStats_OK()
+        {
+            var t1 = await Repository.CreateTemplate("T2100", CreateZeroStream(1));
+            var t2 = await Repository.CreateTemplate("T2101", CreateZeroStream(2));
+            var t3 = await Repository.CreateTemplate("T2102", CreateZeroStream(3));
+
+            var t1_m1 = await Repository.CreateMapping("T2100", "M2100", CreateZeroStream(11));
+            var t1_m2 = await Repository.CreateMapping("T2100", "M2101", CreateZeroStream(12));
+            var t2_m1 = await Repository.CreateMapping("T2101", "M2100", CreateZeroStream(21));
+            var t3_m1 = await Repository.CreateMapping("T2102", "M2100", CreateZeroStream(31));
+
+            await Repository.CreateDocument("T2100", "M2100", CreateStream(111));
+            await Repository.CreateDocument("T2100", "M2100", CreateStream(111));
+            await Repository.CreateDocument("T2100", "M2100", CreateStream(112));
+            await Repository.CreateDocument("T2100", "M2101", CreateStream(121));
+            await Repository.CreateDocument("T2101", "M2100", CreateStream(211));
+
+            var result1 = Repository.GetMappingStats();
+
+            var a1 = result1.First(o => o.MappingName == "M2100");
+            Assert.Null(a1.TemplateName);
+            Assert.Equal(3, a1.Templates);
+            Assert.Equal(4, a1.Documents);
+            var a2 = result1.First(o => o.MappingName == "M2101");
+            Assert.Null(a2.TemplateName);
+            Assert.Equal(1, a2.Templates);
+            Assert.Equal(1, a2.Documents);
+
+            var result2 = Repository.GetMappingStats("M2100");
+
+            var b1 = result2.First(o => o.MappingName == "M2100" && o.TemplateName == "T2100");
+            Assert.Equal(1, b1.Templates);
+            Assert.Equal(3, b1.Documents);
+            var b2 = result2.First(o => o.MappingName == "M2100" && o.TemplateName == "T2101");
+            Assert.Equal(1, b2.Templates);
+            Assert.Equal(1, b2.Documents);
+            var b3 = result2.First(o => o.MappingName == "M2100" && o.TemplateName == "T2102");
+            Assert.Equal(1, b3.Templates);
+            Assert.Equal(0, b3.Documents);
+        }
 
         [Fact]
         public async Task CreateDocument_OK()
@@ -318,7 +359,74 @@ namespace DocumentCreator
             await Assert.ThrowsAsync<ArgumentNullException>(() => Repository.CreateDocument("XXX", "XXX", CreateZeroStream(0)));
         }
 
-        
+        [Fact]
+        public async Task GetDocument_OK()
+        {
+            await Repository.CreateTemplate("T3100", CreateZeroStream(2));
+            await Repository.CreateMapping("T3100", "M3100", CreateZeroStream(2));
+            var docId = (await Repository.CreateDocument("T3100", "M3100", CreateStream(42))).Identifier;
+
+            var result = Repository.GetDocument(docId);
+
+            AssertDocument(result, CreateBytes(42));
+        }
+
+        [Fact]
+        public async Task GetDocument_NotExisting_Null()
+        {
+            await Repository.CreateTemplate("T3100", CreateZeroStream(2));
+            await Repository.CreateMapping("T3100", "M3100", CreateZeroStream(2));
+            var docId = (await Repository.CreateDocument("T3100", "M3100", CreateStream(42))).Identifier;
+
+            var result = Repository.GetDocument(docId + "1");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetDocument_NullIdentifier_Throws()
+        {
+            Assert.Throws<ArgumentNullException>(() => Repository.GetDocument(null));
+        }
+
+        [Fact]
+        public async Task GetDocuments_OK()
+        {
+            var t1 = await Repository.CreateTemplate("T3101", CreateZeroStream(2));
+            await Repository.CreateMapping("T3101", "M3101", CreateZeroStream(21));
+            var d1 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(41))).Identifier;
+            var d2 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(42))).Identifier;
+
+            await Repository.CreateTemplate("T3101", CreateZeroStream(2));
+            await Repository.CreateMapping("T3101", "M3101", CreateZeroStream(22));
+            var d3 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(43))).Identifier;
+
+            var t2 = await Repository.CreateTemplate("T3102", CreateZeroStream(3));
+            var m2 = await Repository.CreateMapping("T3102", "M3102", CreateZeroStream(31));
+            var d4 = (await Repository.CreateDocument("T3102", "M3102", CreateStream(44))).Identifier;
+            var d5 = (await Repository.CreateDocument("T3102", "M3102", CreateStream(45))).Identifier;
+
+            var r1 = Repository.GetDocuments();
+            Assert.Equal(5, r1.Where(o => o.TemplateName.StartsWith("T310")).Count());
+            r1.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
+
+            var r2 = Repository.GetDocuments("T3101");
+            Assert.Equal(3, r2.Count());
+            r2.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
+
+            var r3 = Repository.GetDocuments("T3101", t1.TemplateVersion);
+            Assert.Equal(2, r3.Count());
+            r3.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
+
+            var r4 = Repository.GetDocuments("T3101", null, "M3101");
+            Assert.Equal(3, r4.Count());
+            r4.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
+
+            var r5 = Repository.GetDocuments("T3102", t2.TemplateVersion, "M3102", m2.MappingVersion);
+            Assert.Equal(2, r5.Count());
+            r5.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
+
+        }
 
         protected virtual string PathPattern => @"([a-zA-Z]:|\.)?[\\\/](?:[a-zA-Z0-9]+[\\\/])*([A-Za-z0-9_]+)\.[A-Za-z]+";
         protected virtual string TemplateNamePattern => "[A-Za-z0-9]+_[0-9]+";
@@ -347,7 +455,7 @@ namespace DocumentCreator
             var ms = content.Buffer.ToMemoryStream();
             Assert.Equal(buffer, ms.ToArray());
         }
-        private void AssertDocument(ContentItemSummary content, int size)
+        protected void AssertDocument(ContentItemSummary content, int size)
         {
             AssertContent(content, DocumentNamePattern, DocumentFilePattern, size);
         }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DocumentCreator.Core.Azure
@@ -319,7 +320,40 @@ namespace DocumentCreator.Core.Azure
 
         public IEnumerable<ContentItemStats> GetMappingStats(string mappingName = null)
         {
-            throw new NotImplementedException();
+            var documentsContainerClient = GetDocumentsContainer();
+            var allDocuments = documentsContainerClient
+                .GetBlobs(BlobTraits.Metadata, BlobStates.None, null)
+                .Select(o => ContentItemFactory.BuildDocumentSummary($"{documentsContainerClient.Uri}/{o.Name}", o));
+
+            var mappingContainerClient = GetMappingsContainer();
+            var allMappings = mappingContainerClient
+                .GetBlobs(BlobTraits.Metadata, BlobStates.None, null)
+                .Select(o => ContentItemFactory.BuildMappingSummary($"{mappingContainerClient.Uri}/{o.Name}", o));
+            if (string.IsNullOrEmpty(mappingName))
+            {
+                return allMappings
+                    .GroupBy(o => o.MappingName)
+                    .Select(g => new ContentItemStats()
+                    {
+                        MappingName = g.Key,
+                        TemplateName = null,
+                        Templates = g.Select(o => o.TemplateName).Distinct().Count(),
+                        Documents = allDocuments.Count(d => d.MappingName == g.Key)
+                    });
+            }
+            else
+            {
+                return allMappings
+                    .Where(o => string.Equals(mappingName, o.MappingName, StringComparison.CurrentCultureIgnoreCase))
+                    .GroupBy(o => o.TemplateName)
+                    .Select(g => new ContentItemStats()
+                    {
+                        MappingName = mappingName,
+                        TemplateName = g.Key,
+                        Templates = 1,
+                        Documents = allDocuments.Count(d => d.MappingName == mappingName && d.TemplateName == g.Key)
+                    });
+            }
         }
 
         #endregion
@@ -354,8 +388,8 @@ namespace DocumentCreator.Core.Azure
 
             var documentId = DateTime.Now.Ticks.ToString();
             var containerClient = GetDocumentsContainer();
-            var name = $"{templateName}_{templateVersion}_{mappingName}_{mappingVersion}_{documentId}";
-            var blobFileName = $"{name}.docx";
+            //var name = $"{templateName}_{templateVersion}_{mappingName}_{mappingVersion}_{documentId}";
+            var blobFileName = $"{documentId}.docx";
             var blobClient = containerClient.GetBlobClient(blobFileName);
 
             var metadata = new Dictionary<string, string>
@@ -367,7 +401,7 @@ namespace DocumentCreator.Core.Azure
                 [DOCUMENT_ID] = documentId
             };
 
-            var response = await blobClient.UploadAsync(contents, metadata: null);
+            var response = await blobClient.UploadAsync(contents, metadata: metadata);
             var blobContentInfo = response.Value;
 
             return ContentItemFactory.BuildDocument(blobClient.Uri, blobContentInfo, metadata, contents);
@@ -375,26 +409,70 @@ namespace DocumentCreator.Core.Azure
 
         public DocumentContent GetDocument(string documentId)
         {
-            throw new NotImplementedException();
-            //if (string.IsNullOrEmpty(documentId))
-            //    throw new ArgumentNullException(nameof(documentId));
-            //var pathPattern = $"*_{documentId}.docx";
-            //var documentFileName = Directory
-            //    .GetFiles(DocumentsFolder, pathPattern)
-            //    .FirstOrDefault();
-            //if (documentFileName == null)
-            //    return null;
-            //return FileContentItem.Create(documentFileName);
+            if (string.IsNullOrEmpty(documentId)) throw new ArgumentNullException(nameof(documentId));
+            var containerClient = GetDocumentsContainer();
+
+            var blobName = $"{documentId}.docx";
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            DocumentContent document = null;
+            try
+            {
+                var blobDownloadInfo = DownloadContentItem(blobClient);
+                document = ContentItemFactory.BuildDocument(blobClient.Uri, blobDownloadInfo);
+            }
+            catch (RequestFailedException ex)
+            {
+                if (ex.Status != 404)
+                    throw ex;
+            }
+            return document;
         }
 
         public IEnumerable<DocumentContentSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null)
         {
-            throw new NotImplementedException();
+            var containerClient = GetDocumentsContainer();
+            var documents = containerClient
+                .GetBlobs(BlobTraits.Metadata, BlobStates.None, null)
+                .Select(o => ContentItemFactory.BuildDocumentSummary($"{containerClient.Uri}/{o.Name}", o));
+
+            if (!string.IsNullOrEmpty(templateName))
+                documents = documents.Where(o => o.TemplateName == templateName);
+            if (!string.IsNullOrEmpty(templateVersion))
+                documents = documents.Where(o => o.TemplateVersion == templateVersion);
+            if (!string.IsNullOrEmpty(mappingsName))
+                documents = documents.Where(o => o.MappingName == mappingsName);
+            if (!string.IsNullOrEmpty(mappingsVersion))
+                documents = documents.Where(o => o.MappingVersion == mappingsVersion);
+            return documents;
         }
 
         public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
         {
-            throw new NotImplementedException();
+            var wwwContainerClient = blobServiceClient.GetBlobContainerClient("$web");
+            wwwContainerClient.CreateIfNotExists();
+            if (html != null)
+            {
+                var blobName = $"{htmlName}.html";
+                var blobClient = wwwContainerClient.GetBlobClient(blobName);
+
+                using var stream = new MemoryStream();
+                using var writer = new StreamWriter(stream, Encoding.UTF8);
+                writer.Write(html.Replace(htmlName + "/", htmlName + "_"));
+                writer.Flush();
+                stream.Position = 0;
+                
+                blobClient.Upload(stream);
+            }
+            if (images != null && images.Any())
+            {
+                foreach (var kvp in images)
+                {
+                    var blobName = $"{htmlName}_{kvp.Key}";
+                    var blobClient = wwwContainerClient.GetBlobClient(blobName);
+                    blobClient.Upload(new MemoryStream(kvp.Value));
+                }
+            }
         }
 
         #endregion

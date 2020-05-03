@@ -112,7 +112,7 @@ namespace DocumentCreator.Core.Azure
                 contents);
         }
 
-        internal static DocumentContentSummary BuildDocumentSummary(Uri blobUri, BlobItem blobItem)
+        internal static DocumentContentSummary BuildDocumentSummary(string blobUri, BlobItem blobItem)
         {
             return new DocumentContentSummary()
             {
@@ -123,12 +123,12 @@ namespace DocumentCreator.Core.Azure
                 MappingVersion = blobItem.Metadata[AzureBlobRepository.MAPPING_VERSION_KEY],
                 Identifier = blobItem.Metadata[AzureBlobRepository.DOCUMENT_ID],
                 FileName = blobItem.Name,
-                Path = blobUri.ToString(),
+                Path = blobUri,
                 Timestamp = blobItem.Properties.LastModified.Value.LocalDateTime,
                 Size = blobItem.Properties.ContentLength ?? DEFAULT_CONTENT_LENGTH
             };
         }
-        private static DocumentContent BuildDocument(Uri blobUri, IDictionary<string, string> metadata, DateTime timeStamp, Stream contents)
+        private static DocumentContent BuildDocument(Uri blobUri, IDictionary<string, string> metadata, DateTime timeStamp, long? contentLength, Stream contents)
         {
             var blobPath = blobUri.ToString();
             var blobFileName = blobPath;
@@ -143,13 +143,22 @@ namespace DocumentCreator.Core.Azure
                 FileName = Path.GetFileName(blobFileName),
                 Path = blobPath,
                 Timestamp = timeStamp,
-                Size = contents.Length,
+                Size = contentLength ?? DEFAULT_CONTENT_LENGTH,
                 Buffer = contents
             };
         }
+        internal static DocumentContent BuildDocument(Uri blobUri, BlobDownloadInfo blobDownloadInfo)
+        {
+            return BuildDocument(blobUri,
+                blobDownloadInfo.Details.Metadata,
+                blobDownloadInfo.Details.LastModified.LocalDateTime,
+                blobDownloadInfo.ContentLength,
+                blobDownloadInfo.Content
+                );
+        }
         internal static DocumentContent BuildDocument(Uri blobUri, BlobContentInfo blobContentInfo, Dictionary<string, string> metadata, Stream contents)
         {
-            return BuildDocument(blobUri, metadata, blobContentInfo.LastModified.LocalDateTime, contents);
+            return BuildDocument(blobUri, metadata, blobContentInfo.LastModified.LocalDateTime, contents.Length, contents);
         }
 
     }
