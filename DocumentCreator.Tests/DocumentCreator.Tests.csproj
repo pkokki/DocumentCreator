@@ -12,6 +12,19 @@
 
   <ItemGroup>
     <None Remove="Output\.copy" />
+    <None Remove="Resources\CanEvaluateMapAndGetUDF.json" />
+    <None Remove="Resources\ConvertTemplateWithImages.docx" />
+    <None Remove="Resources\CreateDocument.docx" />
+    <None Remove="Resources\CreateDocument.json" />
+    <None Remove="Resources\CreateDocument.xlsm" />
+    <None Remove="Resources\CreateMappingForTemplate.docx" />
+    <None Remove="Resources\CreateMappingForTemplate.xlsm" />
+    <None Remove="Resources\EvaluateForExcelExample01.docx" />
+    <None Remove="Resources\EvaluateForExcelExample01.json" />
+    <None Remove="Resources\FindTemplateFields001.docx" />
+    <None Remove="Resources\FindTemplateFields002.docx" />
+    <None Remove="Resources\OpenXmlSpreadsheetTests001.xlsm" />
+    <None Remove="Resources\UseForwardOwnCellValues.xlsm" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +53,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\CanEvaluateMapAndGetUDF.json" />
+    <Resource Include="Resources\ConvertTemplateWithImages.docx" />
+    <Resource Include="Resources\CreateDocument.docx" />
+    <Resource Include="Resources\CreateDocument.json" />
+    <Resource Include="Resources\CreateDocument.xlsm" />
+    <Resource Include="Resources\CreateMappingForTemplate.docx" />
+    <Resource Include="Resources\CreateMappingForTemplate.xlsm" />
+    <Resource Include="Resources\EvaluateForExcelExample01.docx" />
+    <Resource Include="Resources\EvaluateForExcelExample01.json" />
+    <Resource Include="Resources\FindTemplateFields001.docx" />
+    <Resource Include="Resources\FindTemplateFields002.docx" />
+    <Resource Include="Resources\OpenXmlSpreadsheetTests001.xlsm" />
+    <Resource Include="Resources\UseForwardOwnCellValues.xlsm" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -52,42 +81,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Resources\CanEvaluateMapAndGetUDF.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ConvertTemplateWithImages.docx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CreateDocument.docx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CreateDocument.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CreateDocument.xlsm">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CreateMappingForTemplate.docx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CreateMappingForTemplate.xlsm">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\FindTemplateFields001.docx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\FindTemplateFields002.docx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\OpenXmlSpreadsheetTests001.xlsm">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\UseForwardOwnCellValues.xlsm">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
