@@ -392,37 +392,37 @@ namespace DocumentCreator
         [Fact]
         public async Task GetDocuments_OK()
         {
-            var t1 = await Repository.CreateTemplate("T3101", CreateZeroStream(2));
-            await Repository.CreateMapping("T3101", "M3101", CreateZeroStream(21));
-            var d1 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(41))).Identifier;
-            var d2 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(42))).Identifier;
+            var t1 = await Repository.CreateTemplate("T3101A", CreateZeroStream(2));
+            await Repository.CreateMapping("T3101A", "M3101", CreateZeroStream(21));
+            var d1 = (await Repository.CreateDocument("T3101A", "M3101", CreateStream(41))).Identifier;
+            var d2 = (await Repository.CreateDocument("T3101A", "M3101", CreateStream(42))).Identifier;
 
-            await Repository.CreateTemplate("T3101", CreateZeroStream(2));
-            await Repository.CreateMapping("T3101", "M3101", CreateZeroStream(22));
-            var d3 = (await Repository.CreateDocument("T3101", "M3101", CreateStream(43))).Identifier;
+            await Repository.CreateTemplate("T3101A", CreateZeroStream(2));
+            await Repository.CreateMapping("T3101A", "M3101", CreateZeroStream(22));
+            var d3 = (await Repository.CreateDocument("T3101A", "M3101", CreateStream(43))).Identifier;
 
-            var t2 = await Repository.CreateTemplate("T3102", CreateZeroStream(3));
-            var m2 = await Repository.CreateMapping("T3102", "M3102", CreateZeroStream(31));
-            var d4 = (await Repository.CreateDocument("T3102", "M3102", CreateStream(44))).Identifier;
-            var d5 = (await Repository.CreateDocument("T3102", "M3102", CreateStream(45))).Identifier;
+            var t2 = await Repository.CreateTemplate("T3101B", CreateZeroStream(3));
+            var m2 = await Repository.CreateMapping("T3101B", "M3102", CreateZeroStream(31));
+            var d4 = (await Repository.CreateDocument("T3101B", "M3102", CreateStream(44))).Identifier;
+            var d5 = (await Repository.CreateDocument("T3101B", "M3102", CreateStream(45))).Identifier;
 
             var r1 = Repository.GetDocuments();
-            Assert.Equal(5, r1.Where(o => o.TemplateName.StartsWith("T310")).Count());
+            Assert.Equal(5, r1.Where(o => o.TemplateName.StartsWith("T3101")).Count());
             r1.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
 
-            var r2 = Repository.GetDocuments("T3101");
+            var r2 = Repository.GetDocuments("T3101A");
             Assert.Equal(3, r2.Count());
             r2.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
 
-            var r3 = Repository.GetDocuments("T3101", t1.TemplateVersion);
+            var r3 = Repository.GetDocuments("T3101A", t1.TemplateVersion);
             Assert.Equal(2, r3.Count());
             r3.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
 
-            var r4 = Repository.GetDocuments("T3101", null, "M3101");
+            var r4 = Repository.GetDocuments("T3101A", null, "M3101");
             Assert.Equal(3, r4.Count());
             r4.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
 
-            var r5 = Repository.GetDocuments("T3102", t2.TemplateVersion, "M3102", m2.MappingVersion);
+            var r5 = Repository.GetDocuments("T3101B", t2.TemplateVersion, "M3102", m2.MappingVersion);
             Assert.Equal(2, r5.Count());
             r5.ToList().ForEach(o => AssertDocument(o, ANY_SIZE));
 

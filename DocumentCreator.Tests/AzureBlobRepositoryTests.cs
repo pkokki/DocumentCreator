@@ -11,17 +11,11 @@ namespace DocumentCreator
     [Trait("Category", "LocalOnly")]
     public class AzureBlobRepositoryTests : IRepositoryTests
     {
-        private const string AZURITE_HTTP_CONN_STRING = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;";
-
         protected override IRepository CreateRepository()
         {
-            BlobServiceClient blobServiceClient;
-            blobServiceClient = new BlobServiceClient(AZURITE_HTTP_CONN_STRING);
-            blobServiceClient.GetBlobContainers()
-                .Where(o => new string[] { "TEMPLATES", "MAPPINGS", "DOCUMENTS" }.Contains(o.Name))
-                .ToList()
-                .ForEach(c => blobServiceClient.DeleteBlobContainer(c.Name));
-            return new AzureBlobRepository(blobServiceClient);
+            var repository = new AzuriteRepository();
+            repository.Clean();
+            return repository;
         }
 
         protected override string TemplateNamePattern => "[A-Za-z0-9]+";

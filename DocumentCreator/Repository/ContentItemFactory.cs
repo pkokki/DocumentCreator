@@ -107,7 +107,7 @@ namespace DocumentCreator.Repository
                 MappingName = parts[2],
                 MappingVersion = parts[3],
                 Identifier = parts[4],
-                Timestamp = info.CreationTime,
+                Timestamp = info.CreationTime
             };
         }
         internal static DocumentContent BuildDocument(string fullName, Stream contents = null)

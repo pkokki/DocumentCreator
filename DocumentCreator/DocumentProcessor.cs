@@ -16,10 +16,12 @@ namespace DocumentCreator
     public class DocumentProcessor : IDocumentProcessor
     {
         private readonly IRepository repository;
+        private readonly IHtmlRepository htmlRepository;
 
-        public DocumentProcessor(IRepository repository)
+        public DocumentProcessor(IRepository repository, IHtmlRepository htmlRepository)
         {
             this.repository = repository;
+            this.htmlRepository = htmlRepository;
         }
 
         public PagedResults<Document> GetDocuments(DocumentQuery query)
@@ -51,9 +53,12 @@ namespace DocumentCreator
             var documentBytes = CreateDocument(template.Buffer, mappingBytes, payload);
             var document = await repository.CreateDocument(templateName, mappingName, documentBytes);
 
-            var templateVersionName = template.Name;
-            var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, templateVersionName, document.Name);
-            repository.SaveHtml(document.Name, conversion.Html, conversion.Images);
+            if (htmlRepository != null)
+            {
+                var pageTitle = template.Name;
+                var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, pageTitle, document.Name);
+                htmlRepository.SaveHtml(document.Name, conversion.Html, conversion.Images);
+            }
             return TransformFull(document);
         }
 
@@ -153,6 +158,8 @@ namespace DocumentCreator
             document.Timestamp = content.Timestamp;
             document.Size = content.Size;
             document.FileName = content.FileName;
+            if (htmlRepository != null)
+                document.Url = htmlRepository.GetUrl(content.Name);
         }
     }
 }

@@ -23,6 +23,5 @@ namespace DocumentCreator.Core.Repository
         Task<DocumentContent> CreateDocument(string templateName, string mappingName, Stream contents);
         IEnumerable<DocumentContentSummary> GetDocuments(string templateName = null, string templateVersion = null, string mappingsName = null, string mappingsVersion = null);
         DocumentContent GetDocument(string documentId);
-        void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images);
     }
 }

@@ -38,6 +38,7 @@ namespace DocumentCreator.Core.Azure
         /// </remarks>
         private static readonly string ENV_CONN_STRING = Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING");
 
+        
         /// <summary>
         /// The key used to store the version number in the blob metadata
         /// </summary>
@@ -50,7 +51,7 @@ namespace DocumentCreator.Core.Azure
         /// <summary>
         /// The <see cref="BlobServiceClient"/> used to access the containers.
         /// </summary>
-        private readonly BlobServiceClient blobServiceClient;
+        protected readonly BlobServiceClient blobServiceClient;
 
         /// <summary>
         /// A lazy-loaded <see cref="BlobContainerClient"/> used to access the document container
@@ -73,7 +74,8 @@ namespace DocumentCreator.Core.Azure
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlobRepository"/> class with 
-        /// the connection string from the environment variable AZURE_STORAGE_CONNECTION_STRING (if exists).
+        /// the connection string from the environment variable AZURE_STORAGE_CONNECTION_STRING 
+        /// and the static website endpoint from the environment variable AZURE_STORAGE_STATIC_WEBSITE.
         /// </summary>
         public AzureBlobRepository() : this(ENV_CONN_STRING)
         {
@@ -88,19 +90,9 @@ namespace DocumentCreator.Core.Azure
         /// 
         /// For more information, <see href="https://docs.microsoft.com/en-us/azure/storage/common/storage-configure-connection-string"/>.
         /// </param>
-        public AzureBlobRepository(string connectionString) : this(new BlobServiceClient(connectionString))
+        public AzureBlobRepository(string connectionString)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AzureBlobRepository"/> class.
-        /// </summary>
-        /// <param name="blobServiceClient">
-        /// A <see cref="BlobServiceClient"/> used to access the Azure Blob service.
-        /// </param>
-        public AzureBlobRepository(BlobServiceClient blobServiceClient)
-        {
-            this.blobServiceClient = blobServiceClient;
+            this.blobServiceClient = new BlobServiceClient(connectionString);
         }
 
         #endregion
@@ -445,34 +437,6 @@ namespace DocumentCreator.Core.Azure
             if (!string.IsNullOrEmpty(mappingsVersion))
                 documents = documents.Where(o => o.MappingVersion == mappingsVersion);
             return documents;
-        }
-
-        public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
-        {
-            var wwwContainerClient = blobServiceClient.GetBlobContainerClient("$web");
-            wwwContainerClient.CreateIfNotExists();
-            if (html != null)
-            {
-                var blobName = $"{htmlName}.html";
-                var blobClient = wwwContainerClient.GetBlobClient(blobName);
-
-                using var stream = new MemoryStream();
-                using var writer = new StreamWriter(stream, Encoding.UTF8);
-                writer.Write(html.Replace(htmlName + "/", htmlName + "_"));
-                writer.Flush();
-                stream.Position = 0;
-                
-                blobClient.Upload(stream);
-            }
-            if (images != null && images.Any())
-            {
-                foreach (var kvp in images)
-                {
-                    var blobName = $"{htmlName}_{kvp.Key}";
-                    var blobClient = wwwContainerClient.GetBlobClient(blobName);
-                    blobClient.Upload(new MemoryStream(kvp.Value));
-                }
-            }
         }
 
         #endregion

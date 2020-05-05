@@ -28,7 +28,7 @@ namespace DocumentCreator
         public TemplateProcessorTests()
         {
             repository = new Mock<IRepository>();
-            processor = new TemplateProcessor(repository.Object);
+            processor = new TemplateProcessor(repository.Object, null);
         }
 
         [Fact]

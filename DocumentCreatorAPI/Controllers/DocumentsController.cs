@@ -22,9 +22,6 @@ namespace DocumentCreatorAPI.Controllers
         public IActionResult Get([FromQuery]DocumentQuery documentParams)
         {
             var documents = processor.GetDocuments(documentParams);
-            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-            documents.Results.ToList()
-                .ForEach(doc => doc.Url = $"{baseUrl}/html/{doc.TemplateName}_{doc.TemplateVersion}_{doc.MappingName}_{doc.MappingVersion}_{doc.DocumentId}.html");
             return Ok(documents);
         }
 

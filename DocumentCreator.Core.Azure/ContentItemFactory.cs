@@ -114,9 +114,10 @@ namespace DocumentCreator.Core.Azure
 
         internal static DocumentContentSummary BuildDocumentSummary(string blobUri, BlobItem blobItem)
         {
+            var name = Path.GetFileNameWithoutExtension(blobItem.Name);
             return new DocumentContentSummary()
             {
-                Name = Path.GetFileNameWithoutExtension(blobItem.Name),
+                Name = name,
                 TemplateName = blobItem.Metadata[AzureBlobRepository.TEMPLATE_NAME_KEY],
                 TemplateVersion = blobItem.Metadata[AzureBlobRepository.TEMPLATE_VERSION_KEY],
                 MappingName = blobItem.Metadata[AzureBlobRepository.MAPPING_NAME_KEY],
@@ -132,9 +133,10 @@ namespace DocumentCreator.Core.Azure
         {
             var blobPath = blobUri.ToString();
             var blobFileName = blobPath;
+            var name = Path.GetFileNameWithoutExtension(blobFileName);
             return new DocumentContent()
             {
-                Name = Path.GetFileNameWithoutExtension(blobFileName),
+                Name = name,
                 TemplateName = metadata[AzureBlobRepository.TEMPLATE_NAME_KEY],
                 TemplateVersion = metadata[AzureBlobRepository.TEMPLATE_VERSION_KEY],
                 MappingName = metadata[AzureBlobRepository.MAPPING_NAME_KEY],
@@ -144,7 +146,7 @@ namespace DocumentCreator.Core.Azure
                 Path = blobPath,
                 Timestamp = timeStamp,
                 Size = contentLength ?? DEFAULT_CONTENT_LENGTH,
-                Buffer = contents
+                Buffer = contents,
             };
         }
         internal static DocumentContent BuildDocument(Uri blobUri, BlobDownloadInfo blobDownloadInfo)

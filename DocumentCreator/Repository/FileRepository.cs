@@ -16,7 +16,7 @@ namespace DocumentCreator.Repository
         private string documentsFolder;
 
         public FileRepository(string rootPath)
-        {
+        { 
             this.rootPath = rootPath;
         }
 
@@ -59,25 +59,6 @@ namespace DocumentCreator.Repository
             WriteContents(templatePath, contents);
             TemplateContent result = ContentItemFactory.BuildTemplate(templatePath, contents);
             return Task.FromResult(result);
-        }
-
-        public void SaveHtml(string htmlName, string html, IDictionary<string, byte[]> images)
-        {
-            var baseFolder = Path.Combine(rootPath, "dcfs", "files", "html");
-            if (!Directory.Exists(baseFolder))
-                Directory.CreateDirectory(baseFolder);
-            if (html != null)
-            {
-                File.WriteAllText(Path.Combine(baseFolder, $"{htmlName}.html"), html, Encoding.UTF8);
-            }
-            if (images != null && images.Any())
-            {
-                var imageFolder = Path.Combine(baseFolder, htmlName);
-                if (!Directory.Exists(imageFolder))
-                    Directory.CreateDirectory(imageFolder);
-                foreach (var kvp in images)
-                    File.WriteAllBytes(Path.Combine(imageFolder, kvp.Key), kvp.Value);
-            }
         }
 
         public Task<MappingContent> CreateMapping(string templateName, string mappingName, Stream contents)

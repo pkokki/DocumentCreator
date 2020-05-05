@@ -12,10 +12,12 @@ namespace DocumentCreator
     public class TemplateProcessor : ITemplateProcessor
     {
         private readonly IRepository repository;
+        private readonly IHtmlRepository htmlRepository;
 
-        public TemplateProcessor(IRepository repository)
+        public TemplateProcessor(IRepository repository, IHtmlRepository htmlRepository)
         {
             this.repository = repository;
+            this.htmlRepository = htmlRepository;
         }
 
         public IEnumerable<Template> GetTemplates(string templateName = null)
@@ -50,8 +52,12 @@ namespace DocumentCreator
                 throw new ArgumentException(nameof(bytes));
             }
             var content = await repository.CreateTemplate(templateName, bytes);
-            var conversion = OpenXmlWordConverter.ConvertToHtml(bytes, content.Name);
-            repository.SaveHtml(content.Name, null, conversion.Images);
+
+            if (htmlRepository != null)
+            {
+                var conversion = OpenXmlWordConverter.ConvertToHtml(bytes, content.Name);
+                htmlRepository.SaveHtml(content.Name, null, conversion.Images);
+            }
             return TransformFull(content, fields);
         }
 

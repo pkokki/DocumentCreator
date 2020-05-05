@@ -24,7 +24,7 @@ namespace DocumentCreator
                 }
             };
 
-            var processor = new DocumentProcessor(null);
+            var processor = new DocumentProcessor(null, null);
             var docStream = processor.CreateDocument(wordBytes, excelBytes, payload);
 
             
