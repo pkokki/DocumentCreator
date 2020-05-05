@@ -53,19 +53,45 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\CanEvaluateMapAndGetUDF.json" />
-    <Resource Include="Resources\ConvertTemplateWithImages.docx" />
-    <Resource Include="Resources\CreateDocument.docx" />
-    <Resource Include="Resources\CreateDocument.json" />
-    <Resource Include="Resources\CreateDocument.xlsm" />
-    <Resource Include="Resources\CreateMappingForTemplate.docx" />
-    <Resource Include="Resources\CreateMappingForTemplate.xlsm" />
-    <Resource Include="Resources\EvaluateForExcelExample01.docx" />
-    <Resource Include="Resources\EvaluateForExcelExample01.json" />
-    <Resource Include="Resources\FindTemplateFields001.docx" />
-    <Resource Include="Resources\FindTemplateFields002.docx" />
-    <Resource Include="Resources\OpenXmlSpreadsheetTests001.xlsm" />
-    <Resource Include="Resources\UseForwardOwnCellValues.xlsm" />
+    <Resource Include="Resources\CanEvaluateMapAndGetUDF.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\ConvertTemplateWithImages.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CreateDocument.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CreateDocument.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CreateDocument.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CreateMappingForTemplate.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\CreateMappingForTemplate.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\EvaluateForExcelExample01.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\EvaluateForExcelExample01.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\FindTemplateFields001.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\FindTemplateFields002.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\OpenXmlSpreadsheetTests001.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\UseForwardOwnCellValues.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
