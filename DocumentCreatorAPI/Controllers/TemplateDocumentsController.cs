@@ -1,7 +1,10 @@
-﻿using DocumentCreator.Core;
+﻿using DocumentCreator;
+using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -54,15 +57,15 @@ namespace DocumentCreatorAPI.Controllers
         [HttpPost]
         [Route("{templateName}/document")]
         [Route("{templateName}/mappings/{mappingName}/document")]
-        public IActionResult CreateDocument([FromRoute]string templateName,
+        public async Task<IActionResult> CreateDocument([FromRoute]string templateName,
             [FromRoute]string mappingName,
             [FromBody] DocumentPayload payload)
         {
-            var document = processor.CreateDocument(templateName, mappingName, payload);
-
+            var document = await processor.CreateDocument(templateName, mappingName, payload);
+            var fileContents = document.Buffer.ToMemoryStream();
             var contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
-            return new FileContentResult(document.Buffer, contentType)
+            return new FileContentResult(fileContents.ToArray(), contentType)
             {
                 FileDownloadName = document.FileName
             };

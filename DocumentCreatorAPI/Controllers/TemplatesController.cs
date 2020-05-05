@@ -3,6 +3,7 @@ using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -42,7 +43,7 @@ namespace DocumentCreatorAPI.Controllers
 
         [HttpPost, DisableRequestSizeLimit]
         [Route("")]
-        public IActionResult CreateTemplate()
+        public async Task<IActionResult> CreateTemplateAsync()
         {
             var templateData = new TemplateData()
             {
@@ -53,7 +54,8 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var ms = new MemoryStream();
                 formFile.CopyTo(ms);
-                var template = processor.CreateTemplate(templateData, ms.ToArray());
+                ms.Position = 0;
+                var template = await processor.CreateTemplate(templateData, ms);
                 return Ok(template);
             }
             else

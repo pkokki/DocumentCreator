@@ -1,9 +1,12 @@
 ﻿using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
+using DocumentCreator.Properties;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentCreator
 {
@@ -36,34 +39,35 @@ namespace DocumentCreator
             return items.Select(o => Transform(o)).ToList();
         }
 
-        public MappingDetails GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
+        public async Task<MappingDetails> GetMapping(string templateName, string templateVersion, string mappingName, string mappingVersion = null)
         {
-            ContentItem content;
+            MappingContent content;
             if (mappingVersion == null)
                 content = repository.GetLatestMapping(templateName, templateVersion, mappingName);
             else
-                content = repository.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
+                content = await repository.GetMapping(templateName, templateVersion, mappingName, mappingVersion);
             return TransformFull(content);
         }
 
-        public MappingDetails CreateMapping(string templateName, string mappingName, string testEvaluationsUrl)
+        public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, string testEvaluationsUrl)
         {
             var template = repository.GetLatestTemplate(templateName);
             if (template == null)
                 return null;
-            var emptyMappingBuffer = repository.GetEmptyMapping();
+
+            var emptyMappingBuffer = new MemoryStream(Resources.empty_mappings_prod_xlsm);
 
             var bytes = CreateMappingForTemplate(template.Buffer, emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl);
-            return CreateMapping(templateName, mappingName, bytes);
+            return await CreateMapping(templateName, mappingName, bytes);
         }
 
-        public MappingDetails CreateMapping(string templateName, string mappingName, byte[] bytes)
+        public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, Stream bytes)
         {
-            var content = repository.CreateMapping(templateName, mappingName, bytes);
+            var content = await repository.CreateMapping(templateName, mappingName, bytes);
             return TransformFull(content);
         }
 
-        public byte[] CreateMappingForTemplate(byte[] templateBytes, byte[] mappingBytes, string templateName, string mappingsName, string testUrl)
+        public Stream CreateMappingForTemplate(Stream templateBytes, Stream mappingBytes, string templateName, string mappingsName, string testUrl)
         {
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
             var excelBytes = OpenXmlSpreadsheet.FillMappingsSheet(mappingBytes, templateFields, templateName, mappingsName, testUrl);
@@ -92,14 +96,14 @@ namespace DocumentCreator
             return response;
         }
 
-        private Mapping Transform(ContentItemSummary content)
+        private Mapping Transform(MappingContentSummary content)
         {
             var mapping = new Mapping();
             Transform(content, mapping);
             return mapping;
         }
 
-        private MappingDetails TransformFull(ContentItem content)
+        private MappingDetails TransformFull(MappingContent content)
         {
             if (content != null)
             {
@@ -114,14 +118,13 @@ namespace DocumentCreator
             return null;
         }
 
-        private void Transform(ContentItemSummary content, Mapping mapping)
+        private void Transform(MappingContentSummary content, Mapping mapping)
         {
-            var parts = content.Name.Split('_');
             mapping.FileName = content.FileName;
-            mapping.TemplateName = parts[0];
-            mapping.TemplateVersion = parts[1];
-            mapping.MappingName = parts[2];
-            mapping.MappingVersion = parts[3];
+            mapping.TemplateName = content.TemplateName;
+            mapping.TemplateVersion = content.TemplateVersion;
+            mapping.MappingName = content.MappingName;
+            mapping.MappingVersion = content.MappingVersion;
             mapping.Timestamp = content.Timestamp;
             mapping.Size = content.Size;
         }

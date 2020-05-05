@@ -1,6 +1,8 @@
-﻿using DocumentCreator.Core;
+﻿using DocumentCreator;
+using DocumentCreator.Core;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -50,11 +52,12 @@ namespace DocumentCreatorAPI.Controllers
 
         [HttpGet]
         [Route("{templateName}/mappings/{mappingName}/xls")]
-        public IActionResult GetTemplateMappingExcel([FromRoute]string templateName, [FromRoute]string mappingName)
+        public async Task<IActionResult> GetTemplateMappingExcel([FromRoute]string templateName, [FromRoute]string mappingName)
         {
-            var mapping = processor.CreateMapping(templateName, mappingName, $"{Request.Scheme}://{Request.Host}/api/evaluations");
+            var mapping = await processor.CreateMapping(templateName, mappingName, $"{Request.Scheme}://{Request.Host}/api/evaluations");
+            var fileContents = mapping.Buffer.ToMemoryStream();
             var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
-            return new FileContentResult(mapping.Buffer, contentType)
+            return new FileContentResult(fileContents.ToArray(), contentType)
             {
                 FileDownloadName = mapping.FileName
             };
@@ -69,7 +72,8 @@ namespace DocumentCreatorAPI.Controllers
             {
                 var ms = new MemoryStream();
                 formFile.CopyTo(ms);
-                processor.CreateMapping(templateName, mappingName, ms.ToArray());
+                ms.Position = 0;
+                processor.CreateMapping(templateName, mappingName, ms);
                 return Ok();
             }
             else

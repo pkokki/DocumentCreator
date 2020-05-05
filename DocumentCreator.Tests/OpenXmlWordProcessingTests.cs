@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using DocumentCreator.Properties;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace DocumentCreator
         [Fact]
         public void CanFindTemplateFields001()
         {
-            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields001.docx");
+            var buffer = new MemoryStream(Resources.find_template_fields001_docx);
 
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 
@@ -28,7 +29,7 @@ namespace DocumentCreator
         [Fact]
         public void CanFindTemplateFields002()
         {
-            var buffer = File.ReadAllBytes("./Resources/FindTemplateFields002.docx");
+            var buffer = new MemoryStream(Resources.find_template_fields002_docx);
 
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 

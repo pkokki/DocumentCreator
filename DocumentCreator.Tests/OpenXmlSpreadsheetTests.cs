@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using DocumentCreator.Properties;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace DocumentCreator
         [Fact]
         public void CanGetTemplateFieldExpressions()
         {
-            var bytes = File.ReadAllBytes(@"./Resources/OpenXmlSpreadsheetTests001.xlsm");
+            var bytes = new MemoryStream(Resources.open_xml_spreadsheet_tests001_xlsm);
             var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
             Assert.NotEmpty(info.Expressions);
         }
@@ -17,7 +18,7 @@ namespace DocumentCreator
         [Fact]
         public void CanUseForwardOwnCellValues()
         {
-            var bytes = File.ReadAllBytes(@"./Resources/UseForwardOwnCellValues.xlsm");
+            var bytes = new MemoryStream(Resources.use_forward_own_cell_values_xlsm);
 
             var info = OpenXmlSpreadsheet.GetMappingInfo(bytes, null);
             var processor = new MappingExpressionEvaluator();

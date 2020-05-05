@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DocumentCreator.Core.Model
 {
@@ -23,7 +24,7 @@ namespace DocumentCreator.Core.Model
     public class MappingDetails : Mapping
     {
         [JsonIgnore]
-        public byte[] Buffer { get; set; }
+        public Stream Buffer { get; set; }
         public IEnumerable<MappingExpression> Expressions { get; set; }
         public IEnumerable<EvaluationSource> Sources { get; set; }
     }

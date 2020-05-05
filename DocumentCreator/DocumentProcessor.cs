@@ -7,17 +7,21 @@ using JsonExcelExpressions.Lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentCreator
 {
     public class DocumentProcessor : IDocumentProcessor
     {
         private readonly IRepository repository;
+        private readonly IHtmlRepository htmlRepository;
 
-        public DocumentProcessor(IRepository repository)
+        public DocumentProcessor(IRepository repository, IHtmlRepository htmlRepository)
         {
             this.repository = repository;
+            this.htmlRepository = htmlRepository;
         }
 
         public PagedResults<Document> GetDocuments(DocumentQuery query)
@@ -36,26 +40,29 @@ namespace DocumentCreator
             return TransformFull(document);
         }
 
-        public DocumentDetails CreateDocument(string templateName, string mappingName, DocumentPayload payload)
+        public async Task<DocumentDetails> CreateDocument(string templateName, string mappingName, DocumentPayload payload)
         {
             var template = repository.GetLatestTemplate(templateName);
 
-            byte[] mappingBytes = null;
+            Stream mappingBytes = null;
             if (mappingName != null)
             {
                 var mapping = repository.GetLatestMapping(templateName, null, mappingName);
                 mappingBytes = mapping.Buffer;
             }
             var documentBytes = CreateDocument(template.Buffer, mappingBytes, payload);
-            var document = repository.CreateDocument(templateName, mappingName, documentBytes);
+            var document = await repository.CreateDocument(templateName, mappingName, documentBytes);
 
-            var templateVersionName = template.Name;
-            var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, templateVersionName, document.Name);
-            repository.SaveHtml(document.Name, conversion.Html, conversion.Images);
+            if (htmlRepository != null)
+            {
+                var pageTitle = template.Name;
+                var conversion = OpenXmlWordConverter.ConvertToHtml(document.Buffer, pageTitle, document.Name);
+                htmlRepository.SaveHtml(document.Name, conversion.Html, conversion.Images);
+            }
             return TransformFull(document);
         }
 
-        public byte[] CreateDocument(byte[] templateBytes, byte[] mappingBytes, DocumentPayload payload)
+        public Stream CreateDocument(Stream templateBytes, Stream mappingBytes, DocumentPayload payload)
         {
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
             MappingInfo mappingInfo;
@@ -122,14 +129,14 @@ namespace DocumentCreator
             return contentControlData;
         }
 
-        private Document Transform(ContentItemSummary content)
+        private Document Transform(DocumentContentSummary content)
         {
             var document = new Document();
             Transform(content, document);
             return document;
         }
 
-        private DocumentDetails TransformFull(ContentItem content)
+        private DocumentDetails TransformFull(DocumentContent content)
         {
             if (content != null)
             {
@@ -141,17 +148,18 @@ namespace DocumentCreator
             return null;
         }
 
-        private void Transform(ContentItemSummary content, Document document)
+        private void Transform(DocumentContentSummary content, Document document)
         {
-            var parts = content.Name.Split('_');
-            document.TemplateName = parts[0];
-            document.TemplateVersion = parts[1];
-            document.MappingName = parts[2];
-            document.MappingVersion = parts[3];
-            document.DocumentId = parts[4];
-            document.Timestamp = new DateTime(long.Parse(parts[4]));
+            document.TemplateName = content.TemplateName;
+            document.TemplateVersion = content.TemplateVersion;
+            document.MappingName = content.MappingName;
+            document.MappingVersion = content.MappingVersion;
+            document.DocumentId = content.Identifier;
+            document.Timestamp = content.Timestamp;
             document.Size = content.Size;
             document.FileName = content.FileName;
+            if (htmlRepository != null)
+                document.Url = htmlRepository.GetUrl(content.Name);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DocumentCreator.Core.Model;
+using DocumentCreator.Properties;
 using JsonExcelExpressions;
 using JsonExcelExpressions.Lang;
 using Newtonsoft.Json.Linq;
@@ -53,9 +54,9 @@ namespace DocumentCreator
         [Fact]
         public void CanEvaluateForExcelExample01()
         {
-            var json = JObject.Parse(File.ReadAllText("./Resources/EvaluateForExcelExample01.json"));
+            var json = JObject.Parse(Resources.evaluate_for_excel_example01_json);
             var request = json.ToObject<EvaluationRequest>();
-            var templateBytes = File.ReadAllBytes("./Resources/EvaluateForExcelExample01.docx");
+            var templateBytes = new MemoryStream(Resources.evaluate_for_excel_example01_docx);
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
 
             var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
@@ -119,7 +120,7 @@ namespace DocumentCreator
         [Fact]
         public void CanEvaluateMapAndGetUDF()
         {
-            var json = JObject.Parse(File.ReadAllText("./Resources/CanEvaluateMapAndGetUDF.json"));
+            var json = JObject.Parse(Resources.can_evaluate_map_and_get_udf_json);
             var sources = new List<EvaluationSource>
             {
                 new EvaluationSource { Name = "N3", Payload = (JObject)json["sources"][0]["payload"] },

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DocumentCreator.Core.Model
 {
@@ -22,7 +23,7 @@ namespace DocumentCreator.Core.Model
         public IEnumerable<TemplateField> Fields { get; set; }
 
         [JsonIgnore]
-        public byte[] Buffer { get; set; }
+        public Stream Buffer { get; set; }
     }
 
     public class TemplateField

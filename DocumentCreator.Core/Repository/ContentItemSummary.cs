@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DocumentCreator.Core.Repository
 {
@@ -7,7 +8,7 @@ namespace DocumentCreator.Core.Repository
         public string Name { get; set; }
         public string FileName { get; set; }
         public string Path { get; set; }
-        public int Size { get; set; }
+        public long Size { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

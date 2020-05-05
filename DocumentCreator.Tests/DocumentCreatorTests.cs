@@ -5,6 +5,7 @@ using Xunit;
 using DocumentCreator.Core.Model;
 using Newtonsoft.Json.Linq;
 using JsonExcelExpressions;
+using DocumentCreator.Properties;
 
 namespace DocumentCreator
 {
@@ -13,21 +14,23 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes = File.ReadAllBytes("./Resources/CreateDocument.docx");
-            var excelBytes = File.ReadAllBytes("./Resources/CreateDocument.xlsm");
+            var wordBytes = new MemoryStream(Resources.create_document_docx);
+            var excelBytes = new MemoryStream(Resources.create_document_xlsm);
             var payload = new DocumentPayload()
             {
                 Sources = new List<EvaluationSource>()
                 {
-                    new EvaluationSource() { Name = "RQ", Payload = JObject.Parse(File.ReadAllText("./Resources/CreateDocument.json")) }
+                    new EvaluationSource() { Name = "RQ", Payload = JObject.Parse(Resources.create_document_json) }
                 }
             };
 
-            var processor = new DocumentProcessor(null);
-            var docBytes = processor.CreateDocument(wordBytes, excelBytes, payload);
+            var processor = new DocumentProcessor(null, null);
+            var docStream = processor.CreateDocument(wordBytes, excelBytes, payload);
 
-            Assert.NotEmpty(docBytes);
-            File.WriteAllBytes("./Output/CreateDocumentTest.docx", docBytes);
+            
+            Assert.NotEqual(0, docStream.Length);
+            using FileStream output = File.OpenWrite("./Output/CreateDocumentTest.docx");
+            docStream.CopyTo(output);
         }
 
         
