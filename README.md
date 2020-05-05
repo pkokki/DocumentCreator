@@ -47,7 +47,9 @@ we can evaluate the following expressions
 | `DATE(2020, 4, 28) + x5.y4[1]` | 30/4/2020 |
 | `IF(__A1 > __A2, UPPER(__A3), "?")` | JOHN SMITH |
 
-and many more. Test it live [here](https://document-creator.azurewebsites.net/#/expressions).
+See the [full list](https://github.com/pkokki/DocumentCreator/wiki/Supported-Excel-Functions) of supported Excel functions. Suggest the implementation of missing functions by [opening an issue](https://github.com/pkokki/DocumentCreator/issues/new).
+
+You can test it live [here](https://document-creator.azurewebsites.net/#/expressions). 
 
 ## Installation
 
