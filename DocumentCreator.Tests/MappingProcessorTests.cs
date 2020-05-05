@@ -36,8 +36,8 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateMappingForTemplate()
         {
-            var emptyMapping = new MemoryStream(Resources.CreateMappingForTemplate_xlsm);
-            var templateBytes = new MemoryStream(Resources.CreateMappingForTemplate_docx);
+            var emptyMapping = new MemoryStream(Resources.create_mapping_for_template_xlsm);
+            var templateBytes = new MemoryStream(Resources.create_mapping_for_template_docx);
 
             var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, "T01", "M01", "http://localhost/api");
 

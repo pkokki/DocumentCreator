@@ -10,7 +10,7 @@ namespace DocumentCreator
         [Fact]
         public void CanFindTemplateFields001()
         {
-            var buffer = new MemoryStream(Resources.FindTemplateFields001_docx);
+            var buffer = new MemoryStream(Resources.find_template_fields001_docx);
 
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 
@@ -29,7 +29,7 @@ namespace DocumentCreator
         [Fact]
         public void CanFindTemplateFields002()
         {
-            var buffer = new MemoryStream(Resources.FindTemplateFields002_docx);
+            var buffer = new MemoryStream(Resources.find_template_fields002_docx);
 
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(buffer);
 

@@ -14,13 +14,13 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes = new MemoryStream(Resources.CreateDocument_docx);
-            var excelBytes = new MemoryStream(Resources.CreateDocument_xlsm);
+            var wordBytes = new MemoryStream(Resources.create_document_docx);
+            var excelBytes = new MemoryStream(Resources.create_document_xlsm);
             var payload = new DocumentPayload()
             {
                 Sources = new List<EvaluationSource>()
                 {
-                    new EvaluationSource() { Name = "RQ", Payload = JObject.Parse(Resources.CreateDocument_json) }
+                    new EvaluationSource() { Name = "RQ", Payload = JObject.Parse(Resources.create_document_json) }
                 }
             };
 

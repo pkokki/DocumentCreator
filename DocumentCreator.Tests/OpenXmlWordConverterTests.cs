@@ -9,7 +9,7 @@ namespace DocumentCreator
         [Fact]
         public void CanConvertTemplateWithImages()
         {
-            using var ms = new MemoryStream(Resources.ConvertTemplateWithImages_docx);
+            using var ms = new MemoryStream(Resources.convert_template_with_images_docx);
             var conversion = OpenXmlWordConverter.ConvertToHtml(ms, "T01_12345678");
             Assert.NotNull(conversion);
             Assert.NotNull(conversion.Html);

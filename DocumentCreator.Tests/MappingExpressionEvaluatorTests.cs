@@ -54,9 +54,9 @@ namespace DocumentCreator
         [Fact]
         public void CanEvaluateForExcelExample01()
         {
-            var json = JObject.Parse(Resources.EvaluateForExcelExample01_json);
+            var json = JObject.Parse(Resources.evaluate_for_excel_example01_json);
             var request = json.ToObject<EvaluationRequest>();
-            var templateBytes = new MemoryStream(Resources.EvaluateForExcelExample01_docx);
+            var templateBytes = new MemoryStream(Resources.evaluate_for_excel_example01_docx);
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
 
             var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
@@ -120,7 +120,7 @@ namespace DocumentCreator
         [Fact]
         public void CanEvaluateMapAndGetUDF()
         {
-            var json = JObject.Parse(Resources.CanEvaluateMapAndGetUDF_json);
+            var json = JObject.Parse(Resources.can_evaluate_map_and_get_udf_json);
             var sources = new List<EvaluationSource>
             {
                 new EvaluationSource { Name = "N3", Payload = (JObject)json["sources"][0]["payload"] },

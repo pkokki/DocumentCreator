@@ -117,44 +117,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CanEvaluateMapAndGetUDF_json" xml:space="preserve">
+  <data name="can-evaluate-map-and-get-udf_json" xml:space="preserve">
     <value>{"expressions":[{"name":"F01","cell":"F3","expression":"=VLOOKUP(source(\"N3\",\"RequestData.PS1016\"),F27:G29,2,0)","isCollection":false,"parent":"","content":""},{"name":"F02","cell":"F4","expression":"=source(\"N4\",source(\"N3\",\"RequestData.PS1016\"))","isCollection":false,"parent":"","content":"_"},{"name":"F03","cell":"F5","expression":"=MAPVALUE(N4,MAPVALUE(N3,\"RequestData.PS1016\"))","isCollection":false,"parent":"","content":""},{"name":"F04","cell":"F6","expression":"=MAPVALUE(N3,\"RequestData.PS1016\")","isCollection":false,"parent":"","content":""},{"name":"F05","cell":"F7","expression":"=MAPVALUE(N3,\"RequestData.PS1016\",N4)","isCollection":false,"parent":"","content":""},{"name":"F06","cell":"F8","expression":"=MAPVALUE(N3,\"LogHeader.Version\")","isCollection":false,"parent":"","content":""},{"name":"F07","cell":"F9","expression":"","isCollection":false,"parent":"","content":""},{"name":"F08","cell":"F10","expression":"","isCollection":false,"parent":"","content":""},{"name":"F09","cell":"F11","expression":"","isCollection":false,"parent":"","content":""},{"name":"F10","cell":"F12","expression":"=MAPVALUE(N3,\"RequestData.InterestTable\")","isCollection":true,"parent":"","content":""},{"name":"F11","cell":"F13","expression":"=MAPITEM(F12,\"Period\")","isCollection":false,"parent":"F10","content":""},{"name":"F12","cell":"F14","expression":"=GETITEM(F12,\"Period\")*100","isCollection":false,"parent":"F10","content":""},{"name":"F13","cell":"F15","expression":"=SUM(GETLIST(F12,\"Period\"))","isCollection":false,"parent":"F10","content":""},{"name":"F14","cell":"F16","expression":"=MAPVALUE(N5,GETITEM(F12,\"Period\",,2))","isCollection":false,"parent":"","content":""},{"name":"F15","cell":"F17","expression":"=GETITEM(F12,\"Period\",N5)","isCollection":false,"parent":"","content":""},{"name":"F16","cell":"F18","expression":"=GETLIST(F12,\"Period\")+7","isCollection":false,"parent":"","content":"Πρώτος προαιρετικός όρος"},{"name":"F17","cell":"F19","expression":"=GETITEM(F12,\"Period\",N5,2)","isCollection":false,"parent":"","content":""},{"name":"F18","cell":"F20","expression":"=GETITEM(F12,\"Period\")","isCollection":false,"parent":"","content":"Τρίτος προαιρετικός όρος"},{"name":"F19","cell":"F21","expression":"=GETITEM(F12,\"Period\",,2)","isCollection":false,"parent":"","content":""},{"name":"F20","cell":"F22","expression":"","isCollection":false,"parent":"","content":""},{"name":"F21","cell":"F23","expression":"","isCollection":false,"parent":"","content":""},{"name":"F22","cell":"F24","expression":"","isCollection":false,"parent":"","content":""},{"name":"F23","cell":"F25","expression":"","isCollection":false,"parent":"","content":""}],"sources":[{"name":"N3","cell":"N3","payload":{"LogHeader":{"Version":"3.10","RequestId":"123456","Unit":"123"},"RequestData":{"ProductDescription":"Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000","AccountNumber":"923456789012345","SEPA":0.17,"PS1014":3,"PS1015":1,"PS1016":"MONTH","PS1053":"START","PS1056":10000,"F1041":5000,"F1042":10000,"InterestTable":[{"Period":1,"Interest":0.2,"Points":500},{"Period":3,"Interest":0.25,"Points":1000}]}}},{"name":"N4","cell":"N4","payload":{"MONTH":"MM","YEAR":"YY","DAY":"DD"}},{"name":"N5","cell":"N5","payload":{"1":"One","2":"Two","3":"Three"}}],"templateName":"T01"}</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ConvertTemplateWithImages_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\converttemplatewithimages.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="convert-template-with-images_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\convert-template-with-images.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CreateDocument_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\createdocument.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="create-document_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\create-document.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CreateDocument_json" xml:space="preserve">
+  <data name="create-document_json" xml:space="preserve">
     <value>{"LogHeader":{"RequestId":"123456","Unit":"123"},"RequestData":{"ProductDescription":"Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000","AccountNumber":"923456789012345","SEPA":0.17,"PS1014":3,"PS1015":1,"PS1016":"MONTH","PS1053":"START","PS1056":10000,"F1041":5000,"F1042":10000,"InterestTable":[{"Period":1,"Interest":0.2,"Points":500},{"Period":3,"Interest":0.25,"Points":1000}]}}</value>
   </data>
-  <data name="CreateDocument_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\createdocument.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="create-document_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\create-document.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CreateMappingForTemplate_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\createmappingfortemplate.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="create-mapping-for-template_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\create-mapping-for-template.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CreateMappingForTemplate_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\createmappingfortemplate.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="create-mapping-for-template_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\create-mapping-for-template.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="EvaluateForExcelExample01_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\evaluateforexcelexample01.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="evaluate-for-excel-example01_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\evaluate-for-excel-example01.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="EvaluateForExcelExample01_json" xml:space="preserve">
+  <data name="evaluate-for-excel-example01_json" xml:space="preserve">
     <value>{"expressions":[{"name":"F01","cell":"J3","expression":"=SYSDATE()","isCollection":false,"parent":"","content":""},{"name":"F02","cell":"J4","expression":"=UPPER(RQD(\"ProductDescription\"))","isCollection":false,"parent":"","content":""},{"name":"F03","cell":"J5","expression":"=RQD(\"AccountNumber\")","isCollection":false,"parent":"","content":""},{"name":"F04","cell":"J6","expression":"=LOWER(RQD(\"PS1014\"))","isCollection":false,"parent":"","content":""},{"name":"F05","cell":"J7","expression":"=RQD(\"PS1016\")","isCollection":false,"parent":"","content":""},{"name":"F06","cell":"J8","expression":"=IF(RQD(\"PS1014\")/RQD(\"PS1015\")&gt;2,\"έκαστης\",\"της πρώτης\")","isCollection":false,"parent":"","content":""},{"name":"F07","cell":"J9","expression":"=RQD(\"PS1056\")","isCollection":false,"parent":"","content":""},{"name":"F08","cell":"J10","expression":"=PROPER(RQD(\"PS1014\"))","isCollection":false,"parent":"","content":""},{"name":"F09","cell":"J11","expression":"=RQD(\"PS1015\")","isCollection":false,"parent":"","content":""},{"name":"F10","cell":"J12","expression":"=RQD(\"InterestTable\")","isCollection":true,"parent":"","content":""},{"name":"F11","cell":"J13","expression":"=RQR(\"Period\")","isCollection":false,"parent":"F10","content":""},{"name":"F12","cell":"J14","expression":"=RQR(\"Interest\")","isCollection":false,"parent":"F10","content":""},{"name":"F13","cell":"J15","expression":"=RQR(\"Points\")","isCollection":false,"parent":"F10","content":""},{"name":"F14","cell":"J16","expression":"=RQD(\"SEPA\")","isCollection":false,"parent":"","content":""},{"name":"F15","cell":"J17","expression":"=RQD(\"PS1015\")","isCollection":false,"parent":"","content":""},{"name":"F16","cell":"J18","expression":"=CONTENT(RQD(\"PS1053\")=\"START\")","isCollection":false,"parent":"","content":""},{"name":"F17","cell":"J19","expression":"=RQD(\"PS1015\")","isCollection":false,"parent":"","content":""},{"name":"F18","cell":"J20","expression":"=CONTENT(RQD(\"PS1014\")-RQD(\"PS1015\")&gt;2)","isCollection":false,"parent":"","content":""},{"name":"F19","cell":"J21","expression":"=RQD(\"F1041\")","isCollection":false,"parent":"","content":""},{"name":"F20","cell":"J22","expression":"=RQD(\"F1042\")","isCollection":false,"parent":"","content":""},{"name":"F21","cell":"J23","expression":"=RQD(\"ProductDescription\")","isCollection":false,"parent":"","content":""},{"name":"F22","cell":"J24","expression":"=RQD(\"AccountNumber\")","isCollection":false,"parent":"","content":""},{"name":"F23","cell":"J25","expression":"=RQL(\"Unit\")","isCollection":false,"parent":"","content":""}],"sources":[{"name":"RQ","payload":{"LogHeader":{"Version":3,"RequestId":"123456","Unit":"123"},"RequestData":{"ProductDescription":"Προθεσμιακή με Bonus 3 Μηνών - Από Ευρώ 10.000","AccountNumber":"923456789012345","SEPA":0.17,"PS1014":3,"PS1015":1,"PS1016":"MONTH","PS1053":"START","PS1056":10000,"F1041":5000,"F1042":10000,"InterestTable":[{"Period":1,"Interest":0.2,"Points":500},{"Period":3,"Interest":0.25,"Points":1000}]}}}]}</value>
   </data>
-  <data name="FindTemplateFields001_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\findtemplatefields001.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="find-template-fields001_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\find-template-fields001.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="FindTemplateFields002_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\findtemplatefields002.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="find-template-fields002_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\find-template-fields002.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="OpenXmlSpreadsheetTests001_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\openxmlspreadsheettests001.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="open-xml-spreadsheet-tests001_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\open-xml-spreadsheet-tests001.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="UseForwardOwnCellValues_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\useforwardowncellvalues.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="use-forward-own-cell-values_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\use-forward-own-cell-values.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>
