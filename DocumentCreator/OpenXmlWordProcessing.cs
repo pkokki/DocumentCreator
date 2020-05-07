@@ -31,6 +31,7 @@ namespace DocumentCreator
                         SetContentControlContent(doc, item.Name, item.Text);
                 }
             }
+            ms.Position = 0;
             return ms;
         }
 
