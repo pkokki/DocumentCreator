@@ -138,7 +138,10 @@ namespace DocumentCreator
 
         private static Text SetTextElement(OpenXmlCompositeElement elem, string name, string text)
         {
-            var textElem = elem.Descendants<Text>().FirstOrDefault();
+            var textElems = elem.Descendants<Text>();
+            textElems.Skip(1).ToList().ForEach(e => e.Remove());
+
+            var textElem = textElems.FirstOrDefault();
             if (textElem == null && elem.ChildElements.Count > 0)
                 throw new InvalidOperationException($"[{name}] No text element: {string.Join(", ", elem.ChildElements.Select(o => o.GetType()))}");
             if (textElem == null)
@@ -154,7 +157,7 @@ namespace DocumentCreator
             return textElem;
         }
 
-        private static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
+        public static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
         {
             if (text == "#HIDE_CONTENT#")
             {

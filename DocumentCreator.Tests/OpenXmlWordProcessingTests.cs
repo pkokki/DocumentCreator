@@ -43,6 +43,8 @@ namespace DocumentCreator
         {
             using (var doc = WordprocessingDocument.CreateFromTemplate(@".\resources\__template_themis.docx"))
             {
+                OpenXmlWordProcessing.SetContentControlContent(doc, "txt1", "SetContentControlContent");
+                OpenXmlWordProcessing.SetContentControlContent(doc, "txt2", "ProcessRepeatingSection");
                 OpenXmlWordProcessing.ProcessRepeatingSection(doc, "TablePercentage",
                     new Dictionary<string, IEnumerable<string>>()
                     {
