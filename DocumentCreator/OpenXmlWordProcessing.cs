@@ -49,11 +49,13 @@ namespace DocumentCreator
             {
                 var sdtProperties = sdt.Elements<SdtProperties>().First();
 
+                var name = ResolveTemplateFieldName(sdtProperties);
+                var isCollection = sdtProperties.Elements<SdtRepeatedSection>().Any();
                 var field = new TemplateField()
                 {
-                    Name = ResolveTemplateFieldName(sdtProperties),
-                    IsCollection = sdtProperties.Elements<SdtRepeatedSection>().Any(),
-                    Content = sdt.Elements<SdtContentBlock>().FirstOrDefault()?.InnerText,
+                    Name = name,
+                    IsCollection = isCollection,
+                    Content = isCollection ? string.Empty : string.Join("", FindSdtContent(sdt, name).ChildElements.Select(o => o?.InnerText)),
                     //Type = sdt.GetType().Name
                 };
                 var parent = sdt.Ancestors<SdtElement>()
@@ -88,25 +90,6 @@ namespace DocumentCreator
             return sdtContent;
         }
 
-        private static void RemoveContentControlContent(WordprocessingDocument doc, string name)
-        {
-            var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
-
-            if (sdt != null)
-                sdt.Remove();
-        }
-
-        private static string ShowContentControlContent(WordprocessingDocument doc, string name)
-        {
-            var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
-            if (sdt != null)
-            {
-                var sdtContent = FindSdtContent(sdt, name);
-                return sdtContent.InnerText;
-            }
-            return null;
-        }
-
         private static SdtElement FindSdt(OpenXmlCompositeElement parent, string name)
         {
             return parent
@@ -115,35 +98,45 @@ namespace DocumentCreator
                 .FirstOrDefault(o => ResolveTemplateFieldName(o.Elements<SdtProperties>().First()) == name);
         }
 
-        private static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
+        public static void ProcessRepeatingSection(WordprocessingDocument doc, string parentName,
             Dictionary<string, IEnumerable<string>> sectionItems)
         {
             var parentSdt = FindSdt(doc.MainDocumentPart.Document.Body, parentName);
             var sdtContent = FindSdtContent(parentSdt, parentName);
             if (sdtContent.ChildElements.Count != 1)
                 throw new NotImplementedException($"[{parentName}] Can not handle repeating sections with {sdtContent.ChildElements.Count} elements in content");
-            var sourceRow = sdtContent.FirstChild;
-            SdtElement newRow = (SdtElement)sourceRow;
             var count = sectionItems.First().Value.Count();
+
+            var sourceRow = sdtContent.FirstChild;
             for (var i = 0; i < count; i++)
             {
-                if (i > 0)
-                {
-                    newRow = (SdtElement)sourceRow.CloneNode(true);
-                    newRow.SdtProperties?.Elements<SdtId>().FirstOrDefault()?.Remove();
-                    sourceRow.InsertAfterSelf(newRow);
-                    sourceRow = newRow;
-                }
+                SdtElement newRow = (SdtElement)sourceRow.CloneNode(true);
+                newRow.SdtProperties?.Elements<SdtId>().FirstOrDefault()?.Remove();
+                sourceRow.Parent.AppendChild(newRow);
                 foreach (var kvp in sectionItems)
                 {
                     var childSdt = FindSdt(newRow, kvp.Key);
                     var childSdtContent = FindSdtContent(childSdt, kvp.Key);
                     SetTextElement(childSdtContent, kvp.Key, kvp.Value.ElementAt(i));
+                    KeepContentAndDeleteSdt(childSdt, childSdtContent);
                 }
             }
+            sourceRow.Remove();
+
+            KeepContentAndDeleteSdt(parentSdt, sdtContent);
         }
 
-        private static void SetTextElement(OpenXmlCompositeElement elem, string name, string text)
+        private static void KeepContentAndDeleteSdt(SdtElement sdt, OpenXmlCompositeElement sdtContent)
+        {
+            foreach (var elem in sdtContent.ChildElements.ToArray())
+            {
+                elem.Remove();
+                sdt.Parent.InsertBefore(elem, sdt);
+            }
+            sdt.Remove();
+        }
+
+        private static Text SetTextElement(OpenXmlCompositeElement elem, string name, string text)
         {
             var textElem = elem.Descendants<Text>().FirstOrDefault();
             if (textElem == null && elem.ChildElements.Count > 0)
@@ -158,23 +151,29 @@ namespace DocumentCreator
                             textElem)));
             }
             textElem.Text = text;
+            return textElem;
         }
 
         private static void SetContentControlContent(WordprocessingDocument doc, string name, string text)
         {
             if (text == "#HIDE_CONTENT#")
             {
-                RemoveContentControlContent(doc, name);
+                var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
+                if (sdt != null)
+                    sdt.Remove();
             }
             else if (text == "#SHOW_CONTENT#")
             {
-                ShowContentControlContent(doc, name);
+                var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
+                var sdtContent = FindSdtContent(sdt, name);
+                KeepContentAndDeleteSdt(sdt, sdtContent);
             }
             else
             {
                 var sdt = FindSdt(doc.MainDocumentPart.Document.Body, name);
                 var sdtContent = FindSdtContent(sdt, name);
                 SetTextElement(sdtContent, name, text);
+                KeepContentAndDeleteSdt(sdt, sdtContent);
             }
         }
     }
