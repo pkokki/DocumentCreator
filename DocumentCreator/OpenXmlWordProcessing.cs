@@ -50,22 +50,26 @@ namespace DocumentCreator
                 var sdtProperties = sdt.Elements<SdtProperties>().First();
 
                 var name = ResolveTemplateFieldName(sdtProperties);
-                var isCollection = sdtProperties.Elements<SdtRepeatedSection>().Any();
-                var field = new TemplateField()
+                // https://github.com/pkokki/DocumentCreator/issues/36
+                if (!fields.Any(o => o.Name == name))
                 {
-                    Name = name,
-                    IsCollection = isCollection,
-                    Content = isCollection ? string.Empty : string.Join("", FindSdtContent(sdt, name).ChildElements.Select(o => o?.InnerText)),
-                    //Type = sdt.GetType().Name
-                };
-                var parent = sdt.Ancestors<SdtElement>()
-                    .FirstOrDefault(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any());
-                if (parent != null)
-                {
-                    var parentProperties = parent.Elements<SdtProperties>().First();
-                    field.Parent = ResolveTemplateFieldName(parentProperties);
+                    var isCollection = sdtProperties.Elements<SdtRepeatedSection>().Any();
+                    var field = new TemplateField()
+                    {
+                        Name = name,
+                        IsCollection = isCollection,
+                        Content = isCollection ? string.Empty : string.Join("", FindSdtContent(sdt, name).ChildElements.Select(o => o?.InnerText)),
+                        //Type = sdt.GetType().Name
+                    };
+                    var parent = sdt.Ancestors<SdtElement>()
+                        .FirstOrDefault(o => !o.Elements<SdtProperties>().First().Elements<SdtRepeatedSectionItem>().Any());
+                    if (parent != null)
+                    {
+                        var parentProperties = parent.Elements<SdtProperties>().First();
+                        field.Parent = ResolveTemplateFieldName(parentProperties);
+                    }
+                    fields.Add(field);
                 }
-                fields.Add(field);
             }
             return fields;
         }

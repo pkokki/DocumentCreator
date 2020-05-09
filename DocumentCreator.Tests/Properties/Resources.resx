@@ -154,6 +154,12 @@
   <data name="open-xml-spreadsheet-tests001_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\open-xml-spreadsheet-tests001.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="simple-receipt-template_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\simple-receipt-template.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="template-themis_docx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\template-themis.docx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="use-forward-own-cell-values_xlsm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\use-forward-own-cell-values.xlsm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
