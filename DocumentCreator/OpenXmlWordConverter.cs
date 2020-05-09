@@ -34,7 +34,7 @@ namespace DocumentCreator
                 pageTitle = (string)part.GetXDocument().Descendants(DC.title).FirstOrDefault() ?? pageTitle;
             }
             // TODO: Determine max-width from size of content area.
-            HtmlConverterSettings settings = new HtmlConverterSettings()
+            var settings = new WmlToHtmlConverterSettings()
             {
                 AdditionalCss = "body { margin: 1cm auto; max-width: 20cm; padding: 0; }",
                 PageTitle = pageTitle,
@@ -98,7 +98,7 @@ namespace DocumentCreator
                 }
             };
 
-            XElement htmlElement = HtmlConverter.ConvertToHtml(wDoc, settings);
+            XElement htmlElement = WmlToHtmlConverter.ConvertToHtml(wDoc, settings);
 
             // Produce HTML document with <!DOCTYPE html > declaration to tell the browser
             // we are using HTML5.
