@@ -15,8 +15,8 @@ namespace DocumentCreator
         [Fact]
         public void CanCreateDocument()
         {
-            var wordBytes = new MemoryStream(Resources.create_document_docx);
-            var excelBytes = new MemoryStream(Resources.create_document_xlsm);
+            var wordBytes = new MemoryStream(Resources.create_document_docx, true);
+            var excelBytes = new MemoryStream(Resources.create_document_xlsm, true);
             var payload = new DocumentPayload()
             {
                 Sources = new List<EvaluationSource>()
@@ -30,7 +30,7 @@ namespace DocumentCreator
 
             
             Assert.NotEqual(0, docStream.Length);
-            using FileStream output = File.OpenWrite("./Output/CreateDocumentTest.docx");
+            using FileStream output = File.Open("./Output/CreateDocumentTest.docx", FileMode.Create);
             docStream.CopyTo(output);
         }
 
@@ -88,7 +88,7 @@ namespace DocumentCreator
             var document = processor.CreateDocument(template, mapping, payload);
 
             // Save the document
-            using FileStream output = File.OpenWrite("./document.docx");
+            using FileStream output = File.Open("./document.docx", FileMode.Create);
             document.CopyTo(output);
         }
     }
