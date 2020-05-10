@@ -122,7 +122,7 @@ namespace DocumentCreator
                 else if (templateField.Parent == null)
                 {
                     var result = results.FirstOrDefault(o => o.Name == templateField.Name);
-                    var text = result.Error ?? result.Text;
+                    var text = result != null ? (result.Error ?? result.Text) : string.Empty;
                     contentControlData.Add(new ContentControlData(templateField.Name, text));
                 }
             }

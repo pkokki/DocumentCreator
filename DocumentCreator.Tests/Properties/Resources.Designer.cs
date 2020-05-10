@@ -180,6 +180,26 @@ namespace DocumentCreator.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] simple_receipt_template_docx {
+            get {
+                object obj = ResourceManager.GetObject("simple-receipt-template_docx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] template_themis_docx {
+            get {
+                object obj = ResourceManager.GetObject("template-themis_docx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] use_forward_own_cell_values_xlsm {
             get {
                 object obj = ResourceManager.GetObject("use-forward-own-cell-values_xlsm", resourceCulture);

@@ -44,7 +44,7 @@ namespace DocumentCreator.Repository
         {
             if (contents.Position != 0)
                 contents.Position = 0;
-            using FileStream output = File.OpenWrite(path);
+            using FileStream output = File.Open(path, FileMode.Create);
             contents.CopyTo(output);
         }
 
