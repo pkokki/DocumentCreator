@@ -1,5 +1,6 @@
 ﻿using DocumentCreator.Core.Model;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.CustomProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -20,12 +21,12 @@ namespace DocumentCreator
             return GetMappingInfo(mappingsDoc, externalSources);
         }
 
-        public static Stream FillMappingsSheet(Stream mappingBytes, IEnumerable<TemplateField> templateFields, string templateName, string mappingName, string testUrl)
+        public static Stream FillMappingsSheet(Stream mappingBytes, IEnumerable<TemplateField> templateFields, FillMappingInfo mappingInfo)
         {
             using var mappingsStream = mappingBytes.ToMemoryStream();
             using (SpreadsheetDocument mappingsDoc = SpreadsheetDocument.Open(mappingsStream, true))
             {
-                FillMappingsSheet(mappingsDoc, templateName, mappingName, templateFields, testUrl);
+                FillMappingsSheet(mappingsDoc, templateFields, mappingInfo);
             }
             return mappingsStream.ToMemoryStream();
         }
@@ -112,12 +113,11 @@ namespace DocumentCreator
         }
 
 
-        private static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, string templateName, string mappingName, IEnumerable<TemplateField> templateFields, string testUrl)
+        private static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, IEnumerable<TemplateField> templateFields, FillMappingInfo mappingInfo)
         {
             var worksheet = GetFirstWorkSheet(mappingsDoc);
             var stringTablePart = GetSharedStringTablePart(mappingsDoc);
             var rowIndex = 3U;
-            var fieldId = 1;
             foreach (var field in templateFields)
             {
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "A", field.Name);
@@ -136,12 +136,27 @@ namespace DocumentCreator
                 UpdateCellText(stringTablePart, worksheet, rowIndex, "J", string.Empty);
                 //UpdateCellFormula(worksheet, rowIndex, "K", $"IF(ISNA(FORMULATEXT(F{rowIndex})),\"\",IF(F{rowIndex}=J{rowIndex},1,IF(F{rowIndex}=IFNA(VALUE(J{rowIndex}),J{rowIndex}),1,2)))");
                 ++rowIndex;
-                ++fieldId;
             }
             UpdateCellText(stringTablePart, worksheet, 14, "N", GetCustomDocumentProperty(mappingsDoc, "DocumentCreatorVersion") ?? "?");
-            UpdateCellText(stringTablePart, worksheet, 15, "N", templateName);
-            UpdateCellText(stringTablePart, worksheet, 16, "N", mappingName);
-            UpdateCellText(stringTablePart, worksheet, 17, "N", testUrl);
+            UpdateCellText(stringTablePart, worksheet, 15, "N", mappingInfo.TemplateName);
+            UpdateCellText(stringTablePart, worksheet, 16, "N", mappingInfo.MappingName);
+            UpdateCellText(stringTablePart, worksheet, 17, "N", mappingInfo.TestUrl);
+
+            if (mappingInfo.Sources != null)
+            {
+                rowIndex = 3U;
+                foreach (var source in mappingInfo.Sources)
+                {
+                    if (source.Key != null && source.Value != null)
+                    {
+                        UpdateCellText(stringTablePart, worksheet, rowIndex, "M", source.Key);
+                        UpdateCellText(stringTablePart, worksheet, rowIndex, "N", source.Value.ToString());
+                        ++rowIndex;
+                        if (rowIndex > 11)
+                            break;
+                    }
+                }
+            }
         }
 
         private static Worksheet GetFirstWorkSheet(SpreadsheetDocument mappingsDoc)

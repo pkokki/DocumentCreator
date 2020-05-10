@@ -7,6 +7,8 @@ using Moq;
 using DocumentCreator.Core.Repository;
 using DocumentCreator.Core.Model;
 using DocumentCreator.Properties;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace DocumentCreator
 {
@@ -39,9 +41,22 @@ namespace DocumentCreator
             var emptyMapping = new MemoryStream(Resources.create_mapping_for_template_xlsm);
             var templateBytes = new MemoryStream(Resources.create_mapping_for_template_docx);
 
-            var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, "T01", "M01", "http://localhost/api");
+            var info = new FillMappingInfo()
+            {
+                TemplateName = "T01",
+                MappingName = "M01",
+                TestUrl = "http://localhost/api",
+                Sources = new Dictionary<string, JObject>()
+                {
+                    ["S1"] = JObject.Parse("{x: 5, y: 6}"),
+                    ["S2"] = JObject.Parse("{z: 10}")
+                }
+            };
+            var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, info);
 
             Assert.NotEqual(0, bytes.Length);
+            using FileStream output = File.Open("./mappings.xlsm", FileMode.Create);
+            bytes.CopyTo(output);
         }
 
         [Fact]

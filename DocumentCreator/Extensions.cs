@@ -14,6 +14,7 @@ namespace DocumentCreator
             if (source.Position != 0)
                 source.Position = 0;
             source.CopyTo(ms);
+            ms.Position = 0;
             return ms;
         }
 
