@@ -61,7 +61,7 @@ TBD
 
 * [ASP.NET Core](https://github.com/dotnet/aspnetcore) 
 * [Open XML SDK](https://github.com/OfficeDev/Open-XML-SDK) - to generate documents and extract content from Word and Excel files
-* [Open XML PowerTools](https://github.com/OfficeDev/Open-Xml-PowerTools) - to convert Word documents to HTML/CSS
+* [Open XML PowerTools](https://github.com/EricWhiteDev/Open-Xml-PowerTools) - to convert Word documents to HTML/CSS
 
 ### Web client
 
@@ -75,7 +75,7 @@ TBD
 
 ## Contributing
 
-Contributions are welcome. Please contact the [project maintainer](https://twitter.com/pkokki).
+Contributions are welcome. Please contact the [project maintainer](https://github.com/pkokki).
 
 ## Versions
 
@@ -83,7 +83,7 @@ For the versions available, see the [tags on this repository](https://github.com
 
 ## Authors
 
-* **Panos** - *Initial work* - [pkokki](https://twitter.com/pkokki)
+* **Panos** - *Initial work* - [pkokki](https://github.com/pkokki)
 
 ## License
 
@@ -92,3 +92,4 @@ This project is licensed under the MIT License - see the [LICENSE.TXT](LICENSE.T
 ## Credits
 * Tim Hall, [JSON conversion and parsing for VBA](https://github.com/VBA-tools/VBA-JSON)
 * E. W. Bachtal, [Excel Formula Parsing in C#](https://ewbi.blogs.com/develops/2007/03/excel_formula_p.html)
+* Eric White, [Open XML PowerTools](https://github.com/EricWhiteDev)
