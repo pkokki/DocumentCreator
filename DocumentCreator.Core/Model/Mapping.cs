@@ -60,12 +60,17 @@ namespace DocumentCreator.Core.Model
         public string TemplateName { get; set; }
         public string MappingName { get; set; }
         public string TestUrl { get; set; }
-        public IDictionary<string, JObject> Sources { get; set; }
+        public FillMappingPayload Payload { get; set; }
     }
 
     public class FillMappingResult
     {
         public string FileName { get; set; }
         public Stream Buffer { get; set; }
+    }
+
+    public class FillMappingPayload
+    {
+        public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 }

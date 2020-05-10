@@ -66,14 +66,14 @@ namespace DocumentCreatorAPI.Controllers
         public async Task<IActionResult> GetTemplateMappingExcelWithSources(
             [FromRoute]string templateName, 
             [FromRoute]string mappingName,
-            [FromBody]IDictionary<string, JObject> sources)
+            [FromBody]FillMappingPayload payload)
         {
             var info = new FillMappingInfo()
             {
                 TemplateName = templateName,
                 MappingName = mappingName,
                 TestUrl = $"{Request.Scheme}://{Request.Host}/api/evaluations",
-                Sources = sources
+                Payload = payload
             };
 
             var mapping = await processor.BuildMapping(info);

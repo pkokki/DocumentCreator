@@ -142,15 +142,15 @@ namespace DocumentCreator
             UpdateCellText(stringTablePart, worksheet, 16, "N", mappingInfo.MappingName);
             UpdateCellText(stringTablePart, worksheet, 17, "N", mappingInfo.TestUrl);
 
-            if (mappingInfo.Sources != null)
+            if (mappingInfo.Payload != null && mappingInfo.Payload.Sources != null)
             {
                 rowIndex = 3U;
-                foreach (var source in mappingInfo.Sources)
+                foreach (var source in mappingInfo.Payload.Sources)
                 {
-                    if (source.Key != null && source.Value != null)
+                    if (source.Name != null && source.Payload != null)
                     {
-                        UpdateCellText(stringTablePart, worksheet, rowIndex, "M", source.Key);
-                        UpdateCellText(stringTablePart, worksheet, rowIndex, "N", source.Value.ToString());
+                        UpdateCellText(stringTablePart, worksheet, rowIndex, "M", source.Name);
+                        UpdateCellText(stringTablePart, worksheet, rowIndex, "N", source.Payload.ToString());
                         ++rowIndex;
                         if (rowIndex > 11)
                             break;

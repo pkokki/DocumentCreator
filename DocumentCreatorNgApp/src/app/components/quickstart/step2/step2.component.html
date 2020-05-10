@@ -1,3 +1,5 @@
+<h2>Download an empty mapping sheet</h2>
+
 <p>Download an Excel workbook with the mappings definition for the template.</p>
 
 <p>
@@ -11,7 +13,23 @@
     </mat-form-field>
 </p>
 
-<pre>GET {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}/xls</pre>
+<pre>{{withSources ? 'PUT' : 'GET'}} {{this.state.apiBaseUrl}}/templates/{{this.state.templateName}}/mappings/{{this.state.mappingName}}/xls</pre>
+
+<p>
+    <mat-checkbox [(ngModel)]="withSources">Check here to provide a sample source for the mapping.</mat-checkbox>
+</p>
+
+<p [hidden]="!withSources">
+    <mat-form-field appearance="fill" style="width:100%">
+        <mat-label>JSON payload</mat-label>
+        <textarea matInput style="font-family: Roboto Mono, monospace; font-size: 80%;"
+            matTextareaAutosize
+            matAutosizeMinRows="8"
+            matAutosizeMaxRows="10"
+            [(ngModel)]="sourcePayload">
+        </textarea>
+    </mat-form-field>
+</p>
 
 <p>
     <button mat-stroked-button color="primary" 
@@ -21,6 +39,3 @@
     </button>
 </p>
 
-<p>Use the <code>Test Mappings</code> button in the Excel worksheet to test your expressions</p>
-
-<code>POST {{state.apiBaseUrl}}/evaluations/{{state.templateName}}</code>

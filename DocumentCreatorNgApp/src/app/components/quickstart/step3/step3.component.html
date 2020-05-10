@@ -1,4 +1,18 @@
-<p>Upload the Excel workbook with the mappings definition.</p>
+<h2>Upload a complete mapping sheet</h2>
+
+<p>Open the Excel file and fill the mapping expressions in column <code>F</code> labeled <code>Value</code>.</p>
+
+<p class="mat-hint">
+    HINT: If the sample template of Step 1 is used, then 
+    <button mat-button (click)="openBottomSheet()">here</button>
+    are some ready expressions to copy.
+</p>
+    
+<p>Use the <code>Test Mappings</code> button in the Excel worksheet to test your expressions.</p>
+
+<pre>POST {{state.apiBaseUrl}}/evaluations/{{state.templateName}}</pre>
+
+<p>Upload the completed Excel workbook with the mappings definition.</p>
 
 <pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}/mappings/{{state.mappingName}}/xls</pre>
 

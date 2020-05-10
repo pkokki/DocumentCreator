@@ -9,6 +9,7 @@ using DocumentCreator.Core.Model;
 using DocumentCreator.Properties;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Newtonsoft.Json.Linq;
+using JsonExcelExpressions;
 
 namespace DocumentCreator
 {
@@ -46,10 +47,13 @@ namespace DocumentCreator
                 TemplateName = "T01",
                 MappingName = "M01",
                 TestUrl = "http://localhost/api",
-                Sources = new Dictionary<string, JObject>()
+                Payload = new FillMappingPayload()
                 {
-                    ["S1"] = JObject.Parse("{x: 5, y: 6}"),
-                    ["S2"] = JObject.Parse("{z: 10}")
+                    Sources = new List<EvaluationSource>() 
+                    { 
+                        new EvaluationSource() { Name = "S1", Payload = JObject.Parse("{x: 5, y: 6}") },
+                        new EvaluationSource() { Name = "S2", Payload = JObject.Parse("{z: 10}") }
+                    }
                 }
             };
             var bytes = processor.CreateMappingForTemplate(templateBytes, emptyMapping, info);
