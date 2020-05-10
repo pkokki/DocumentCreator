@@ -54,4 +54,23 @@ namespace DocumentCreator.Core.Model
         public int Templates { get; set; }
         public int Documents { get; set; }
     }
+
+    public class FillMappingInfo
+    {
+        public string TemplateName { get; set; }
+        public string MappingName { get; set; }
+        public string TestUrl { get; set; }
+        public FillMappingPayload Payload { get; set; }
+    }
+
+    public class FillMappingResult
+    {
+        public string FileName { get; set; }
+        public Stream Buffer { get; set; }
+    }
+
+    public class FillMappingPayload
+    {
+        public IEnumerable<EvaluationSource> Sources { get; set; }
+    }
 }

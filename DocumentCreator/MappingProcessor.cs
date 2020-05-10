@@ -2,6 +2,7 @@
 using DocumentCreator.Core.Model;
 using DocumentCreator.Core.Repository;
 using DocumentCreator.Properties;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,16 +50,21 @@ namespace DocumentCreator
             return TransformFull(content);
         }
 
-        public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, string testEvaluationsUrl)
+        public async Task<FillMappingResult> BuildMapping(FillMappingInfo info)
         {
-            var template = repository.GetLatestTemplate(templateName);
+            var template = repository.GetLatestTemplate(info.TemplateName);
             if (template == null)
                 return null;
 
-            var emptyMappingBuffer = new MemoryStream(Resources.empty_mappings_prod_xlsm);
+            var mapping = await GetMapping(info.TemplateName, null, info.MappingName);
+            var mappingBytes = mapping != null ? mapping.Buffer : new MemoryStream(Resources.empty_mappings_prod_xlsm);
 
-            var bytes = CreateMappingForTemplate(template.Buffer, emptyMappingBuffer, templateName, mappingName, testEvaluationsUrl);
-            return await CreateMapping(templateName, mappingName, bytes);
+            var bytes = CreateMappingForTemplate(template.Buffer, mappingBytes, info);
+            return new FillMappingResult()
+            {
+                FileName = $"{info.TemplateName}_{info.MappingName}.xlsm",
+                Buffer = bytes
+            };
         }
 
         public async Task<MappingDetails> CreateMapping(string templateName, string mappingName, Stream bytes)
@@ -67,10 +73,10 @@ namespace DocumentCreator
             return TransformFull(content);
         }
 
-        public Stream CreateMappingForTemplate(Stream templateBytes, Stream mappingBytes, string templateName, string mappingsName, string testUrl)
+        public Stream CreateMappingForTemplate(Stream templateBytes, Stream mappingBytes, FillMappingInfo info)
         {
             var templateFields = OpenXmlWordProcessing.FindTemplateFields(templateBytes);
-            var excelBytes = OpenXmlSpreadsheet.FillMappingsSheet(mappingBytes, templateFields, templateName, mappingsName, testUrl);
+            var excelBytes = OpenXmlSpreadsheet.FillMappingsSheet(mappingBytes, templateFields, info);
             return excelBytes;
         }
 

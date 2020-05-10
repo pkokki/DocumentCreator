@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { UploadService } from '../../../services/upload/upload.service'
 import { State } from '../../../services/state/state.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 
 @Component({
   selector: 'app-step3',
@@ -16,7 +17,8 @@ export class Step3Component implements OnInit {
   constructor(
     public state: State, 
     private uploadService: UploadService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private _bottomSheet: MatBottomSheet
   ) { }
 
   ngOnInit(): void {
@@ -42,4 +44,15 @@ export class Step3Component implements OnInit {
     this.file.nativeElement.click();
   }
 
+  openBottomSheet(): void {
+    this._bottomSheet.open(BottomSheetSampleExpressions);
+  }
+}
+
+@Component({
+  selector: 'bottom-sheet-sample-expressions',
+  templateUrl: 'bottom-sheet-sample-expressions.html',
+})
+export class BottomSheetSampleExpressions {
+  constructor() {}
 }

@@ -1,0 +1,11 @@
+<pre style="font-size:80%">
+=MAPVALUE(N3;"Data.Initiation.DebtorAccount.Name")
+=CONCATENATE(MAPVALUE(N3;"Data.Initiation.DebtorPostalAddress.StreetName");" ";MAPVALUE(N3;"Data.Initiation.DebtorPostalAddress.BuildingNumber");", ";MAPVALUE(N3;"Data.Initiation.DebtorPostalAddress.PostCode");" ";MAPVALUE(N3;"Data.Initiation.DebtorPostalAddress.TownName"))
+=MAPVALUE(N3;"Data.Initiation.RemittanceInformation.Unstructured")
+=MAPVALUE(N3;"Data.Initiation.DebtorAccount.Identification")
+=MAPVALUE(N3;"Data.Initiation.EndToEndIdentification")
+=""
+=MAPVALUE(N3;"Data.Initiation.InstructedAmount.Amount")
+=F9*10%
+=F9+F10
+</pre>

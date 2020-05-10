@@ -1,3 +1,5 @@
+<h2>Create template</h2>
+
 <p>Prepare and upload a Word template with content controls.</p>
 
 <p>
@@ -11,8 +13,12 @@
 <pre>POST {{state.apiBaseUrl}}/templates/{{state.templateName}}</pre>
 
 <input type="file" #file style="display: none" (change)="onFileAdd()" />
-<button mat-stroked-button color="primary" 
+<p>
+    <button mat-stroked-button color="primary" 
     [disabled]="uploading || !state.templateName" 
     (click)="addFile()">
     Select Word to upload
-</button>
+    </button>
+</p>
+
+<p class="mat-hint">HINT: You can download <a target="_blank" href="assets/example/simple-receipt-template.docx">a sample template</a> to view and upload.</p>

@@ -1,0 +1,38 @@
+{
+  "Data": {
+    "ConsentId": "7290",
+    "Initiation": {
+      "InstructionIdentification": "ANSM023",
+      "EndToEndIdentification": "FRESCO.21302.GFX.37",
+      "InstructedAmount": {
+        "Amount": 20.50,
+        "Currency": "GBP"
+      },
+      "DebtorAccount": {
+        "SchemeName": "UK.OBIE.SortCodeAccountNumber",
+        "Identification": "11280001234567",
+        "Name": "Andrea Smith"
+      },
+      "DebtorPostalAddress": {
+        "AddressType": "Correspondence",
+        "StreetName": "Liberty",
+        "BuildingNumber":"1",
+        "PostCode":"AB1 2CD",
+        "TownName":"London",
+        "Country":"UK"
+      },
+      "CreditorAccount": {
+        "SchemeName": "UK.OBIE.SortCodeAccountNumber",
+        "Identification": "08080021325698",
+        "Name": "Bob Clements"
+      },
+      "RemittanceInformation": {
+        "Reference": "FRESCO-037",
+        "Unstructured": "Internal ops code 5120103"
+      }
+    }
+  },
+  "Risk": {
+    "PaymentContextCode": "PartyToParty"
+  }
+}

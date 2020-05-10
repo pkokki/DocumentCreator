@@ -1,17 +1,17 @@
 <mat-card>
     <h2>Getting started with Document Creator</h2>
-    <mat-vertical-stepper [linear]="false" #stepper>
-        <mat-step label="Step 1: Create template">
+    <mat-horizontal-stepper [linear]="false" #stepper>
+        <mat-step label="Step 1">
             <app-step1></app-step1>
         </mat-step>
-        <mat-step label="Step 2: Download an empty mapping sheet">
+        <mat-step label="Step 2">
             <app-step2></app-step2>
         </mat-step>
-        <mat-step label="Step 3: Upload a complete mapping sheet">
+        <mat-step label="Step 3">
             <app-step3></app-step3>
         </mat-step>
-        <mat-step label="Step 4: Create documents">
+        <mat-step label="Step 4">
             <app-step4></app-step4>
         </mat-step>
-    </mat-vertical-stepper>
+    </mat-horizontal-stepper>
 </mat-card>

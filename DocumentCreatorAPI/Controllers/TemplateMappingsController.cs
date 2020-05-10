@@ -1,6 +1,10 @@
 ﻿using DocumentCreator;
 using DocumentCreator.Core;
+using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -54,7 +58,26 @@ namespace DocumentCreatorAPI.Controllers
         [Route("{templateName}/mappings/{mappingName}/xls")]
         public async Task<IActionResult> GetTemplateMappingExcel([FromRoute]string templateName, [FromRoute]string mappingName)
         {
-            var mapping = await processor.CreateMapping(templateName, mappingName, $"{Request.Scheme}://{Request.Host}/api/evaluations");
+            return await GetTemplateMappingExcelWithSources(templateName, mappingName, null);
+        }
+
+        [HttpPut]
+        [Route("{templateName}/mappings/{mappingName}/xls")]
+        public async Task<IActionResult> GetTemplateMappingExcelWithSources(
+            [FromRoute]string templateName, 
+            [FromRoute]string mappingName,
+            [FromBody]FillMappingPayload payload)
+        {
+            var info = new FillMappingInfo()
+            {
+                TemplateName = templateName,
+                MappingName = mappingName,
+                TestUrl = $"{Request.Scheme}://{Request.Host}/api/evaluations",
+                Payload = payload
+            };
+
+            var mapping = await processor.BuildMapping(info);
+
             var fileContents = mapping.Buffer.ToMemoryStream();
             var contentType = "application/vnd.ms-excel.sheet.macroEnabled.12";
             return new FileContentResult(fileContents.ToArray(), contentType)
