@@ -41,8 +41,11 @@ namespace JsonExcelExpressions.Eval
                 return ExcelValue.Create(sources.First(o => o.Name == key || o.Cell == key).Payload, OutLanguage);
             if (values.ContainsKey(key))
                 return values[key];
+            if (key.Contains(':'))
+                return GetRangeValues(key);
             throw new InvalidOperationException($"Name or cell {key} not found in scope.");
         }
+
         public ExcelValue Get(ExcelValue key, ExcelValue path)
         {
             JObject target;
@@ -63,6 +66,21 @@ namespace JsonExcelExpressions.Eval
                 return new ExcelValue.ArrayValue(values, OutLanguage);
             }
             throw new InvalidOperationException();
+        }
+
+        private ExcelValue GetRangeValues(string key)
+        {
+            var rangeCells = key.Split(':');
+            var startCell = new CellAddress(rangeCells[0]);
+            var endCell = new CellAddress(rangeCells[1]);
+            if (startCell.Column != endCell.Column)
+                throw new InvalidOperationException($"GetRangeValues does not support multi-column range {key}.");
+            var values = new List<ExcelValue>();
+            for (var row = startCell.Row; row <= endCell.Row; row++)
+            {
+                values.Add(Get($"{startCell.Column}{row}"));
+            }
+            return new ExcelValue.ArrayValue(values, OutLanguage);
         }
     }
 }
