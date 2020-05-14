@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -7,16 +8,16 @@ namespace JsonExcelExpressions.Eval
 {
     public class ExpressionFormat
     {
-        public static readonly Dictionary<int, ValueFormat> standardFormats
-            = new Dictionary<int, ValueFormat>();
-        public static readonly Dictionary<string, ValueFormat> customFormats
-            = new Dictionary<string, ValueFormat>();
+        public static readonly IDictionary<int, ValueFormat> standardFormats
+            = new ConcurrentDictionary<int, ValueFormat>();
+        public static readonly IDictionary<string, ValueFormat> customFormats
+            = new ConcurrentDictionary<string, ValueFormat>();
 
         public abstract class ValueFormat
         {
             public ValueFormat(string format) 
             {
-                if (format != null && !format.StartsWith("{"))
+                if (format != null && !format.Contains("{0"))
                     format = "{0:" + format + "}";
                 Format = format; 
             }
@@ -72,7 +73,9 @@ namespace JsonExcelExpressions.Eval
         public ValueFormat GetFormat(ExpressionFormat defaultFormat)
         {
             var format = Resolve();
-            return format ?? defaultFormat.GetFormat(null);
+            if (format == null && defaultFormat != null)
+                format = defaultFormat.Resolve();
+            return format ?? TranslateExcelStandardFormat(0);
         }
 
         private ValueFormat Resolve()
@@ -112,25 +115,28 @@ namespace JsonExcelExpressions.Eval
                 case 12: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,-9:F0}"));
                 //case 13: return "# ??/??";
                 case 14: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("d"));
-                case 15: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("d-MMM-yy"));
-                case 16: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("M"));
-                case 17: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("Y"));
+                case 15: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("{0:d-MMM-yy}"));
+                case 16: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("{0:d-MMM}"));
+                case 17: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("{0:MMM-yy}"));
                 case 18: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("t"));
                 case 19: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("T"));
                 case 20: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("H:mm"));
                 case 21: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("H:mm:ss"));
-                case 22: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("d H:mm"));
-                case 30: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("m/d/yy"));
+                case 22: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("{0:d} {0:H:mm}"));
 
                 case 37:
                 case 38: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,-8:N0}"));
                 case 39:
                 case 40: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,-11:N2}"));
+                case 41: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,7:N0}   "));
+                case 42: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,9:C0} "));
+                case 43: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,10:N2}   "));
+                case 44: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0,12:C2} "));
 
                 case 45: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("mm:ss"));
                 case 46: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("[h]:mm:ss"));
-                case 47: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("mmss.0"));
-                case 48: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("##0.0E+0"));
+                case 47: return standardFormats.TryGetAndAdd(numFormatId, () => new DateValueFormat("mm:ss"));
+                case 48: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("{0:#0.0E+0}"));
 
                 case 49: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("G10"));
             }
@@ -139,6 +145,7 @@ namespace JsonExcelExpressions.Eval
 
         private ValueFormat TranslateExcelFormat(string format)
         {
+            bool isDate = false;
             var sb = new StringBuilder();
             foreach (var ch1 in format)
             {
@@ -149,9 +156,12 @@ namespace JsonExcelExpressions.Eval
                 else if (nf.NumberGroupSeparator[0] == ch1)
                     ch2 = ',';
                 sb.Append(ch2);
+                if (ch2 == 'd' || ch2 == 'M' || ch2 == 'y' || ch2 == 'H' || ch2 == 'h' || ch2 == 'm' || ch2 == 's')
+                    isDate = true;
             }
             var customFormat = sb.ToString();
-            // TODO: need to separate DateValueFormat
+            if (isDate)
+                return customFormats.TryGetAndAdd(customFormat, () => new DateValueFormat(customFormat));
             return customFormats.TryGetAndAdd(customFormat, () => new NumberValueFormat(customFormat));
         }
     }

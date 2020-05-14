@@ -58,7 +58,7 @@ namespace JsonExcelExpressions.Lang
         public string ToString(decimal value, ExpressionFormat info = null)
         {
             info ??= ExpressionFormat.General;
-            var format = info.GetFormat(ExpressionFormat.General);
+            var format = info.GetFormat(null);
             if (format.NeedsDate)
                 return string.Format(culture, format.Format, ExcelValue.DateValue.FromSerial(value));
             return string.Format(culture, format.Format, value);

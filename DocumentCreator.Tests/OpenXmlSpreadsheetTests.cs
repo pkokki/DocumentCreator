@@ -152,18 +152,18 @@ namespace DocumentCreator
 
             Assert.Equal("3/1/1986", results.First(o => o.Name == "B14").Text);
             Assert.Equal("3-Ιαν-86", results.First(o => o.Name == "B15").Text);
-            Assert.Equal("3 Ιανουαρίου", results.First(o => o.Name == "B16").Text);
-            Assert.Equal("Ιανουάριος 1986", results.First(o => o.Name == "B17").Text);
+            Assert.Equal("3-Ιαν", results.First(o => o.Name == "B16").Text);
+            Assert.Equal("Ιαν-86", results.First(o => o.Name == "B17").Text);
             Assert.Equal("10:14 μμ", results.First(o => o.Name == "B18").Text);
             Assert.Equal("10:14:13 μμ", results.First(o => o.Name == "B19").Text);
             Assert.Equal("22:14", results.First(o => o.Name == "B20").Text);
             Assert.Equal("22:14:13", results.First(o => o.Name == "B21").Text);
             Assert.Equal("3/1/1986 22:14", results.First(o => o.Name == "B22").Text);
 
-            //Assert.Equal("14:13", results.First(o => o.Name == "B45").Text);
+            Assert.Equal("14:13", results.First(o => o.Name == "B45").Text);
             //Assert.Equal("753982:14:13", results.First(o => o.Name == "B46").Text);
             //Assert.Equal("14:12,7", results.First(o => o.Name == "B47").Text);
-            //Assert.Equal("31,4E+3", results.First(o => o.Name == "B48").Text);
+            Assert.Equal("31,4E+3", results.First(o => o.Name == "B48").Text);
         }
     }
 }

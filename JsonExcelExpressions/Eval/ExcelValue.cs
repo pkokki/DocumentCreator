@@ -271,8 +271,9 @@ namespace JsonExcelExpressions.Eval
             public static DateTime FromSerial(decimal serial)
             {
                 var intPart = (int)Math.Truncate(serial);
-                var decPart = (double)(serial - intPart);
-                var date = BASE.AddDays(intPart - 1).AddSeconds(decPart * 86400 + 1);
+                var timePart = (double)(serial - intPart);
+                var seconds = Math.Round(timePart * 86400);
+                var date = BASE.AddDays(intPart - 1).AddSeconds(seconds);
                 return date;
             }
             public static decimal ToSerial(DateTime date)

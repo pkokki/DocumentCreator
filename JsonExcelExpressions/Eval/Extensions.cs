@@ -78,13 +78,17 @@ namespace JsonExcelExpressions.Eval
             return value == null;
         }
 
+        private static readonly object theLock = new object();
         public static TValue TryGetAndAdd<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> factory)
         {
-            if (dict.TryGetValue(key, out TValue value))
+            lock (theLock)
+            {
+                if (dict.TryGetValue(key, out TValue value))
+                    return value;
+                value = factory();
+                dict.Add(key, value);
                 return value;
-            value = factory();
-            dict.Add(key, value);
-            return value;
+            }
         }
     }
 }
