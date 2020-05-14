@@ -2,6 +2,7 @@
 using DocumentCreator.Properties;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -71,7 +72,7 @@ namespace DocumentCreator
                 }
             };
 
-            var processor = new MappingExpressionEvaluator();
+            var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
             var results = processor.Evaluate(input).Results;
 
             var subtotal = results.First(o => o.Name == "subtotal");
@@ -99,7 +100,7 @@ namespace DocumentCreator
                 Expressions = expressions
             };
 
-            var processor = new MappingExpressionEvaluator();
+            var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
             var results = processor.Evaluate(input).Results;
 
             Assert.Equal("31416", results.First(o => o.Name == "B1").Text);
@@ -147,7 +148,7 @@ namespace DocumentCreator
                 Expressions = expressions
             };
 
-            var processor = new MappingExpressionEvaluator();
+            var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
             var results = processor.Evaluate(input).Results;
 
             Assert.Equal("3/1/1986", results.First(o => o.Name == "B14").Text);
