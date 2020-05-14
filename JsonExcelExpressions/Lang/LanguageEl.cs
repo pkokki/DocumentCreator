@@ -39,9 +39,7 @@ namespace JsonExcelExpressions.Lang
         {
             // When running unit tests on github we receive "π.μ." instead of "πμ"
             var text = base.ToString(value, info, isTime);
-            if (isTime)
-                return text?.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
-            return text;
+            return text?.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
         }
 
     }
