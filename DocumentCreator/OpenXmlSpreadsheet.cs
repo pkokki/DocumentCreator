@@ -54,22 +54,27 @@ namespace DocumentCreator
         {
             var templateFieldExpressions = new List<MappingExpression>();
             var worksheet = GetFirstWorkSheet(doc);
-            var stringTablePart = GetSharedStringTablePart(doc);
+            var stringTablePart = GetOrCreatePart<SharedStringTablePart>(doc);
+            var stylesPart = GetOrCreatePart<WorkbookStylesPart>(doc);
             var rowIndex = 3U;
             string name;
             do
             {
-                name = GetCellValue(worksheet, stringTablePart, $"A{rowIndex}");
+                name = GetCellValue(GetCell(worksheet, $"A{rowIndex}"), stringTablePart);
                 if (!string.IsNullOrEmpty(name))
                 {
+                    var formulaCell = GetCell(worksheet, $"F{rowIndex}");
+                    var formulaCellFormat = GetCellFormat(formulaCell, stylesPart);
                     var templateFieldExpression = new MappingExpression()
                     {
                         Name = name,
-                        Parent = GetCellValue(worksheet, stringTablePart, $"B{rowIndex}"),
-                        IsCollection = GetCellValueAsBoolean(worksheet, stringTablePart, $"C{rowIndex}"),
-                        Content = GetCellValue(worksheet, stringTablePart, $"D{rowIndex}"),
-                        Expression = GetCellFormula(worksheet, $"F{rowIndex}"),
-                        Cell = $"F{rowIndex}"
+                        Parent = GetCellValue(GetCell(worksheet, $"B{rowIndex}"), stringTablePart),
+                        IsCollection = GetCellValueAsBoolean(GetCell(worksheet, $"C{rowIndex}"), stringTablePart),
+                        Content = GetCellValue(GetCell(worksheet, $"D{rowIndex}"), stringTablePart),
+                        Expression = GetCellFormula(formulaCell),
+                        Cell = $"F{rowIndex}",
+                        NumFormatId = formulaCellFormat.Item1,
+                        NumFormatCode = formulaCellFormat.Item2
                     };
                     templateFieldExpressions.Add(templateFieldExpression);
                     ++rowIndex;
@@ -84,7 +89,7 @@ namespace DocumentCreator
             rowIndex = 3U;
             do
             {
-                name = GetCellValue(worksheet, stringTablePart, $"M{rowIndex}");
+                name = GetCellValue(GetCell(worksheet, $"M{rowIndex}"), stringTablePart);
                 if (!string.IsNullOrEmpty(name))
                 {
                     var existing = sources.FirstOrDefault(o => string.Equals(name, o.Name, StringComparison.InvariantCultureIgnoreCase));
@@ -94,7 +99,7 @@ namespace DocumentCreator
                     }
                     else 
                     {
-                        var payload = GetCellValue(worksheet, stringTablePart, $"N{rowIndex}");
+                        var payload = GetCellValue(GetCell(worksheet, $"N{rowIndex}"), stringTablePart);
                         sources.Add(new EvaluationSource()
                         {
                             Name = name,
@@ -112,11 +117,11 @@ namespace DocumentCreator
             };
         }
 
-
+        
         private static void FillMappingsSheet(SpreadsheetDocument mappingsDoc, IEnumerable<TemplateField> templateFields, FillMappingInfo mappingInfo)
         {
             var worksheet = GetFirstWorkSheet(mappingsDoc);
-            var stringTablePart = GetSharedStringTablePart(mappingsDoc);
+            var stringTablePart = GetOrCreatePart<SharedStringTablePart>(mappingsDoc);
             var rowIndex = 3U;
             foreach (var field in templateFields)
             {
@@ -176,12 +181,11 @@ namespace DocumentCreator
                 .InnerText;
         }
 
-        private static SharedStringTablePart GetSharedStringTablePart(SpreadsheetDocument doc)
+        private static T GetOrCreatePart<T>(SpreadsheetDocument doc) where T: OpenXmlPart, IFixedContentTypePart
         {
-            // Get the SharedStringTablePart. If it does not exist, create a new one.
-            var stringTablePart = doc.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+            var stringTablePart = doc.WorkbookPart.GetPartsOfType<T>().FirstOrDefault();
             if (stringTablePart == null)
-                stringTablePart = doc.WorkbookPart.AddNewPart<SharedStringTablePart>();
+                stringTablePart = doc.WorkbookPart.AddNewPart<T>();
             return stringTablePart;
         }
 
@@ -267,6 +271,15 @@ namespace DocumentCreator
                 return row;
             }
         }
+
+        private static Cell GetCell(Worksheet worksheet, string address)
+        {
+            return worksheet
+                .Descendants<Cell>()
+                .Where(c => string.Compare(c.CellReference, address, true) == 0)
+                .FirstOrDefault();
+
+        }
         private static Cell GetCell(Row row, string cellRef)
         {
             // Cells must be in sequential order according to CellReference. Determine where to insert the new cell.
@@ -303,18 +316,40 @@ namespace DocumentCreator
             return orderedExpressions;
         }
 
-        private static string GetCellFormula(Worksheet worksheet, string cellAddress)
+        private static string GetCellFormula(Cell cell)
         {
-            var cell = worksheet.Descendants<Cell>().
-                        Where(c => c.CellReference == cellAddress).FirstOrDefault();
             return cell?.CellFormula?.InnerText;
         }
 
-        private static string GetCellValue(Worksheet worksheet, SharedStringTablePart stringTablePart, string cellAddress)
+        private static Tuple<int?, string> GetCellFormat(Cell cell, WorkbookStylesPart stylesPart)
+        {
+            int? numberFormatId = null;
+            string formatCode = null;
+            if (cell != null)
+            {
+                var styleIndex = 0U;
+                if (cell.StyleIndex != null && cell.StyleIndex.HasValue)
+                    styleIndex = cell.StyleIndex.Value;
+
+                var cellFormat = stylesPart.Stylesheet.CellFormats
+                    .Elements<CellFormat>()
+                    .ElementAtOrDefault((int)styleIndex);
+                if (cellFormat != null && cellFormat.NumberFormatId.HasValue)
+                {
+                    numberFormatId = (int)cellFormat.NumberFormatId.Value;
+                    formatCode = stylesPart.Stylesheet.NumberingFormats?
+                        .Elements<NumberingFormat>()
+                        .Where(o => o.NumberFormatId == numberFormatId)
+                        .Select(o => o.FormatCode)
+                        .FirstOrDefault();
+                }
+            }
+            return System.Tuple.Create(numberFormatId, formatCode);
+        }
+
+        private static string GetCellValue(Cell cell, SharedStringTablePart stringTablePart)
         {
             string cellValue = null;
-            var cell = worksheet.Descendants<Cell>().
-                    Where(c => c.CellReference == cellAddress).FirstOrDefault();
             if (cell != null)
             {
                 cellValue = cell.CellValue?.InnerText ?? cell.InnerText;
@@ -323,9 +358,9 @@ namespace DocumentCreator
             }
             return cellValue;
         }
-        private static bool GetCellValueAsBoolean(Worksheet worksheet, SharedStringTablePart stringTablePart, string address)
+        private static bool GetCellValueAsBoolean(Cell cell, SharedStringTablePart stringTablePart)
         {
-            var content = GetCellValue(worksheet, stringTablePart, address);
+            var content = GetCellValue(cell, stringTablePart);
             if (string.IsNullOrEmpty(content))
                 return false;
             return content != "0";

@@ -43,6 +43,8 @@ namespace DocumentCreator.Core.Model
         public string Parent { get; set; }
         public bool IsCollection { get; set; }
         public string Content { get; set; }
+        public int? NumFormatId { get; set; }
+        public string NumFormatCode { get; set; }
     }
 
 

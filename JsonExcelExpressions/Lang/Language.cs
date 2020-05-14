@@ -32,6 +32,7 @@ namespace JsonExcelExpressions.Lang
         }
 
         internal ExcelValue.TextValue EmptyText { get; }
+        internal NumberFormatInfo NumberFormat => culture.NumberFormat;
 
         protected string ReplaceLetters(string text, char[] toReplace, char[] replacements)
         {
@@ -46,52 +47,23 @@ namespace JsonExcelExpressions.Lang
             return builder.ToString();
         }
 
-        public string ToString(ExcelValue value)
+        public virtual string ToString(DateTime value, ExpressionFormat info, bool isTime)
         {
-            return value?.ToString(this);
+            var format = info.GetFormat(isTime ? ExpressionFormat.ShortTimePattern : ExpressionFormat.ShortDatePattern);
+            if (format.NeedsDate)
+                return string.Format(culture, format.Format, value);
+            // Should start from beginning in order to use the overriden methods
+            return ToString(ExcelValue.DateValue.ToSerial(value), info);
         }
 
-        public virtual string ToString(DateTime value, string format = null)
+        public string ToString(decimal value, ExpressionFormat info = null)
         {
-            if (format == null) format = culture.DateTimeFormat.ShortDatePattern;
-            return value.ToString(format, culture);
-        }
-        public virtual string ToTimeString(DateTime value, string format = null)
-        {
-            if (format == null) format = culture.DateTimeFormat.ShortTimePattern;
-            return value.ToString(format, culture);
-        }
-
-        public string ToString(decimal value, int? decimals = null, bool commas = false)
-        {
-            string format = null;
-            if (commas)
-                format = $"N{decimals}";
-            else if (decimals.HasValue)
-                format = $"F{decimals.Value}";
-            return value.ToString(format, culture);
-        }
-
-        public string ToString(decimal value, string format)
-        {
-            var translatedFormat = TranslateFormat(format, culture);
-            return value.ToString(translatedFormat, culture);
-        }
-
-        private string TranslateFormat(string format, CultureInfo culture)
-        {
-            var sb = new StringBuilder();
-            foreach (var ch1 in format)
-            {
-                var ch2 = ch1;
-                var nf = culture.NumberFormat;
-                if (nf.NumberDecimalSeparator[0] == ch1)
-                    ch2 = '.';
-                else if (nf.NumberGroupSeparator[0] == ch1)
-                    ch2 = ',';
-                sb.Append(ch2);
-            }
-            return sb.ToString();
+            info ??= ExpressionFormat.General;
+            var format = info.GetFormat(null);
+            if (!format.NeedsDate)
+                return string.Format(culture, format.Format, value);
+            // Should start from beginning in order to use the overriden methods
+            return ToString(ExcelValue.DateValue.FromSerial(value), info, false);
         }
 
         public decimal ToDecimal(string value)

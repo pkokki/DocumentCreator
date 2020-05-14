@@ -37,38 +37,28 @@ namespace DocumentCreator
             return response;
         }
 
-        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, IEnumerable<EvaluationSource> sources)
-        {
-            return Evaluate(templateFieldExpressions, CreateExpressionScope(sources));
-        }
-
-
-        public EvaluationResult Evaluate(string exprName, string cell, string expression, IEnumerable<EvaluationSource> sources)
-        {
-            return Evaluate(exprName, cell, expression, CreateExpressionScope(sources));
-        }
-
-        
-        private IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> templateFieldExpressions, ExpressionScope scope)
+        public IEnumerable<EvaluationResult> Evaluate(IEnumerable<MappingExpression> expressions, IEnumerable<EvaluationSource> sources)
         {
             var results = new List<EvaluationResult>();
-            foreach (var templateFieldExpression in templateFieldExpressions)
+         
+            var scope = CreateExpressionScope(sources);
+            foreach (var expression in expressions)
             {
                 var result = new EvaluationResult()
                 {
-                    Name = templateFieldExpression.Name,
+                    Name = expression.Name,
                 };
-                scope.ParentName = templateFieldExpressions.FirstOrDefault(o => o.Name == templateFieldExpression.Parent)?.Cell;
-                var expr = templateFieldExpression.Expression;
-                if (!string.IsNullOrWhiteSpace(expr) && expr != "=")
-                    result = Evaluate(templateFieldExpression.Name, templateFieldExpression.Cell, expr, scope);
+                scope.ParentName = expressions.FirstOrDefault(o => o.Name == expression.Parent)?.Cell;
+                var exprFormula = expression.Expression;
+                if (!string.IsNullOrWhiteSpace(exprFormula) && exprFormula != "=")
+                {
+                    var format = CreateExpressionFormat(expression.NumFormatId, expression.NumFormatCode);
+                    result = Evaluate(expression.Name, expression.Cell, exprFormula, scope, format);
+                }
                 results.Add(result);
             }
             return results;
         }
-
-        
-
 
         private void PreEvaluate(List<MappingExpression> expressions, IEnumerable<TemplateField> templateFields)
         {
@@ -85,15 +75,18 @@ namespace DocumentCreator
         {
             foreach (var result in results)
             {
+                var expression = expressions.First(o => o.Name == result.Name);
                 if (result.Text == "#HIDE_CONTENT#")
                 {
                     result.Text = string.Empty;
                 }
                 else if (result.Text == "#SHOW_CONTENT#")
                 {
-                    result.Text = expressions.First(o => o.Name == result.Name).Content;
+                    result.Text = expression.Content;
                 }
             }
         }
+
+        
     }
 }
