@@ -9,7 +9,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue CONCATENATE(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
-            var parts = args.Select(a => a.ToString(scope.OutLanguage));
+            var parts = args.Select(a => a.ToString(scope.OutLanguage, null));
             var result = string.Join(string.Empty, parts);
             return new ExcelValue.TextValue(result, scope.OutLanguage);
         }
@@ -42,7 +42,8 @@ namespace JsonExcelExpressions.Eval
                 num = Math.Round(num / factor, 0) * factor;
                 decimals = 0;
             }
-            return new ExcelValue.DecimalValue(num, scope.OutLanguage, decimals, !noComma);
+            return new ExcelValue.DecimalValue(num, scope.OutLanguage, 
+                noComma ? ExpressionFormat.CreateFixedPoint(decimals) : ExpressionFormat.CreateNumeric(decimals));
         }
 
         public ExcelValue LEFT(List<ExcelValue> args, ExpressionScope scope)
@@ -153,15 +154,16 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue TEXT(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.NotText(1, null, scope.OutLanguage, out string format)) return ExcelValue.NA;
+            var exprFormat = new ExpressionFormat(null, format, scope.OutLanguage.NumberFormat);
             if (args[0] is ExcelValue.DateValue)
             {
                 var date = ((ExcelValue.DateValue)args[0]).Date;
-                return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, format), scope.OutLanguage);
+                return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, exprFormat, false), scope.OutLanguage);
             }
             else
             {
                 if (args.NotDecimal(0, null, out decimal value)) return ExcelValue.NA;
-                return new ExcelValue.TextValue(scope.OutLanguage.ToString(value, format), scope.OutLanguage);
+                return new ExcelValue.TextValue(scope.OutLanguage.ToString(value, exprFormat), scope.OutLanguage);
             }
         }
 

@@ -133,7 +133,7 @@ namespace JsonExcelExpressions.Eval
 
         protected internal abstract bool? AsBoolean();
         protected internal abstract decimal? AsDecimal();
-        internal abstract string ToString(Language language);
+        internal abstract string ToString(Language language, ExpressionFormat info);
 
         #endregion
 
@@ -144,7 +144,7 @@ namespace JsonExcelExpressions.Eval
             {
             }
 
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
 
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
@@ -155,7 +155,7 @@ namespace JsonExcelExpressions.Eval
             public NullValue() : base(null, null, Language.Invariant)
             {
             }
-            internal override string ToString(Language language) { return null; }
+            internal override string ToString(Language language, ExpressionFormat info) { return null; }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
         }
@@ -172,7 +172,7 @@ namespace JsonExcelExpressions.Eval
                     return v;
                 return null;
             }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class JsonObjectValue : ExcelValue
@@ -182,7 +182,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class ArrayValue : ExcelValue
@@ -208,7 +208,7 @@ namespace JsonExcelExpressions.Eval
 
             protected internal override bool? AsBoolean() { return asBoolean; }
             protected internal override decimal? AsDecimal() { return asDecimal; }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
             public override ExcelValue ElementAt(int index)
             {
                 return values.ElementAt(index);
@@ -222,7 +222,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class BooleanValue : ExcelValue
@@ -232,7 +232,7 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
             protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class RangeValue : ExcelValue
@@ -242,18 +242,18 @@ namespace JsonExcelExpressions.Eval
             }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
-            internal override string ToString(Language language) { return Text; }
+            internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class DateValue : DecimalValue
         {
-            private static readonly DateTime BASE = new DateTime(1900, 1, 1);
+            private static readonly DateTime BASE = new DateTime(1899, 12, 31);
             public DateValue(int year, int month, int day, Language language)
                 : this(ToDateSerial(year, month, day), language)
             {
             }
             public DateValue(decimal serial, Language language)
-                : base(serial, language, 0, false)
+                : base(serial, language, ExpressionFormat.General)
             {
                 Serial = serial;
                 Date = BASE.AddDays((double)serial - 1);
@@ -268,22 +268,37 @@ namespace JsonExcelExpressions.Eval
                 return ts.Days + 1;
             }
 
-            internal override string ToString(Language language)
+            public static DateTime FromSerial(decimal serial)
             {
-                return language.ToString(Date);
+                var intPart = (int)Math.Truncate(serial);
+                var decPart = (double)(serial - intPart);
+                var date = BASE.AddDays(intPart - 1).AddSeconds(decPart * 86400 + 1);
+                return date;
+            }
+            public static decimal ToSerial(DateTime date)
+            {
+                var dp = (date.Date - BASE).Days;
+                var tp = (date.Hour * 3600M + date.Minute * 60M + date.Second) / 86400M;
+                return dp + tp;
+            }
+
+            internal override string ToString(Language language, ExpressionFormat info)
+            {
+                return language.ToString(Date, info ?? ExpressionFormat.ShortDatePattern, false);
             }
         }
 
         internal class TimeValue : DecimalValue
         {
-            private static readonly DateTime BASE = new DateTime(1900, 1, 1);
+            internal static readonly DateTime BASE = new DateTime(1900, 1, 1);
+
             public TimeValue(int hours, int minutes, int seconds, Language language)
-                : base(ToTimeSerial(hours, minutes, seconds), language, 0, false)
+                : base(ToTimeSerial(hours, minutes, seconds), language, ExpressionFormat.General)
             {
                 Time = BASE + new TimeSpan(hours, minutes, seconds);
             }
             public TimeValue(decimal serial, Language language)
-                : base(serial, language, 0, false)
+                : base(serial, language, ExpressionFormat.General)
             {
                 Time = BASE.AddDays((double)serial - 1);
             }
@@ -294,26 +309,26 @@ namespace JsonExcelExpressions.Eval
                 return (hours * 3600M + minutes * 60M + seconds) / 86400M;
             }
 
-            internal override string ToString(Language language)
+            internal override string ToString(Language language, ExpressionFormat info)
             {
-                return language.ToTimeString(Time);
+                return language.ToString(Time, info ?? ExpressionFormat.ShortTimePattern, false);
             }
         }
 
         internal class DecimalValue : ExcelValue
         {
-            private readonly int? decimals;
-            private readonly bool commas;
-
-            public DecimalValue(decimal value, Language language, int? decimals = null, bool commas = false)
-                : base(value, language.ToString(value, decimals, commas), language)
+            public DecimalValue(decimal value, Language language, ExpressionFormat format = null)
+                : base(value, language.ToString(value, format), language)
             {
-                this.decimals = decimals;
-                this.commas = commas;
             }
             protected internal override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
             protected internal override decimal? AsDecimal() { return (decimal)InnerValue; }
-            internal override string ToString(Language language) { return language.ToString((decimal)InnerValue, decimals, commas); }
+            internal override string ToString(Language language, ExpressionFormat info) 
+            {
+                if (info != null)
+                    return language.ToString((decimal)InnerValue, info);
+                return Text;
+            }
         }
 
         #endregion

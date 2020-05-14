@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JsonExcelExpressions.Eval;
+using System;
 using System.Globalization;
 
 namespace JsonExcelExpressions.Lang
@@ -34,18 +35,14 @@ namespace JsonExcelExpressions.Lang
             return ReplaceLetters(base.ToUpper(text), UpperAccent, UpperNoAccent).Replace('ς', 'Σ');
         }
 
-        public override string ToString(DateTime value, string format = null)
+        public override string ToString(DateTime value, ExpressionFormat info, bool isTime)
         {
             // When running unit tests on github we receive "π.μ." instead of "πμ"
-            var text = base.ToString(value, format);
-            return text.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
+            var text = base.ToString(value, info, isTime);
+            if (isTime)
+                return text?.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
+            return text;
         }
 
-        public override string ToTimeString(DateTime value, string format = null)
-        {
-            // When running unit tests on github we receive "π.μ." instead of "πμ"
-            var text = base.ToTimeString(value, format);
-            return text.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
-        }
     }
 }

@@ -72,10 +72,19 @@ namespace JsonExcelExpressions.Eval
         {
             value = null;
             if (args.Count > index)
-                value = args[index].ToString(language);
+                value = args[index].ToString(language, null);
             if (value == null)
                 value = defaultValue;
             return value == null;
+        }
+
+        public static TValue TryGetAndAdd<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> factory)
+        {
+            if (dict.TryGetValue(key, out TValue value))
+                return value;
+            value = factory();
+            dict.Add(key, value);
+            return value;
         }
     }
 }

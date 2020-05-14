@@ -50,7 +50,7 @@ namespace JsonExcelExpressions
                 var exprName = $"__A{index}";
                 var cell = exprName;
                 var tokens = helper.Parse(sourcePayload, expression);
-                var result = Evaluate(exprName, cell, tokens, scope);
+                var result = Evaluate(exprName, cell, tokens, scope, null);
                 var translatedResult = helper.TranslateResult(result);
                 results.Add(translatedResult);
                 ++index;
@@ -58,20 +58,20 @@ namespace JsonExcelExpressions
             return results;
         }
 
-        protected EvaluationResult Evaluate(string exprName, string cell, string expression, ExpressionScope scope)
+        protected EvaluationResult Evaluate(string name, string cell, string expression, ExpressionScope scope, ExpressionFormat format)
         {
             if (!expression.StartsWith("="))
                 expression = "=" + expression;
             var excelFormula = new ExcelFormula(expression);
             var tokens = excelFormula.OfType<ExcelFormulaToken>();
-            return Evaluate(exprName, cell, tokens, scope);
+            return Evaluate(name, cell, tokens, scope, format);
         }
 
-        internal EvaluationResult Evaluate(string exprName, string cell, IEnumerable<ExcelFormulaToken> tokens, ExpressionScope scope)
+        private EvaluationResult Evaluate(string name, string cell, IEnumerable<ExcelFormulaToken> tokens, ExpressionScope scope, ExpressionFormat format)
         {
             var result = new EvaluationResult()
             {
-                Name = exprName
+                Name = name
             };
             try
             {
@@ -79,9 +79,9 @@ namespace JsonExcelExpressions
                 var excelExpression = new ExcelExpression();
                 TraverseExpression(excelExpression, queue, scope);
                 var operand = excelExpression.Evaluate(scope);
-                scope.Set(cell ?? exprName, operand.Value);
+                scope.Set(cell ?? name, operand.Value);
                 result.Value = operand.Value.InnerValue;
-                result.Text = outputLang.ToString(operand.Value);
+                result.Text = operand.Value?.ToString(outputLang, format);
             }
             catch (Exception ex)
             {
@@ -164,7 +164,9 @@ namespace JsonExcelExpressions
         {
             return new ExpressionScope(outputLang, sources);
         }
-
-
+        protected ExpressionFormat CreateExpressionFormat(int? numFormatId, string numFormatCode)
+        {
+            return new ExpressionFormat(numFormatId, numFormatCode, outputLang.NumberFormat);
+        }
     }
 }
