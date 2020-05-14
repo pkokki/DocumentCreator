@@ -52,16 +52,18 @@ namespace JsonExcelExpressions.Lang
             var format = info.GetFormat(isTime ? ExpressionFormat.ShortTimePattern : ExpressionFormat.ShortDatePattern);
             if (format.NeedsDate)
                 return string.Format(culture, format.Format, value);
-            return string.Format(culture, format.Format, ExcelValue.DateValue.ToSerial(value));
+            // Should start from beginning in order to use the overriden methods
+            return ToString(ExcelValue.DateValue.ToSerial(value), info);
         }
 
         public string ToString(decimal value, ExpressionFormat info = null)
         {
             info ??= ExpressionFormat.General;
             var format = info.GetFormat(null);
-            if (format.NeedsDate)
-                return string.Format(culture, format.Format, ExcelValue.DateValue.FromSerial(value));
-            return string.Format(culture, format.Format, value);
+            if (!format.NeedsDate)
+                return string.Format(culture, format.Format, value);
+            // Should start from beginning in order to use the overriden methods
+            return ToString(ExcelValue.DateValue.FromSerial(value), info, false);
         }
 
         public decimal ToDecimal(string value)
