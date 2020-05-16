@@ -87,6 +87,14 @@ namespace JsonExcelExpressions
         }
 
         [Fact]
+        public void TODAY()
+        {
+            AssertExpression("=TODAY()", DateTime.Now.ToString("d", CultureInfo.GetCultureInfo("el-GR")));
+            AssertExpression("=TODAY()+123", (DateTime.Now.AddDays(123)).ToString("d", CultureInfo.GetCultureInfo("el-GR")));
+            AssertExpression("=DAY(TODAY())", DateTime.Now.Day.ToString());
+        }
+
+        [Fact]
         public void DAY()
         {
             AssertExpression("=DAY(1)", "1");
@@ -121,6 +129,49 @@ namespace JsonExcelExpressions
             AssertExpression("=YEAR(40179)", "2010");
             AssertExpression("=YEAR(\"18/4/2020\")", "2020");
             AssertExpression("=YEAR(\"18/4/2020 10:10:20\")", "2020");
+        }
+
+        [Fact]
+        public void HOUR()
+        {
+            AssertExpression("=HOUR(0)", "0");
+            AssertExpression("=HOUR(1)", "0");
+            AssertExpression("=HOUR(0.75)", "18");
+            AssertExpression("=HOUR(\"18/7/2011 7:45\")", "7");
+            AssertExpression("=HOUR(\"18/7/2011 19:45\")", "19");
+            AssertExpression("=HOUR(\"21/4/2012\")", "0");
+            AssertExpression("=HOUR(-1)", "#VALUE!");
+            AssertExpression("=HOUR(0.74999)", "17");
+            AssertExpression("=HOUR(19/24-0.00001)", "18");
+            AssertExpression("=HOUR(40178.74999)", "17");
+        }
+
+        [Fact]
+        public void MINUTE()
+        {
+            AssertExpression("=MINUTE(0)", "0");
+            AssertExpression("=MINUTE(1)", "0");
+            AssertExpression("=MINUTE(0.75)", "0");
+            AssertExpression("=MINUTE(\"12:45:00\")", "45");
+            AssertExpression("=MINUTE(-1)", "#VALUE!");
+            AssertExpression("=MINUTE(0.76)", "14");
+            AssertExpression("=MINUTE(0.765)", "21");
+            AssertExpression("=MINUTE(40000.765)", "21");
+
+        }
+
+        [Fact]
+        public void SECOND()
+        {
+            AssertExpression("=SECOND(0)", "0");
+            AssertExpression("=SECOND(1)", "0");
+            AssertExpression("=SECOND(0.75)", "0");
+            AssertExpression("=SECOND(\"12:45:32\")", "32");
+            AssertExpression("=SECOND(-1)", "#VALUE!");
+            AssertExpression("=SECOND(0.76)", "24");
+            AssertExpression("=SECOND(0.765)", "36");
+            AssertExpression("=SECOND(40000.765)", "36");
+
         }
 
         [Fact]
@@ -181,6 +232,18 @@ namespace JsonExcelExpressions
             AssertExpression("=DATEDIF(\"1/6/2019\", \"1/6/2020\", \"YD\")", "0");
             AssertExpression("=DATEDIF(\"1/6/2020\", \"31/5/2021\", \"YD\")", "364");
             AssertExpression("=DATEDIF(\"1/6/2020\", \"1/6/2021\", \"YD\")", "0");
+        }
+
+        [Fact]
+        public void DATEVALUE()
+        {
+            AssertExpression("=DATEVALUE(\"\")", "#VALUE!");
+            AssertExpression("=DATEVALUE(\"22/8/2011\")", "40777");
+            AssertExpression("=DATEVALUE(\"22-Απρ-2011\")", "40655");
+            AssertExpression("=DATEVALUE(\"23/2/2011\")", "40597");
+            AssertExpression("=DATEVALUE(\"23-Ιουλ\")", ExcelValue.ToDateSerial(DateTime.Now.Year, 7, 23).ToString());
+            AssertExpression("=DATEVALUE(\"22-Απλ-2011\")", "#VALUE!");
+
         }
     }
 }

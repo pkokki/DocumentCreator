@@ -45,13 +45,18 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("SUM", SUM);
 
             Registry.Add("NOW", NOW);
+            Registry.Add("TODAY", TODAY);
             Registry.Add("DATE", DATE);
             Registry.Add("TIME", TIME);
             Registry.Add("DATEDIF", DATEDIF);
+            Registry.Add("DATEVALUE", DATEVALUE);
             Registry.Add("DAYS", DAYS);
             Registry.Add("DAY", DAY);
             Registry.Add("MONTH", MONTH);
             Registry.Add("YEAR", YEAR);
+            Registry.Add("HOUR", HOUR);
+            Registry.Add("MINUTE", MINUTE);
+            Registry.Add("SECOND", SECOND);
 
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);

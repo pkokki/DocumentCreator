@@ -9,7 +9,12 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue NOW(List<ExcelValue> args, ExpressionScope scope)
         {
             var now = DateTime.Now;
-            return ExcelValue.CreateDateValue(now.Year, now.Month, now.Day, scope.OutLanguage, ExpressionFormat.ShortDatePattern);
+            return ExcelValue.CreateDateValue(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, scope.OutLanguage, ExpressionFormat.ShortDatePattern);
+        }
+        public ExcelValue TODAY(List<ExcelValue> args, ExpressionScope scope)
+        {
+            var today = DateTime.Today;
+            return ExcelValue.CreateDateValue(today.Year, today.Month, today.Day, 0, 0, 0, scope.OutLanguage, ExpressionFormat.ShortDatePattern);
         }
         public ExcelValue DATE(List<ExcelValue> args, ExpressionScope scope)
         {
@@ -54,6 +59,39 @@ namespace JsonExcelExpressions.Eval
             var date = ExcelValue.FromDateSerial(serial);
             if (date.HasValue)
                 return new ExcelValue.DecimalValue(date.Value.Year, scope.OutLanguage, ExpressionFormat.General);
+            return ExcelValue.VALUE;
+        }
+
+        public ExcelValue HOUR(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (serial == 0)
+                return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
+            var date = ExcelValue.FromDateSerial(serial);
+            if (date.HasValue)
+                return new ExcelValue.DecimalValue(date.Value.Hour, scope.OutLanguage, ExpressionFormat.General);
+            return ExcelValue.VALUE;
+        }
+
+        public ExcelValue MINUTE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (serial == 0)
+                return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
+            var date = ExcelValue.FromDateSerial(serial);
+            if (date.HasValue)
+                return new ExcelValue.DecimalValue(date.Value.Minute, scope.OutLanguage, ExpressionFormat.General);
+            return ExcelValue.VALUE;
+        }
+
+        public ExcelValue SECOND(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (serial == 0)
+                return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
+            var date = ExcelValue.FromDateSerial(serial);
+            if (date.HasValue)
+                return new ExcelValue.DecimalValue(date.Value.Second, scope.OutLanguage, ExpressionFormat.General);
             return ExcelValue.VALUE;
         }
 
@@ -106,5 +144,12 @@ namespace JsonExcelExpressions.Eval
             return new ExcelValue.DecimalValue(days, scope.OutLanguage, ExpressionFormat.General);
         }
 
+        public ExcelValue DATEVALUE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.VALUE;
+
+            return new ExcelValue.DecimalValue(serial, scope.OutLanguage, ExpressionFormat.General);
+
+        }
     }
 }
