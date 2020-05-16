@@ -47,9 +47,9 @@ namespace JsonExcelExpressions.Lang
             return builder.ToString();
         }
 
-        public virtual string ToString(DateTime value, ExpressionFormat info, bool isTime)
+        public virtual string ToString(DateTime value, ExpressionFormat info)
         {
-            var format = info.GetFormat(isTime ? ExpressionFormat.ShortTimePattern : ExpressionFormat.ShortDatePattern);
+            var format = info.GetFormat(ExpressionFormat.ShortDatePattern);
             if (format.NeedsDate)
                 return string.Format(culture, format.Format, value);
             // Should start from beginning in order to use the overriden methods
@@ -63,7 +63,7 @@ namespace JsonExcelExpressions.Lang
             if (!format.NeedsDate)
                 return string.Format(culture, format.Format, value);
             // Should start from beginning in order to use the overriden methods
-            return ToString(ExcelValue.DateValue.FromSerial(value), info, false);
+            return ToString(ExcelValue.DateValue.FromSerial(value), info);
         }
 
         public decimal ToDecimal(string value)

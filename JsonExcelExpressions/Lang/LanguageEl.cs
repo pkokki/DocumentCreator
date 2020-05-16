@@ -35,10 +35,10 @@ namespace JsonExcelExpressions.Lang
             return ReplaceLetters(base.ToUpper(text), UpperAccent, UpperNoAccent).Replace('ς', 'Σ');
         }
 
-        public override string ToString(DateTime value, ExpressionFormat info, bool isTime)
+        public override string ToString(DateTime value, ExpressionFormat info)
         {
             // When running unit tests on github we receive "π.μ." instead of "πμ"
-            var text = base.ToString(value, info, isTime);
+            var text = base.ToString(value, info);
             return text?.Replace("π.μ.", "πμ").Replace("μ.μ.", "μμ");
         }
 

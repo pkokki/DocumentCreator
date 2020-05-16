@@ -100,7 +100,7 @@ namespace JsonExcelExpressions.Eval
         {
             switch (numFormatId)
             {
-                case 0: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("G"));
+                case 0: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("G10"));
                 case 1: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("F0"));
                 case 2: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("F2"));
                 case 3: return standardFormats.TryGetAndAdd(numFormatId, () => new NumberValueFormat("N0"));

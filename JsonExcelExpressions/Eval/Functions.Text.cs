@@ -158,7 +158,7 @@ namespace JsonExcelExpressions.Eval
             if (args[0] is ExcelValue.DateValue)
             {
                 var date = ((ExcelValue.DateValue)args[0]).Date;
-                return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, exprFormat, false), scope.OutLanguage);
+                return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, exprFormat), scope.OutLanguage);
             }
             else
             {
