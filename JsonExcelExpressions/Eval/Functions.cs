@@ -69,6 +69,10 @@ namespace JsonExcelExpressions.Eval
             //Registry.Add("WORKDAY.INTL", WORKDAY.INTL);
             //Registry.Add("YEARFRAC", YEARFRAC);
 
+            Registry.Add("ENCODEURL", ENCODEURL);
+            Registry.Add("WEBSERVICE", WEBSERVICE);
+            Registry.Add("FILTERXML", FILTERXML);
+
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);
             Registry.Add("RQD", RQD);
