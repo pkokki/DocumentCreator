@@ -252,7 +252,9 @@ namespace JsonExcelExpressions
             AssertExpression("=TIMEVALUE(\"2:24 AM\")", "0,1");
             AssertExpression("=TIMEVALUE(\"2:24 PM\")", "0,6");
             AssertExpression("=TIMEVALUE(\"22-Αυγ-2011 6:35 AM\")", "0,2743055556");
-            AssertExpression("=TIMEVALUE(\"2:24 μμ\")", "0,6");
+            // The known issue with μμ and μ.μ.
+            var pm = CultureInfo.GetCultureInfo("el-GR").DateTimeFormat.PMDesignator;
+            AssertExpression($"=TIMEVALUE(\"2:24 {pm}\")", "0,6");
         }
     }
 }
