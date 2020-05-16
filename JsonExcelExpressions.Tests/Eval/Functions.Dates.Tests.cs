@@ -243,7 +243,16 @@ namespace JsonExcelExpressions
             AssertExpression("=DATEVALUE(\"23/2/2011\")", "40597");
             AssertExpression("=DATEVALUE(\"23-Ιουλ\")", ExcelValue.ToDateSerial(DateTime.Now.Year, 7, 23).ToString());
             AssertExpression("=DATEVALUE(\"22-Απλ-2011\")", "#VALUE!");
+        }
 
+        [Fact]
+        public void ΤΙΜΕVALUE()
+        {
+            AssertExpression("=TIMEVALUE(\"\")", "#VALUE!");
+            AssertExpression("=TIMEVALUE(\"2:24 AM\")", "0,1");
+            AssertExpression("=TIMEVALUE(\"2:24 PM\")", "0,6");
+            AssertExpression("=TIMEVALUE(\"22-Αυγ-2011 6:35 AM\")", "0,2743055556");
+            AssertExpression("=TIMEVALUE(\"2:24 μμ\")", "0,6");
         }
     }
 }

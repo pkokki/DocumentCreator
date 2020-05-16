@@ -149,7 +149,13 @@ namespace JsonExcelExpressions.Eval
             if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.VALUE;
 
             return new ExcelValue.DecimalValue(serial, scope.OutLanguage, ExpressionFormat.General);
+        }
 
+        public ExcelValue TIMEVALUE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.VALUE;
+
+            return new ExcelValue.DecimalValue(serial - Math.Truncate(serial), scope.OutLanguage, ExpressionFormat.General);
         }
     }
 }

@@ -50,6 +50,7 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("TIME", TIME);
             Registry.Add("DATEDIF", DATEDIF);
             Registry.Add("DATEVALUE", DATEVALUE);
+            Registry.Add("TIMEVALUE", TIMEVALUE);
             Registry.Add("DAYS", DAYS);
             Registry.Add("DAY", DAY);
             Registry.Add("MONTH", MONTH);
@@ -57,6 +58,16 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("HOUR", HOUR);
             Registry.Add("MINUTE", MINUTE);
             Registry.Add("SECOND", SECOND);
+            //Registry.Add("DAYS360", DAYS360);
+            //Registry.Add("EDATE", EDATE);
+            //Registry.Add("EOMONTH", EOMONTH);
+            //Registry.Add("ISOWEEKNUM", ISOWEEKNUM);
+            //Registry.Add("NETWORKDAYS", NETWORKDAYS);
+            //Registry.Add("WEEKDAY", WEEKDAY);
+            //Registry.Add("WEEKNUM", WEEKNUM);
+            //Registry.Add("WORKDAY", WORKDAY);
+            //Registry.Add("WORKDAY.INTL", WORKDAY.INTL);
+            //Registry.Add("YEARFRAC", YEARFRAC);
 
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);
