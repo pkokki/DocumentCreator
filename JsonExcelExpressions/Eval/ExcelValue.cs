@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 
@@ -19,6 +20,57 @@ namespace JsonExcelExpressions.Eval
         public static readonly ExcelValue FALSE = new BooleanValue(false);
         public static readonly ExcelValue NULL = new NullValue();
 
+        #endregion
+
+        #region Static methods
+        public static decimal? ToDateSerial(DateTime date)
+        {
+            return ToDateSerial(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second);
+        }
+        public static decimal? ToDateSerial(int year, int month, int day, int hours = 0, int minutes = 0, int seconds = 0)
+        {
+            if (year > 0 && month > 0 && day > 0)
+            {
+                var date = new DateTime(year, month, day, hours, minutes, seconds);
+                var serial = date.ToOADate() - 1;
+                if (serial <= 0)
+                    return null;
+                // Excel/Lotus 123 have a bug with 29-02-1900. 1900 is not a
+                // leap year, but Excel/Lotus 123 think it is...
+                if (serial >= 60)
+                    ++serial;
+                return (decimal)serial;
+            }
+            else
+            {
+                var serial = Math.Round((hours * 60 * 60 + minutes * 60 + seconds) / 86400M, 10);
+                if (serial < 0)
+                    return null;
+                return serial;
+            }
+        }
+
+        public static DateTime? FromDateSerial(decimal serial)
+        {
+            if (serial > 0 && serial < 1)
+            {
+                var seconds = Math.Round(serial * 86400M);
+                return DateValue.BASE.AddSeconds((double)seconds);
+            }
+            else
+            {
+                // Excel/Lotus 123 have a bug with 29-02-1900. 1900 is not a
+                // leap year, but Excel/Lotus 123 think it is...
+                if (serial < 60)
+                    ++serial;
+                var date = DateTime.FromOADate((double)serial);
+                if (date < DateValue.BASE)
+                    return null;
+                if (date.Millisecond >= 500)
+                    return date.AddSeconds(1);
+                return date;
+            }
+        }
         #endregion
 
         #region Factories
@@ -96,11 +148,17 @@ namespace JsonExcelExpressions.Eval
             throw new InvalidOperationException($"Unhandled comparison {v1?.GetType().Name ?? "NULL"} {oper} {v2?.GetType().Name ?? "NULL"}");
         }
 
-        public virtual ExcelValue ElementAt(int index)
+        internal static ExcelValue CreateDateValue(int year, int month, int day, Language language, ExpressionFormat format)
         {
-            throw new InvalidOperationException($"{this.GetType().Name} is single-valued. ElementAt is not supported.");
+            return CreateDateValue(year, month, day, 0, 0, 0, language, format);
         }
-
+        internal static ExcelValue CreateDateValue(int year, int month, int day, int hours, int minutes, int seconds, Language language, ExpressionFormat format)
+        {
+            var serial = ToDateSerial(year, month, day, hours, minutes, seconds);
+            if (serial.HasValue)
+                return new DateValue(serial.Value, language, format);
+            return NA;
+        }
         #endregion
 
         #region Constructor 
@@ -135,6 +193,11 @@ namespace JsonExcelExpressions.Eval
         protected internal abstract decimal? AsDecimal();
         internal abstract string ToString(Language language, ExpressionFormat info);
 
+        public virtual ExcelValue ElementAt(int index)
+        {
+            throw new InvalidOperationException($"{this.GetType().Name} is single-valued. ElementAt is not supported.");
+        }
+
         #endregion
 
         #region Private classes
@@ -168,8 +231,10 @@ namespace JsonExcelExpressions.Eval
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal()
             {
-                if (decimal.TryParse(Text, out decimal v))
+                if (Language.TryParseDecimal(Text, out decimal v))
                     return v;
+                if (Language.TryParseDateTime(Text, out DateTime d))
+                    return DateValue.ToDateSerial(d);
                 return null;
             }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
@@ -247,72 +312,26 @@ namespace JsonExcelExpressions.Eval
 
         internal class DateValue : DecimalValue
         {
-            private static readonly DateTime BASE = new DateTime(1899, 12, 31);
-            public DateValue(int year, int month, int day, Language language)
-                : this(ToDateSerial(year, month, day), language)
-            {
-            }
-            public DateValue(decimal serial, Language language)
+            internal static readonly DateTime BASE = new DateTime(1900, 1, 1);
+            
+            public DateValue(decimal serial, Language language, ExpressionFormat format)
                 : base(serial, language, ExpressionFormat.General)
             {
                 Serial = serial;
-                Date = BASE.AddDays((double)serial - 1);
+                Format = format;
             }
 
             public decimal Serial { get; }
-            public DateTime Date { get; }
-
-            private static int ToDateSerial(int year, int month, int day)
-            {
-                var ts = new DateTime(year, month, day) - BASE;
-                return ts.Days + 1;
-            }
-
-            public static DateTime FromSerial(decimal serial)
-            {
-                var intPart = (int)Math.Truncate(serial);
-                var timePart = (double)(serial - intPart);
-                var seconds = Math.Round(timePart * 86400);
-                var date = BASE.AddDays(intPart - 1).AddSeconds(seconds);
-                return date;
-            }
-            public static decimal ToSerial(DateTime date)
-            {
-                var dp = (date.Date - BASE).Days;
-                var tp = (date.Hour * 3600M + date.Minute * 60M + date.Second) / 86400M;
-                return dp + tp;
-            }
+            public ExpressionFormat Format { get; }
 
             internal override string ToString(Language language, ExpressionFormat info)
             {
-                return language.ToString(Date, info ?? ExpressionFormat.ShortDatePattern, false);
-            }
-        }
-
-        internal class TimeValue : DecimalValue
-        {
-            internal static readonly DateTime BASE = new DateTime(1900, 1, 1);
-
-            public TimeValue(int hours, int minutes, int seconds, Language language)
-                : base(ToTimeSerial(hours, minutes, seconds), language, ExpressionFormat.General)
-            {
-                Time = BASE + new TimeSpan(hours, minutes, seconds);
-            }
-            public TimeValue(decimal serial, Language language)
-                : base(serial, language, ExpressionFormat.General)
-            {
-                Time = BASE.AddDays((double)serial - 1);
-            }
-            public DateTime Time { get; }
-
-            private static decimal ToTimeSerial(int hours, int minutes, int seconds)
-            {
-                return (hours * 3600M + minutes * 60M + seconds) / 86400M;
-            }
-
-            internal override string ToString(Language language, ExpressionFormat info)
-            {
-                return language.ToString(Time, info ?? ExpressionFormat.ShortTimePattern, false);
+                if (info == null)
+                    info = Format;
+                var date = FromDateSerial(Serial);
+                if (date.HasValue)
+                    return language.ToString(date.Value, info);
+                return NA.ToString();
             }
         }
 
@@ -341,10 +360,8 @@ namespace JsonExcelExpressions.Eval
             var value = a.AsDecimal() + b.AsDecimal();
             if (!value.HasValue)
                 return NA;
-            if (a is DateValue)
-                return new DateValue(value.Value, a.Language);
-            else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language);
+            if (a is DateValue d)
+                return new DateValue(value.Value, d.Language, d.Format);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
@@ -352,10 +369,8 @@ namespace JsonExcelExpressions.Eval
             var value = a.AsDecimal() - b.AsDecimal();
             if (!value.HasValue)
                 return NA;
-            if (a is DateValue)
-                return new DateValue(value.Value, a.Language);
-            else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language);
+            if (a is DateValue d)
+                return new DateValue(value.Value, a.Language, d.Format);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
@@ -363,10 +378,8 @@ namespace JsonExcelExpressions.Eval
             var value = a.AsDecimal() * b.AsDecimal();
             if (!value.HasValue)
                 return NA;
-            if (a is DateValue)
-                return new DateValue(value.Value, a.Language);
-            else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language);
+            if (a is DateValue d)
+                return new DateValue(value.Value, a.Language, d.Format);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
@@ -381,10 +394,8 @@ namespace JsonExcelExpressions.Eval
             var value = a.AsDecimal() / denominator;
             if (!value.HasValue)
                 return NA;
-            if (a is DateValue)
-                return new DateValue(value.Value, a.Language);
-            else if (a is TimeValue)
-                return new TimeValue(value.Value, a.Language);
+            if (a is DateValue d)
+                return new DateValue(value.Value, a.Language, d.Format);
             return new DecimalValue(value.Value, a.Language);
         }
         public static ExcelValue operator -(ExcelValue a)

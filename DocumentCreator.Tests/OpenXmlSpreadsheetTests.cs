@@ -166,5 +166,67 @@ namespace DocumentCreator
             //Assert.Equal("14:12,7", results.First(o => o.Name == "B47").Text);
             Assert.Equal("31,4E+3", results.First(o => o.Name == "B48").Text);
         }
+
+        [Fact]
+        public void CanFormatDatesAndTimes()
+        {
+            var expressions = new List<MappingExpression>()
+            {
+                new MappingExpression() { Name = "A1", Expression = "=1", NumFormatId = 14 },
+                new MappingExpression() { Name = "A2", Expression = "=1", NumFormatId = 19 },
+                new MappingExpression() { Name = "B1", Expression = "=2", NumFormatId = 14 },
+                new MappingExpression() { Name = "B2", Expression = "=2", NumFormatId = 19 },
+                new MappingExpression() { Name = "A3", Expression = "=PI()", NumFormatId = 14 },
+                new MappingExpression() { Name = "A4", Expression = "=PI()", NumFormatId = 19 },
+                new MappingExpression() { Name = "A5", Expression = "=10000.00001", NumFormatId = 14 },
+                new MappingExpression() { Name = "A6", Expression = "=10000.00001", NumFormatId = 19 },
+                new MappingExpression() { Name = "B5", Expression = "=10000.000001", NumFormatId = 14 },
+                new MappingExpression() { Name = "B6", Expression = "=10000.000001", NumFormatId = 19 },
+                new MappingExpression() { Name = "A7", Expression = "=10000.99999", NumFormatId = 14 },
+                new MappingExpression() { Name = "A8", Expression = "=10000.99999", NumFormatId = 19 },
+                new MappingExpression() { Name = "A9", Expression = "=10000.999999", NumFormatId = 14 },
+                new MappingExpression() { Name = "A10", Expression = "=10000.999999", NumFormatId = 19 },
+                new MappingExpression() { Name = "A11", Expression = "=0.5787", NumFormatId = 14 },
+                new MappingExpression() { Name = "A12", Expression = "=0.5787", NumFormatId = 19 },
+
+                new MappingExpression() { Name = "C5", Expression = "=A5", NumFormatId = 0 },
+                new MappingExpression() { Name = "C6", Expression = "=A6", NumFormatId = 0 },
+                new MappingExpression() { Name = "C7", Expression = "=B5", NumFormatId = 0 },
+                new MappingExpression() { Name = "C8", Expression = "=B6", NumFormatId = 0 },
+                new MappingExpression() { Name = "C9", Expression = "=A7", NumFormatId = 0 },
+                new MappingExpression() { Name = "C10", Expression = "=A8", NumFormatId = 0 },
+            };
+
+            var input = new EvaluationInput()
+            {
+                Expressions = expressions
+            };
+
+            var processor = new MappingExpressionEvaluator(CultureInfo.GetCultureInfo("el-GR"));
+            var results = processor.Evaluate(input).Results;
+            Assert.Equal("1/1/1900", results.First(o => o.Name == "A1").Text);
+            Assert.Equal("12:00:00 πμ", results.First(o => o.Name == "A2").Text);
+            Assert.Equal("2/1/1900", results.First(o => o.Name == "B1").Text);
+            Assert.Equal("12:00:00 πμ", results.First(o => o.Name == "B2").Text);
+            Assert.Equal("3/1/1900", results.First(o => o.Name == "A3").Text);
+            Assert.Equal("3:23:54 πμ", results.First(o => o.Name == "A4").Text);
+            Assert.Equal("18/5/1927", results.First(o => o.Name == "A5").Text);
+            Assert.Equal("12:00:01 πμ", results.First(o => o.Name == "A6").Text);
+            Assert.Equal("18/5/1927", results.First(o => o.Name == "B5").Text);
+            Assert.Equal("12:00:00 πμ", results.First(o => o.Name == "B6").Text);
+            Assert.Equal("18/5/1927", results.First(o => o.Name == "A7").Text);
+            Assert.Equal("11:59:59 μμ", results.First(o => o.Name == "A8").Text);
+            Assert.Equal("19/5/1927", results.First(o => o.Name == "A9").Text);
+            Assert.Equal("12:00:00 πμ", results.First(o => o.Name == "A10").Text);
+            Assert.Equal("1/1/1900", results.First(o => o.Name == "A11").Text);
+            Assert.Equal("1:53:20 μμ", results.First(o => o.Name == "A12").Text);
+
+            Assert.Equal("10000,00001", results.First(o => o.Name == "C5").Text);
+            Assert.Equal("10000,00001", results.First(o => o.Name == "C6").Text);
+            Assert.Equal("10000", results.First(o => o.Name == "C7").Text);
+            Assert.Equal("10000", results.First(o => o.Name == "C8").Text);
+            Assert.Equal("10000,99999", results.First(o => o.Name == "C9").Text);
+            Assert.Equal("10000,99999", results.First(o => o.Name == "C10").Text);
+        }
     }
 }

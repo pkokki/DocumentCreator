@@ -18,14 +18,14 @@ namespace JsonExcelExpressions
         public void MINUS()
         {
             AssertExpression("=1-1", "0");
-            AssertExpression("=1.1-1.1", "0,0");
+            AssertExpression("=1.1-1.1", "0");
         }
 
         [Fact]
         public void TIMES()
         {
             AssertExpression("=2*4", "8");
-            AssertExpression("=1.5*4.2", "6,30");
+            AssertExpression("=1.5*4.2", "6,3");
 
         }
 
@@ -33,7 +33,7 @@ namespace JsonExcelExpressions
         public void DIV()
         {
             AssertExpression("=2/4", "0,5");
-            AssertExpression("=1.5/4.2", "0,3571428571428571428571428571");
+            AssertExpression("=1.5/4.2", "0,3571428571");
             AssertExpression("=2/0", "#DIV/0!");
         }
 
@@ -49,7 +49,7 @@ namespace JsonExcelExpressions
         {
             AssertExpression("=2^3", "8");
             AssertExpression("=3^2", "9");
-            AssertExpression("=2^3.1", "8,57418770029034");
+            AssertExpression("=2^3.1", "8,5741877");
         }
 
         [Fact]

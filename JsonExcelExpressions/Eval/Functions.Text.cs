@@ -155,16 +155,16 @@ namespace JsonExcelExpressions.Eval
         {
             if (args.NotText(1, null, scope.OutLanguage, out string format)) return ExcelValue.NA;
             var exprFormat = new ExpressionFormat(null, format, scope.OutLanguage.NumberFormat);
-            if (args[0] is ExcelValue.DateValue)
-            {
-                var date = ((ExcelValue.DateValue)args[0]).Date;
-                return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, exprFormat, false), scope.OutLanguage);
-            }
-            else
-            {
+            //if (args[0] is ExcelValue.DateValue)
+            //{
+            //    var date = ((ExcelValue.DateValue)args[0]).Date;
+            //    return new ExcelValue.TextValue(scope.OutLanguage.ToString(date, exprFormat), scope.OutLanguage);
+            //}
+            //else
+            //{
                 if (args.NotDecimal(0, null, out decimal value)) return ExcelValue.NA;
                 return new ExcelValue.TextValue(scope.OutLanguage.ToString(value, exprFormat), scope.OutLanguage);
-            }
+            //}
         }
 
         public ExcelValue TRIM(List<ExcelValue> args, ExpressionScope scope)
