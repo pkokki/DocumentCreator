@@ -13,10 +13,7 @@ namespace JsonExcelExpressions.Eval
         private Functions()
         {
             Registry.Add("NA", NA);
-            Registry.Add("NOW", NOW);
-            Registry.Add("DATE", DATE);
-            Registry.Add("TIME", TIME);
-
+            
             Registry.Add("CONCATENATE", CONCATENATE);
             Registry.Add("EXACT", EXACT);
             Registry.Add("FIND", FIND);
@@ -47,6 +44,15 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("PI", PI);
             Registry.Add("SUM", SUM);
 
+            Registry.Add("NOW", NOW);
+            Registry.Add("DATE", DATE);
+            Registry.Add("TIME", TIME);
+            Registry.Add("DATEDIF", DATEDIF);
+            Registry.Add("DAYS", DAYS);
+            Registry.Add("DAY", DAY);
+            Registry.Add("MONTH", MONTH);
+            Registry.Add("YEAR", YEAR);
+
             Registry.Add("SYSDATE", SYSDATE);
             Registry.Add("SOURCE", SOURCE);
             Registry.Add("RQD", RQD);
@@ -57,7 +63,6 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("MAPITEM", MAPITEM);
             Registry.Add("GETITEM", GETITEM);
             Registry.Add("GETLIST", GETLIST);
-
         }
 
         public ExcelValue Evaluate(string name, List<ExcelValue> args, ExpressionScope scope)
@@ -72,24 +77,6 @@ namespace JsonExcelExpressions.Eval
         {
             return ExcelValue.NA;
         }
-        public ExcelValue NOW(List<ExcelValue> args, ExpressionScope scope)
-        {
-            var now = DateTime.Now;
-            return new ExcelValue.DateValue(now.Year, now.Month, now.Day, scope.OutLanguage, ExpressionFormat.ShortDatePattern);
-        }
-        public ExcelValue DATE(List<ExcelValue> args, ExpressionScope scope)
-        {
-            if (args.NotInteger(0, null, out int year)) return ExcelValue.NA;
-            if (args.NotInteger(1, null, out int month)) return ExcelValue.NA;
-            if (args.NotInteger(2, null, out int day)) return ExcelValue.NA;
-            return new ExcelValue.DateValue(year, month, day, scope.OutLanguage, ExpressionFormat.ShortDatePattern);
-        }
-        public ExcelValue TIME(List<ExcelValue> args, ExpressionScope scope)
-        {
-            if (args.NotInteger(0, null, out int hours)) return ExcelValue.NA;
-            if (args.NotInteger(1, null, out int minutes)) return ExcelValue.NA;
-            if (args.NotInteger(2, null, out int seconds)) return ExcelValue.NA;
-            return new ExcelValue.DateValue(0, 0, 0, hours, minutes, seconds, scope.OutLanguage, ExpressionFormat.ShortTimePattern);
-        }
+        
     }
 }

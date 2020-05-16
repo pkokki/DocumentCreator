@@ -218,7 +218,7 @@ namespace DocumentCreator
             Assert.Equal("11:59:59 μμ", results.First(o => o.Name == "A8").Text);
             Assert.Equal("19/5/1927", results.First(o => o.Name == "A9").Text);
             Assert.Equal("12:00:00 πμ", results.First(o => o.Name == "A10").Text);
-            Assert.Equal("31/12/1899", results.First(o => o.Name == "A11").Text);
+            Assert.Equal("1/1/1900", results.First(o => o.Name == "A11").Text);
             Assert.Equal("1:53:20 μμ", results.First(o => o.Name == "A12").Text);
 
             Assert.Equal("10000,00001", results.First(o => o.Name == "C5").Text);

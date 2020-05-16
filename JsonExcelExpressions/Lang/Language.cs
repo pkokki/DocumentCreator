@@ -53,7 +53,10 @@ namespace JsonExcelExpressions.Lang
             if (format.NeedsDate)
                 return string.Format(culture, format.Format, value);
             // Should start from beginning in order to use the overriden methods
-            return ToString(ExcelValue.DateValue.ToSerial(value), info);
+            var serial = ExcelValue.ToDateSerial(value);
+            if (serial.HasValue)
+                return ToString(serial.Value, info);
+            return ExcelValue.NA.ToString();
         }
 
         public string ToString(decimal value, ExpressionFormat info = null)
@@ -63,7 +66,10 @@ namespace JsonExcelExpressions.Lang
             if (!format.NeedsDate)
                 return string.Format(culture, format.Format, value);
             // Should start from beginning in order to use the overriden methods
-            return ToString(ExcelValue.DateValue.FromSerial(value), info);
+            var date = ExcelValue.FromDateSerial(value);
+            if (date.HasValue)
+                return ToString(date.Value, info);
+            return ExcelValue.NA.ToString();
         }
 
         public decimal ToDecimal(string value)
@@ -96,6 +102,11 @@ namespace JsonExcelExpressions.Lang
         public bool TryParseDecimal(string value, out decimal result)
         {
             return decimal.TryParse(value, NumberStyles.Any, culture, out result);
+        }
+
+        public bool TryParseDateTime(string value, out DateTime result)
+        {
+            return DateTime.TryParse(value, culture, DateTimeStyles.None, out result);
         }
 
         public int? IndexOf(string target, string text, int startIndex)
