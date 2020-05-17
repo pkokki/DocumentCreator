@@ -83,10 +83,10 @@ namespace JsonExcelExpressions
                 result.Value = operand.Value.InnerValue;
                 result.Text = operand.Value?.ToString(outputLang, format);
             }
-            //catch (Exception ex)
-            //{
-            //    result.Error = ex.Message;
-            //}
+            catch (Exception ex)
+            {
+                result.Error = ex.Message;
+            }
             finally { }
             return result;
         }
