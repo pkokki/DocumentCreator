@@ -27,11 +27,11 @@ namespace JsonExcelExpressions.Eval
         #endregion
 
         #region Static methods
-        public static decimal? ToDateSerial(DateTime date)
+        public static double? ToDateSerial(DateTime date)
         {
             return ToDateSerial(date.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second);
         }
-        public static decimal? ToDateSerial(int year, int month, int day, int hours = 0, int minutes = 0, int seconds = 0)
+        public static double? ToDateSerial(int year, int month, int day, int hours = 0, int minutes = 0, int seconds = 0)
         {
             if (year > 0 && month > 0 && day > 0)
             {
@@ -43,23 +43,23 @@ namespace JsonExcelExpressions.Eval
                 // leap year, but Excel/Lotus 123 think it is...
                 if (serial >= 60)
                     ++serial;
-                return (decimal)serial;
+                return serial;
             }
             else
             {
-                var serial = Math.Round((hours * 60 * 60 + minutes * 60 + seconds) / 86400M, 10);
+                var serial = Math.Round((hours * 60 * 60 + minutes * 60 + seconds) / 86400.0, 10);
                 if (serial < 0)
                     return null;
                 return serial;
             }
         }
 
-        public static DateTime? FromDateSerial(decimal serial)
+        public static DateTime? FromDateSerial(double serial)
         {
             if (serial > 0 && serial < 1)
             {
-                var seconds = Math.Round(serial * 86400M);
-                return DateValue.BASE.AddSeconds((double)seconds);
+                var seconds = Math.Round(serial * 86400.0);
+                return DateValue.BASE.AddSeconds(seconds);
             }
             else
             {
@@ -88,7 +88,7 @@ namespace JsonExcelExpressions.Eval
                 case JTokenType.Boolean: return BooleanValue.Create((bool)token);
                 case JTokenType.Integer:
                 case JTokenType.Float:
-                    return new DecimalValue((decimal)token, language);
+                    return new DecimalValue((double)token, language);
                 default: return new TextValue(token.ToString(), language);
             }
         }
@@ -98,7 +98,7 @@ namespace JsonExcelExpressions.Eval
             switch(token.Subtype)
             {
                 case ExcelFormulaTokenSubtype.Text: return new TextValue(token.Value, scope.OutLanguage);
-                case ExcelFormulaTokenSubtype.Number: return new DecimalValue(decimal.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage);
+                case ExcelFormulaTokenSubtype.Number: return new DecimalValue(double.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage);
                 case ExcelFormulaTokenSubtype.Logical: return BooleanValue.Create(bool.Parse(token.Value));
                 case ExcelFormulaTokenSubtype.Range: return new RangeValue(token.Value);
                 default: throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}");
@@ -120,7 +120,7 @@ namespace JsonExcelExpressions.Eval
                 if ((v1 is TextValue && v2 is TextValue)) //*********** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) == 0);
+                    return BooleanValue.Create(((double)v1.InnerValue).IsEqual((double)v2.InnerValue));
                 return FALSE;
             }
             if (oper == "<" || oper == "<=")
@@ -136,7 +136,7 @@ namespace JsonExcelExpressions.Eval
                 if ((v1 is TextValue && v2 is TextValue)) //********** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) > 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) > 0);
+                    return BooleanValue.Create(((double)v1.InnerValue).CompareWith((double)v2.InnerValue) > 0);
                 return BooleanValue.Create(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) > 0);
 
             }
@@ -146,7 +146,7 @@ namespace JsonExcelExpressions.Eval
                 if ((v1 is TextValue && v2 is TextValue)) // *************** || (v1 is JsonTextValue && v2 is JsonTextValue))
                     return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) >= 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) >= 0);
+                    return BooleanValue.Create(((double)v1.InnerValue).CompareWith((double)v2.InnerValue) >= 0);
                 return BooleanValue.Create(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) >= 0);
             }
             throw new InvalidOperationException($"Unhandled comparison {v1?.GetType().Name ?? "NULL"} {oper} {v2?.GetType().Name ?? "NULL"}");
@@ -194,7 +194,7 @@ namespace JsonExcelExpressions.Eval
         #region Methods 
 
         protected internal abstract bool? AsBoolean();
-        protected internal abstract decimal? AsDecimal();
+        protected internal abstract double? AsDecimal();
         internal abstract string ToString(Language language, ExpressionFormat info);
 
         public virtual ExcelValue ElementAt(int index)
@@ -214,7 +214,7 @@ namespace JsonExcelExpressions.Eval
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
 
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() { return null; }
+            protected internal override double? AsDecimal() { return null; }
         }
 
         internal class NullValue : ExcelValue
@@ -224,7 +224,7 @@ namespace JsonExcelExpressions.Eval
             }
             internal override string ToString(Language language, ExpressionFormat info) { return string.Empty; }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() { return null; }
+            protected internal override double? AsDecimal() { return null; }
         }
 
         internal class TextValue : ExcelValue
@@ -233,9 +233,9 @@ namespace JsonExcelExpressions.Eval
             {
             }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal()
+            protected internal override double? AsDecimal()
             {
-                if (Language.TryParseDecimal(Text, out decimal v))
+                if (Language.TryParseDecimal(Text, out double v))
                     return v;
                 if (Language.TryParseDateTime(Text, out DateTime d))
                     return DateValue.ToDateSerial(d);
@@ -250,14 +250,14 @@ namespace JsonExcelExpressions.Eval
             {
             }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() { return null; }
+            protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
         internal class ArrayValue : ExcelValue
         {
             private readonly bool? asBoolean;
-            private readonly decimal? asDecimal;
+            private readonly double? asDecimal;
             private readonly IEnumerable<ExcelValue> values;
 
             public ArrayValue(JArray token, Language language)
@@ -278,7 +278,7 @@ namespace JsonExcelExpressions.Eval
             public IEnumerable<ExcelValue> Values => values;
 
             protected internal override bool? AsBoolean() { return asBoolean; }
-            protected internal override decimal? AsDecimal() { return asDecimal; }
+            protected internal override double? AsDecimal() { return asDecimal; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
             public override ExcelValue ElementAt(int index)
             {
@@ -292,7 +292,7 @@ namespace JsonExcelExpressions.Eval
             {
             }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() { return null; }
+            protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
@@ -310,7 +310,7 @@ namespace JsonExcelExpressions.Eval
             }
 
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
-            protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
+            protected internal override double? AsDecimal() { return (bool)InnerValue ? 1 : 0; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
@@ -320,7 +320,7 @@ namespace JsonExcelExpressions.Eval
             {
             }
             protected internal override bool? AsBoolean() { return null; }
-            protected internal override decimal? AsDecimal() { return null; }
+            protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
         }
 
@@ -328,14 +328,14 @@ namespace JsonExcelExpressions.Eval
         {
             internal static readonly DateTime BASE = new DateTime(1900, 1, 1);
             
-            public DateValue(decimal serial, Language language, ExpressionFormat format)
+            public DateValue(double serial, Language language, ExpressionFormat format)
                 : base(serial, language, ExpressionFormat.General)
             {
                 Serial = serial;
                 Format = format;
             }
 
-            public decimal Serial { get; }
+            public double Serial { get; }
             public ExpressionFormat Format { get; }
 
             internal override string ToString(Language language, ExpressionFormat info)
@@ -351,16 +351,16 @@ namespace JsonExcelExpressions.Eval
 
         internal class DecimalValue : ExcelValue
         {
-            public DecimalValue(decimal value, Language language, ExpressionFormat format = null)
+            public DecimalValue(double value, Language language, ExpressionFormat format = null)
                 : base(value, language.ToString(value, format), language)
             {
             }
-            protected internal override bool? AsBoolean() { return ((decimal)InnerValue) != 0M; }
-            protected internal override decimal? AsDecimal() { return (decimal)InnerValue; }
+            protected internal override bool? AsBoolean() { return ((double)InnerValue) != 0; }
+            protected internal override double? AsDecimal() { return (double)InnerValue; }
             internal override string ToString(Language language, ExpressionFormat info) 
             {
                 if (info != null)
-                    return language.ToString((decimal)InnerValue, info);
+                    return language.ToString((double)InnerValue, info);
                 return Text;
             }
         }
@@ -368,7 +368,7 @@ namespace JsonExcelExpressions.Eval
         #endregion
 
         #region Operators
-        private static ExcelValue MathOperation(ExcelValue a, ExcelValue b, Func<decimal, decimal, decimal> oper)
+        private static ExcelValue MathOperation(ExcelValue a, ExcelValue b, Func<double, double, double> oper)
         {
             var a1 = a.AsDecimal();
             if (a1.HasValue)
@@ -402,7 +402,7 @@ namespace JsonExcelExpressions.Eval
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
         {
             var denominator = b.AsDecimal();
-            if (denominator == 0M)
+            if (denominator == 0.0)
                 return DIV0;
             return MathOperation(a, b, (a, b) => a / b);
         }
@@ -412,7 +412,7 @@ namespace JsonExcelExpressions.Eval
         }
         public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
         {
-            return MathOperation(a, b, (a, b) => Convert.ToDecimal(Math.Pow(Convert.ToDouble(a), Convert.ToDouble(b))));
+            return MathOperation(a, b, (a, b) => Math.Pow(a, b));
         }
         public static ExcelValue operator &(ExcelValue a, ExcelValue b)
         {

@@ -33,12 +33,12 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue FIXED(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
-            if (args.NotDecimal(0, null, out decimal num)) return ExcelValue.VALUE;
+            if (args.NotDecimal(0, null, out double num)) return ExcelValue.VALUE;
             if (args.NotInteger(1, 2, out int decimals)) return ExcelValue.VALUE;
             if (args.NotBoolean(2, false, out bool noComma)) return ExcelValue.VALUE;
             if (decimals < 0)
             {
-                var factor = Convert.ToDecimal(Math.Pow(10, -decimals));
+                var factor = Math.Pow(10, -decimals);
                 num = Math.Round(num / factor, 0) * factor;
                 decimals = 0;
             }
@@ -162,7 +162,7 @@ namespace JsonExcelExpressions.Eval
             //}
             //else
             //{
-                if (args.NotDecimal(0, null, out decimal value)) return ExcelValue.NA;
+                if (args.NotDecimal(0, null, out double value)) return ExcelValue.NA;
                 return new ExcelValue.TextValue(scope.OutLanguage.ToString(value, exprFormat), scope.OutLanguage);
             //}
         }

@@ -7,13 +7,13 @@ namespace JsonExcelExpressions.Eval
     {
         public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope)
         {
-            return new ExcelValue.DecimalValue(3.14159265358979M, scope.OutLanguage);
+            return new ExcelValue.DecimalValue(3.14159265358979, scope.OutLanguage);
         }
 
         public ExcelValue SUM(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
-            var result = 0M;
+            var result = 0.0;
             foreach (var arg in args)
             {
                 if (arg is ExcelValue.ArrayValue)

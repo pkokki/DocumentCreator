@@ -59,12 +59,12 @@ namespace JsonExcelExpressions.Lang
             return ExcelValue.NA.ToString();
         }
 
-        public string ToString(decimal value, ExpressionFormat info = null)
+        public string ToString(double value, ExpressionFormat info = null)
         {
             info ??= ExpressionFormat.General;
             var format = info.GetFormat(null);
             if (!format.NeedsDate)
-                return string.Format(culture, format.Format, value);
+                return string.Format(culture, format.Format, Convert.ToDecimal(value));
             // Should start from beginning in order to use the overriden methods
             var date = ExcelValue.FromDateSerial(value);
             if (date.HasValue)
@@ -72,9 +72,9 @@ namespace JsonExcelExpressions.Lang
             return ExcelValue.NA.ToString();
         }
 
-        public decimal ToDecimal(string value)
+        public double ToDecimal(string value)
         {
-            var result = decimal.Parse(value, NumberStyles.Number, culture);
+            var result = double.Parse(value, NumberStyles.Number, culture);
             // Check for wrong thousands separators
             if (value != ToString(result))
                 throw new ArgumentException($"Wrong decimal text: '{value}' -> '{result}'");
@@ -99,9 +99,9 @@ namespace JsonExcelExpressions.Lang
             return culture.TextInfo.ToTitleCase(text);
         }
 
-        public bool TryParseDecimal(string value, out decimal result)
+        public bool TryParseDecimal(string value, out double result)
         {
-            return decimal.TryParse(value, NumberStyles.Any, culture, out result);
+            return double.TryParse(value, NumberStyles.Any, culture, out result);
         }
 
         public bool TryParseDateTime(string value, out DateTime result)

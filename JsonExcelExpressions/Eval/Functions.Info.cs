@@ -9,7 +9,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue ISEVEN(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
-            if (args.NotDecimal(0, null, out decimal number) || args[0] is ExcelValue.BooleanValue) 
+            if (args.NotDecimal(0, null, out double number) || args[0] is ExcelValue.BooleanValue) 
                 return ExcelValue.VALUE;
             var isEven = Math.Truncate(number) % 2 == 0;
             return isEven ? ExcelValue.TRUE : ExcelValue.FALSE;
@@ -17,7 +17,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue ISODD(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.ContainErrorValues()) return ExcelValue.NA;
-            if (args.NotDecimal(0, null, out decimal number) || args[0] is ExcelValue.BooleanValue)
+            if (args.NotDecimal(0, null, out double number) || args[0] is ExcelValue.BooleanValue)
                 return ExcelValue.VALUE;
             var isOdd = Math.Truncate(number) % 2 != 0;
             return isOdd ? ExcelValue.TRUE : ExcelValue.FALSE;
