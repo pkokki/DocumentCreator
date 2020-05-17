@@ -7,6 +7,8 @@ namespace JsonExcelExpressions.Lang
 {
     internal class Language
     {
+        private const double MIN_NUMBER = (double)decimal.MinValue;
+        private const double MAX_NUMBER = (double)decimal.MaxValue;
         private readonly CultureInfo culture;
 
 
@@ -61,15 +63,30 @@ namespace JsonExcelExpressions.Lang
 
         public string ToString(double value, ExpressionFormat info = null)
         {
-            info ??= ExpressionFormat.General;
-            var format = info.GetFormat(null);
-            if (!format.NeedsDate)
-                return string.Format(culture, format.Format, Convert.ToDecimal(value));
-            // Should start from beginning in order to use the overriden methods
-            var date = ExcelValue.FromDateSerial(value);
-            if (date.HasValue)
-                return ToString(date.Value, info);
-            return ExcelValue.NA.ToString();
+            string text;
+            if (value < MIN_NUMBER || value > MAX_NUMBER)
+            {
+                text = ExcelValue.VALUE.ToString();
+            }
+            else
+            {
+                info ??= ExpressionFormat.General;
+                var format = info.GetFormat(null);
+                if (format.NeedsDate)
+                {
+                    var date = ExcelValue.FromDateSerial(value);
+                    // Should start from beginning in order to use the overriden methods
+                    if (date.HasValue)
+                        text = ToString(date.Value, info);
+                    else
+                       text = ExcelValue.NA.ToString();
+                }
+                else
+                {
+                    text = string.Format(culture, format.Format, Convert.ToDecimal(value));
+                }
+            }
+            return text;
         }
 
         public double ToDecimal(string value)

@@ -269,30 +269,30 @@ namespace JsonExcelExpressions.Eval
 
         private void RegisterMathTrigonometryFunctions()
         {
-            // Registry.Add("ABS", ABS);  // Returns the absolute value of a number
-            // Registry.Add("ACOS", ACOS);  // Returns the arccosine of a number
-            // Registry.Add("ACOSH", ACOSH);  // Returns the inverse hyperbolic cosine of a number
-            // Registry.Add("ACOT", ACOT);  // Returns the arccotangent of a number
-            // Registry.Add("ACOTH", ACOTH);  // Returns the hyperbolic arccotangent of a number
+            Registry.Add("ABS", ABS);  // Returns the absolute value of a number
+            Registry.Add("ACOS", ACOS);  // Returns the arccosine of a number
+            Registry.Add("ACOSH", ACOSH);  // Returns the inverse hyperbolic cosine of a number
+            Registry.Add("ACOT", ACOT);  // Returns the arccotangent of a number
+            Registry.Add("ACOTH", ACOTH);  // Returns the hyperbolic arccotangent of a number
             // Registry.Add("AGGREGATE", AGGREGATE);  // Returns an aggregate in a list or database
             // Registry.Add("ARABIC", ARABIC);  // Converts a Roman number to Arabic, as a number
-            // Registry.Add("ASIN", ASIN);  // Returns the arcsine of a number
-            // Registry.Add("ASINH", ASINH);  // Returns the inverse hyperbolic sine of a number
-            // Registry.Add("ATAN", ATAN);  // Returns the arctangent of a number
-            // Registry.Add("ATAN2", ATAN2);  // Returns the arctangent from x- and y-coordinates
-            // Registry.Add("ATANH", ATANH);  // Returns the inverse hyperbolic tangent of a number
+            Registry.Add("ASIN", ASIN);  // Returns the arcsine of a number
+            Registry.Add("ASINH", ASINH);  // Returns the inverse hyperbolic sine of a number
+            Registry.Add("ATAN", ATAN);  // Returns the arctangent of a number
+            Registry.Add("ATAN2", ATAN2);  // Returns the arctangent from x- and y-coordinates
+            Registry.Add("ATANH", ATANH);  // Returns the inverse hyperbolic tangent of a number
             // Registry.Add("BASE", BASE);  // Converts a number into a text representation with the given radix (base)
             // Registry.Add("CEILING", CEILING);  // Rounds a number to the nearest integer or to the nearest multiple of significance
             // Registry.Add("CEILING.MATH", CEILING.MATH);  // Rounds a number up, to the nearest integer or to the nearest multiple of significance
             // Registry.Add("CEILING.PRECISE", CEILING.PRECISE);  // Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.
             // Registry.Add("COMBIN", COMBIN);  // Returns the number of combinations for a given number of objects
             // Registry.Add("COMBINA", COMBINA);  // Returns the number of combinations with repetitions for a given number of items
-            // Registry.Add("COS", COS);  // Returns the cosine of a number
-            // Registry.Add("COSH", COSH);  // Returns the hyperbolic cosine of a number
-            // Registry.Add("COT", COT);  // Returns the cotangent of an angle
-            // Registry.Add("COTH", COTH);  // Returns the hyperbolic cotangent of a number
-            // Registry.Add("CSC", CSC);  // Returns the cosecant of an angle
-            // Registry.Add("CSCH", CSCH);  // Returns the hyperbolic cosecant of an angle
+            Registry.Add("COS", COS);  // Returns the cosine of a number
+            Registry.Add("COSH", COSH);  // Returns the hyperbolic cosine of a number
+            Registry.Add("COT", COT);  // Returns the cotangent of an angle
+            Registry.Add("COTH", COTH);  // Returns the hyperbolic cotangent of a number
+            Registry.Add("CSC", CSC);  // Returns the cosecant of an angle
+            Registry.Add("CSCH", CSCH);  // Returns the hyperbolic cosecant of an angle
             // Registry.Add("DECIMAL", DECIMAL);  // Converts a text representation of a number in a given base into a decimal number
             // Registry.Add("DEGREES", DEGREES);  // Converts radians to degrees
             // Registry.Add("EVEN", EVEN);  // Rounds a number up to the nearest even integer
@@ -329,13 +329,13 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("ROUND", ROUND);  // Rounds a number to a specified number of digits
             // Registry.Add("ROUNDDOWN", ROUNDDOWN);  // Rounds a number down, toward zero
             // Registry.Add("ROUNDUP", ROUNDUP);  // Rounds a number up, away from zero
-            // Registry.Add("SEC", SEC);  // Returns the secant of an angle
-            // Registry.Add("SECH", SECH);  // Returns the hyperbolic secant of an angle
+            Registry.Add("SEC", SEC);  // Returns the secant of an angle
+            Registry.Add("SECH", SECH);  // Returns the hyperbolic secant of an angle
             // Registry.Add("SERIESSUM", SERIESSUM);  // Returns the sum of a power series based on the formula
             // Registry.Add("SEQUENCE", SEQUENCE);  // [Office 365 button] Generates a list of sequential numbers in an array, such as 1, 2, 3, 4
             // Registry.Add("SIGN", SIGN);  // Returns the sign of a number
-            // Registry.Add("SIN", SIN);  // Returns the sine of the given angle
-            // Registry.Add("SINH", SINH);  // Returns the hyperbolic sine of a number
+            Registry.Add("SIN", SIN);  // Returns the sine of the given angle
+            Registry.Add("SINH", SINH);  // Returns the hyperbolic sine of a number
             // Registry.Add("SQRT", SQRT);  // Returns a positive square root
             // Registry.Add("SQRTPI", SQRTPI);  // Returns the square root of (number * pi)
             // Registry.Add("SUBTOTAL", SUBTOTAL);  // Returns a subtotal in a list or database
@@ -347,8 +347,8 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("SUMX2MY2", SUMX2MY2);  // Returns the sum of the difference of squares of corresponding values in two arrays
             // Registry.Add("SUMX2PY2", SUMX2PY2);  // Returns the sum of the sum of squares of corresponding values in two arrays
             // Registry.Add("SUMXMY2", SUMXMY2);  // Returns the sum of squares of differences of corresponding values in two arrays
-            // Registry.Add("TAN", TAN);  // Returns the tangent of a number
-            // Registry.Add("TANH", TANH);  // Returns the hyperbolic tangent of a number
+            Registry.Add("TAN", TAN);  // Returns the tangent of a number
+            Registry.Add("TANH", TANH);  // Returns the hyperbolic tangent of a number
             // Registry.Add("TRUNC", TRUNC);  // Truncates a number to an integer
         }
 

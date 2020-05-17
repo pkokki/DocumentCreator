@@ -197,6 +197,10 @@ namespace JsonExcelExpressions.Eval
         protected internal abstract double? AsDecimal();
         internal abstract string ToString(Language language, ExpressionFormat info);
 
+        public override string ToString()
+        {
+            return ToString(Language, null);
+        }
         public virtual ExcelValue ElementAt(int index)
         {
             throw new InvalidOperationException($"{this.GetType().Name} is single-valued. ElementAt is not supported.");
