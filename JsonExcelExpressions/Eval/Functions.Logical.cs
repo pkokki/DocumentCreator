@@ -8,7 +8,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue AND(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.Any(a => !a.AsBoolean().HasValue)) return ExcelValue.NA;
-            return new ExcelValue.BooleanValue(args.All(o => o.AsBoolean().Value));
+            return ExcelValue.BooleanValue.Create(args.All(o => o.AsBoolean().Value));
         }
 
         public ExcelValue IF(List<ExcelValue> args, ExpressionScope scope)
@@ -31,19 +31,19 @@ namespace JsonExcelExpressions.Eval
         {
             if (args[0] is ExcelValue.TextValue) return ExcelValue.VALUE;
             if (!args[0].AsBoolean().HasValue) return ExcelValue.NA;
-            return new ExcelValue.BooleanValue(!args[0].AsBoolean().Value);
+            return ExcelValue.BooleanValue.Create(!args[0].AsBoolean().Value);
         }
 
         public ExcelValue OR(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.Any(a => !a.AsBoolean().HasValue)) return ExcelValue.NA;
-            return new ExcelValue.BooleanValue(args.Any(o => o.AsBoolean().Value));
+            return ExcelValue.BooleanValue.Create(args.Any(o => o.AsBoolean().Value));
         }
 
         public ExcelValue XOR(List<ExcelValue> args, ExpressionScope scope)
         {
             if (args.Any(a => !a.AsBoolean().HasValue)) return ExcelValue.NA;
-            return new ExcelValue.BooleanValue(args.Select(o => o.AsBoolean().Value).Aggregate((a, b) => a ^ b));
+            return ExcelValue.BooleanValue.Create(args.Select(o => o.AsBoolean().Value).Aggregate((a, b) => a ^ b));
         }
     }
 }

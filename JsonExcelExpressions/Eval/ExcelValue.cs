@@ -16,9 +16,13 @@ namespace JsonExcelExpressions.Eval
         public static readonly ExcelValue NA = new ErrorValue("#N/A");
         public static readonly ExcelValue VALUE = new ErrorValue("#VALUE!");
         public static readonly ExcelValue DIV0 = new ErrorValue("#DIV/0!");
-        public static readonly ExcelValue TRUE = new BooleanValue(true);
-        public static readonly ExcelValue FALSE = new BooleanValue(false);
+        public static readonly ExcelValue TRUE = BooleanValue._TRUE;
+        public static readonly ExcelValue FALSE = BooleanValue._FALSE;
         public static readonly ExcelValue NULL = new NullValue();
+        public static readonly ExcelValue ZERO = new DecimalValue(0, Language.Invariant);
+        public static readonly ExcelValue ONE = new DecimalValue(1, Language.Invariant);
+        public static readonly ExcelValue MINUS_ONE = new DecimalValue(-1, Language.Invariant);
+        public static readonly ExcelValue HUNDRED = new DecimalValue(100, Language.Invariant);
 
         #endregion
 
@@ -81,7 +85,7 @@ namespace JsonExcelExpressions.Eval
             {
                 case JTokenType.Object: return new JsonObjectValue((JObject)token, language);
                 case JTokenType.Array: return new ArrayValue((JArray)token, language);
-                case JTokenType.Boolean: return new BooleanValue((bool)token);
+                case JTokenType.Boolean: return BooleanValue.Create((bool)token);
                 case JTokenType.Integer:
                 case JTokenType.Float:
                     return new DecimalValue((decimal)token, language);
@@ -95,7 +99,7 @@ namespace JsonExcelExpressions.Eval
             {
                 case ExcelFormulaTokenSubtype.Text: return new TextValue(token.Value, scope.OutLanguage);
                 case ExcelFormulaTokenSubtype.Number: return new DecimalValue(decimal.Parse(token.Value, CultureInfo.InvariantCulture), scope.OutLanguage);
-                case ExcelFormulaTokenSubtype.Logical: return new BooleanValue(bool.Parse(token.Value));
+                case ExcelFormulaTokenSubtype.Logical: return BooleanValue.Create(bool.Parse(token.Value));
                 case ExcelFormulaTokenSubtype.Range: return new RangeValue(token.Value);
                 default: throw new InvalidOperationException($"ExcelValue.Create: invalid subtype {token.Subtype}");
             };
@@ -112,11 +116,11 @@ namespace JsonExcelExpressions.Eval
             if (oper == "=")
             {
                 if (v1 is BooleanValue)
-                    return new BooleanValue(v1 == v2);
+                    return BooleanValue.Create(v1 == v2);
                 if ((v1 is TextValue && v2 is TextValue)) //*********** || (v1 is JsonTextValue && v2 is JsonTextValue))
-                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
+                    return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) == 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) == 0);
+                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) == 0);
                 return FALSE;
             }
             if (oper == "<" || oper == "<=")
@@ -128,22 +132,22 @@ namespace JsonExcelExpressions.Eval
             }
             if (oper == ">")
             {
-                if (v1 is BooleanValue) return new BooleanValue(v1 == TRUE && v2 == FALSE);
+                if (v1 is BooleanValue) return BooleanValue.Create(v1 == TRUE && v2 == FALSE);
                 if ((v1 is TextValue && v2 is TextValue)) //********** || (v1 is JsonTextValue && v2 is JsonTextValue))
-                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) > 0);
+                    return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) > 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) > 0);
-                return new BooleanValue(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) > 0);
+                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) > 0);
+                return BooleanValue.Create(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) > 0);
 
             }
             if (oper == ">=")
             {
-                if (v1 is BooleanValue) return new BooleanValue(!(v1 == FALSE && v2 == TRUE));
+                if (v1 is BooleanValue) return BooleanValue.Create(!(v1 == FALSE && v2 == TRUE));
                 if ((v1 is TextValue && v2 is TextValue)) // *************** || (v1 is JsonTextValue && v2 is JsonTextValue))
-                    return new BooleanValue(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) >= 0);
+                    return BooleanValue.Create(string.Compare((string)v1.InnerValue, (string)v2.InnerValue, ignoreCase) >= 0);
                 if (v1 is DecimalValue && v2 is DecimalValue)
-                    return new BooleanValue(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) >= 0);
-                return new BooleanValue(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) >= 0);
+                    return BooleanValue.Create(decimal.Compare((decimal)v1.InnerValue, (decimal)v2.InnerValue) >= 0);
+                return BooleanValue.Create(string.Compare(v1.InnerValue.ToString(), v2.InnerValue.ToString(), ignoreCase) >= 0);
             }
             throw new InvalidOperationException($"Unhandled comparison {v1?.GetType().Name ?? "NULL"} {oper} {v2?.GetType().Name ?? "NULL"}");
         }
@@ -218,7 +222,7 @@ namespace JsonExcelExpressions.Eval
             public NullValue() : base(null, null, Language.Invariant)
             {
             }
-            internal override string ToString(Language language, ExpressionFormat info) { return null; }
+            internal override string ToString(Language language, ExpressionFormat info) { return string.Empty; }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override decimal? AsDecimal() { return null; }
         }
@@ -271,6 +275,8 @@ namespace JsonExcelExpressions.Eval
                 }
             }
 
+            public IEnumerable<ExcelValue> Values => values;
+
             protected internal override bool? AsBoolean() { return asBoolean; }
             protected internal override decimal? AsDecimal() { return asDecimal; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
@@ -292,9 +298,17 @@ namespace JsonExcelExpressions.Eval
 
         internal class BooleanValue : ExcelValue
         {
-            public BooleanValue(bool value) : base(value, value ? "TRUE" : "FALSE", Language.Invariant)
+            public static readonly ExcelValue _TRUE = new BooleanValue(true);
+            public static readonly ExcelValue _FALSE = new BooleanValue(false);
+            internal static ExcelValue Create(bool value)
+            {
+                return value ? _TRUE : _FALSE;
+            }
+
+            private BooleanValue(bool value) : base(value, value ? "TRUE" : "FALSE", Language.Invariant)
             {
             }
+
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
             protected internal override decimal? AsDecimal() { return (bool)InnerValue ? 1M : 0M; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
@@ -354,62 +368,59 @@ namespace JsonExcelExpressions.Eval
         #endregion
 
         #region Operators
+        private static ExcelValue MathOperation(ExcelValue a, ExcelValue b, Func<decimal, decimal, decimal> oper)
+        {
+            var a1 = a.AsDecimal();
+            if (a1.HasValue)
+            {
+                var b1 = b.AsDecimal();
+                if (b1.HasValue)
+                {
+                    var value = oper(a1.Value, b1.Value);
+                    if (a is DateValue d1)
+                        return new DateValue(value, d1.Language, d1.Format);
+                    if (b is DateValue d2)
+                        return new DateValue(value, d2.Language, d2.Format);
+                    return new DecimalValue(value, a.Language);
+                }
+            }
+            return VALUE;
+        }
 
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
-            var value = a.AsDecimal() + b.AsDecimal();
-            if (!value.HasValue)
-                return NA;
-            if (a is DateValue d)
-                return new DateValue(value.Value, d.Language, d.Format);
-            return new DecimalValue(value.Value, a.Language);
+            return MathOperation(a, b, (a, b) => a + b);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
-            var value = a.AsDecimal() - b.AsDecimal();
-            if (!value.HasValue)
-                return NA;
-            if (a is DateValue d)
-                return new DateValue(value.Value, a.Language, d.Format);
-            return new DecimalValue(value.Value, a.Language);
+            return MathOperation(a, b, (a, b) => a - b);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
-            var value = a.AsDecimal() * b.AsDecimal();
-            if (!value.HasValue)
-                return NA;
-            if (a is DateValue d)
-                return new DateValue(value.Value, a.Language, d.Format);
-            return new DecimalValue(value.Value, a.Language);
+            return MathOperation(a, b, (a, b) => a * b);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
         {
             var denominator = b.AsDecimal();
-            return a / denominator.Value;
-        }
-        public static ExcelValue operator /(ExcelValue a, decimal denominator)
-        {
             if (denominator == 0M)
                 return DIV0;
-            var value = a.AsDecimal() / denominator;
-            if (!value.HasValue)
-                return NA;
-            if (a is DateValue d)
-                return new DateValue(value.Value, a.Language, d.Format);
-            return new DecimalValue(value.Value, a.Language);
+            return MathOperation(a, b, (a, b) => a / b);
         }
         public static ExcelValue operator -(ExcelValue a)
         {
-            return new DecimalValue(-a.AsDecimal().Value, a.Language);
+            return a * MINUS_ONE;
         }
         public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
         {
-            var value = Convert.ToDecimal(Math.Pow(Convert.ToDouble(a.InnerValue), Convert.ToDouble(b.InnerValue)));
-            return new DecimalValue(value, a.Language);
+            return MathOperation(a, b, (a, b) => Convert.ToDecimal(Math.Pow(Convert.ToDouble(a), Convert.ToDouble(b))));
         }
         public static ExcelValue operator &(ExcelValue a, ExcelValue b)
         {
-            var value = Convert.ToString(a.InnerValue) + Convert.ToString(b.InnerValue);
+            if (a is ErrorValue)
+                return a;
+            if (b is ErrorValue)
+                return b;
+            var value = $"{a.Text}{b.Text}";
             return new TextValue(value, a.Language);
         }
         #endregion

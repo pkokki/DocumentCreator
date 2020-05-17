@@ -12,8 +12,22 @@ namespace JsonExcelExpressions.Eval
 
         private Functions()
         {
+            Registry.Add("ISEVEN", ISEVEN);
+            Registry.Add("ISODD", ISODD); 
+            Registry.Add("ISBLANK", ISBLANK); // Returns TRUE if the value is blank
+            Registry.Add("ISERR", ISERR); // Returns TRUE if the value is any error value except #N/A
+            Registry.Add("ISERROR", ISERROR); // Returns TRUE if the value is any error value
+            //Registry.Add("ISFORMULA", ISFORMULA); // Returns TRUE if there is a reference to a cell that contains a formula
+            Registry.Add("ISLOGICAL", ISLOGICAL); // Returns TRUE if the value is a logical value
+            Registry.Add("ISNA", ISNA); // Returns TRUE if the value is the #N/A error value
+            Registry.Add("ISNONTEXT", ISNONTEXT); // Returns TRUE if the value is not text
+            Registry.Add("ISNUMBER", ISNUMBER); // Returns TRUE if the value is a number
+            Registry.Add("ISTEXT", ISTEXT); // Returns TRUE if the value is text
+            Registry.Add("N", N); // Returns a value converted to a number
             Registry.Add("NA", NA);
-            
+            Registry.Add("TYPE", TYPE); // Returns a number indicating the data type of a value
+            //Registry.Add("ISREF", ISREF); .. Returns TRUE if the value is a reference
+
             Registry.Add("CONCATENATE", CONCATENATE);
             Registry.Add("EXACT", EXACT);
             Registry.Add("FIND", FIND);
@@ -92,11 +106,5 @@ namespace JsonExcelExpressions.Eval
             else
                 throw new InvalidOperationException($"Unknown function name: {name}");
         }
-
-        public ExcelValue NA(List<ExcelValue> args, ExpressionScope scope)
-        {
-            return ExcelValue.NA;
-        }
-        
     }
 }
