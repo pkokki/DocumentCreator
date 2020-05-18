@@ -1,4 +1,7 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http.Headers;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace JsonExcelExpressions
@@ -244,7 +247,7 @@ namespace JsonExcelExpressions
             AssertExpression("=SUM(42,TRUE)", "43");
             AssertExpression("=SUM(42,\"A\")", "#VALUE!");
             AssertExpression("=SUM(42,\"1\")", "43");
-            AssertExpression("=SUM(42,NA())", "#N/A");
+            AssertExpression("=SUM(42,NA())", "#VALUE!");
             AssertExpression("=SUM(1.2,1.02,1.002)", "3,222");
             AssertExpression("=SUM(-5,-3)", "-8");
         }
@@ -351,5 +354,223 @@ namespace JsonExcelExpressions
             AssertExpression("=CEILING.PRECISE(4,0)", "0");
             AssertExpression("=CEILING.PRECISE(0,0)", "0");
         }
+
+        [Fact]
+        public void ROUND()
+        {
+            AssertExpression("=ROUND(0, 0)", "0");
+            AssertExpression("=ROUND(10, 0)", "10");
+            AssertExpression("=ROUND(10.001, 2.9)", "10");
+            AssertExpression("=ROUND(9.99, 2)", "9,99");
+            AssertExpression("=ROUND(9.999, 2)", "10");
+            AssertExpression("=ROUND(-10, 0)", "-10");
+            AssertExpression("=ROUND(-10, 2)", "-10");
+            AssertExpression("=ROUND(-9.99, 2)", "-9,99");
+            AssertExpression("=ROUND(-9.999, 2)", "-10");
+            AssertExpression("=ROUND(-9.001, 2)", "-9");
+            AssertExpression("=ROUND(-9.5, 2)", "-9,5");
+            AssertExpression("=ROUND(-9.5, 0)", "-10");
+            AssertExpression("=ROUND(9.5, 0)", "10");
+            AssertExpression("=ROUND(2.15, 1)", "2,2");
+            AssertExpression("=ROUND(2.149, 1)", "2,1");
+            AssertExpression("=ROUND(-1.475, 2)", "-1,48");
+            AssertExpression("=ROUND(21.5, -1)", "20");
+            AssertExpression("=ROUND(626.3, -3)", "1000");
+            AssertExpression("=ROUND(1.98, -1)", "0");
+            AssertExpression("=ROUND(-50.55, -2)", "-100");
+        }
+        [Fact]
+        public void ROUNDDOWN()
+        {
+            AssertExpression("=ROUNDDOWN(0, 0)", "0");
+            AssertExpression("=ROUNDDOWN(10, 0)", "10");
+            AssertExpression("=ROUNDDOWN(10.001, 2.9)", "10");
+            AssertExpression("=ROUNDDOWN(9.99, 2)", "9,99");
+            AssertExpression("=ROUNDDOWN(9.999, 2)", "9,99");
+            AssertExpression("=ROUNDDOWN(-10, 0)", "-10");
+            AssertExpression("=ROUNDDOWN(-10, 2)", "-10");
+            AssertExpression("=ROUNDDOWN(-9.99, 2)", "-9,99");
+            AssertExpression("=ROUNDDOWN(-9.999, 2)", "-9,99");
+            AssertExpression("=ROUNDDOWN(-9.001, 2)", "-9");
+            AssertExpression("=ROUNDDOWN(-9.5, 2)", "-9,5");
+            AssertExpression("=ROUNDDOWN(-9.5, 0)", "-9");
+            AssertExpression("=ROUNDDOWN(9.5, 0)", "9");
+            AssertExpression("=ROUNDDOWN(2.15, 1)", "2,1");
+            AssertExpression("=ROUNDDOWN(2.149, 1)", "2,1");
+            AssertExpression("=ROUNDDOWN(-1.475, 2)", "-1,47");
+            AssertExpression("=ROUNDDOWN(21.5, -1)", "20");
+            AssertExpression("=ROUNDDOWN(626.3, -3)", "0");
+            AssertExpression("=ROUNDDOWN(1.98, -1)", "0");
+            AssertExpression("=ROUNDDOWN(-50.55, -2)", "0");
+        }
+        [Fact]
+        public void ROUNDUP()
+        {
+            AssertExpression("=ROUNDUP(0, 0)", "0");
+            AssertExpression("=ROUNDUP(10, 0)", "10");
+            AssertExpression("=ROUNDUP(10.001, 2.9)", "10,01");
+            AssertExpression("=ROUNDUP(9.99, 2)", "9,99");
+            AssertExpression("=ROUNDUP(9.999, 2)", "10");
+            AssertExpression("=ROUNDUP(-10, 0)", "-10");
+            AssertExpression("=ROUNDUP(-10, 2)", "-10");
+            AssertExpression("=ROUNDUP(-9.99, 2)", "-9,99");
+            AssertExpression("=ROUNDUP(-9.999, 2)", "-10");
+            AssertExpression("=ROUNDUP(-9.001, 2)", "-9,01");
+            AssertExpression("=ROUNDUP(-9.5, 2)", "-9,5");
+            AssertExpression("=ROUNDUP(-9.5, 0)", "-10");
+            AssertExpression("=ROUNDUP(9.5, 0)", "10");
+            AssertExpression("=ROUNDUP(2.15, 1)", "2,2");
+            AssertExpression("=ROUNDUP(2.149, 1)", "2,2");
+            AssertExpression("=ROUNDUP(-1.475, 2)", "-1,48");
+            AssertExpression("=ROUNDUP(21.5, -1)", "30");
+            AssertExpression("=ROUNDUP(626.3, -3)", "1000");
+            AssertExpression("=ROUNDUP(1.98, -1)", "10");
+            AssertExpression("=ROUNDUP(-50.55, -2)", "-100");
+        }
+
+        [Fact]
+        public void TRUNC()
+        {
+            AssertExpression("=TRUNC(8.9)", "8");
+            AssertExpression("=TRUNC(-8.9)", "-8");
+            AssertExpression("=TRUNC(0.45)", "0");
+            AssertExpression("=TRUNC(0.55)", "0");
+            AssertExpression("=TRUNC(-0.55)", "0");
+            AssertExpression("=TRUNC(0.55, 0)", "0");
+            AssertExpression("=TRUNC(-0.55, 0)", "0");
+            AssertExpression("=TRUNC(555, -1)", "550");
+            AssertExpression("=TRUNC(555, 1)", "555");
+            AssertExpression("=TRUNC(0.55, 1)", "0,5");
+            AssertExpression("=TRUNC(-0.55, 1)", "-0,5");
+        }
+
+        [Fact]
+        public void EXP()
+        {
+            AssertExpression("=EXP(0)", "1");
+            AssertExpression("=EXP(1)", "2,718281828");
+            AssertExpression("=EXP(-1.2)", "0,3011942119");
+            AssertExpression("=EXP(1.234)", "3,434941861");
+        }
+
+        [Fact]
+        public void SIGN()
+        {
+            AssertExpression("=SIGN(0)", "0");
+            AssertExpression("=SIGN(13)", "1");
+            AssertExpression("=SIGN(-21.2)", "-1");
+            AssertExpression("=SIGN(12.234)", "1");
+        }
+
+        [Fact]
+        public void INT()
+        {
+            AssertExpression("=INT(0)", "0");
+            AssertExpression("=INT(1.99)", "1");
+            AssertExpression("=INT(-1.99)", "-2");
+            AssertExpression("=INT(-1.5)", "-2");
+            AssertExpression("=INT(1.5)", "1");
+            AssertExpression("=INT(TRUE)", "1");
+            AssertExpression("=INT(\"10,123\")", "10");
+        }
+
+        [Fact]
+        public void LN()
+        {
+            AssertExpression("=LN(0)", "#VALUE!");
+            AssertExpression("=LN(1)", "0");
+            AssertExpression("=LN(-1.2)", "#VALUE!");
+            AssertExpression("=LN(1.234)", "0,2102609255");
+        }
+
+        [Fact]
+        public void LOG()
+        {
+            AssertExpression("=LOG(0, 2)", "#VALUE!");
+            AssertExpression("=LOG(1, 2)", "0");
+            AssertExpression("=LOG(-1.2, 2)", "#VALUE!");
+            AssertExpression("=LOG(1.234, 2)", "0,3033423945");
+            AssertExpression("=LOG(5)", "0,6989700043");
+            AssertExpression("=LOG(0.599999)", "-0,2218494734");
+            AssertExpression("=LOG(111111111.9999)", "8,045757494");
+            AssertExpression("=LOG(1.234, 3.2)", "0,1807684126");
+        }
+
+        [Fact]
+        public void LOG10()
+        {
+            AssertExpression("=LOG10(0)", "#VALUE!");
+            AssertExpression("=LOG10(1)", "0");
+            AssertExpression("=LOG10(-1,2)", "#VALUE!");
+            AssertExpression("=LOG10(1.234)", "0,0913151597");
+        }
+
+        [Fact]
+        public void MOD()
+        {
+            AssertExpression("=MOD(0, 5)", "0");
+            AssertExpression("=MOD(5, 0)", "#VALUE!");
+            AssertExpression("=MOD(5, 2)", "1");
+            AssertExpression("=MOD(10, 1.345)", "0,585");
+            AssertExpression("=MOD(23.456, 2.432)", "1,568");
+            AssertExpression("=MOD(-23.456, -2.432)", "-1,568");
+            AssertExpression("=MOD(23.456, -2.432)", "-0,864");
+            AssertExpression("=MOD(-23.456, 2.432)", "0,864");
+        }
+
+        [Fact]
+        public void POWER()
+        {
+            AssertExpression("=POWER(0, 2)", "0");
+            AssertExpression("=POWER(1, 2)", "1");
+            AssertExpression("=POWER(-1.2, 2)", "1,44");
+            AssertExpression("=POWER(1.234, 2)", "1,522756");
+            AssertExpression("=POWER(5, -2.34)", "0,0231424956");
+            AssertExpression("=POWER(0.599999, -1)", "1,666669444");
+            AssertExpression("=POWER(111111111.9999, 1.02)", "160943204,4");
+            AssertExpression("=POWER(1.234, 3.2)", "1,959785369");
+        }
+
+        [Fact]
+        public void PRODUCT()
+        {
+            AssertExpression("=PRODUCT(5,15,30)", "2250");
+            AssertExpression("=PRODUCT({5;15;30}, 2)", "4500");
+            AssertExpression("=PRODUCT({5,15,30}, 2)", "4500");
+        }
+
+        [Fact]
+        public void RAND()
+        {
+            for (var i = 0; i < 30; i++)
+                AssertExpression("=RAND()", v => double.Parse(v, culture) >= 0 && double.Parse(v, culture) < 1);
+        }
+
+        [Fact]
+        public void RANDBETWEEN()
+        {
+            AssertExpression("=RANDBETWEEN(0, 0)", "0");
+            AssertExpression("=RANDBETWEEN(1, 1)", "1");
+            AssertExpression("=RANDBETWEEN(10, 5)", "#VALUE!");
+
+            var ints = new List<double>();
+            for (var i = 0; i < 30; i++)
+                AssertExpression("=RANDBETWEEN(1, 5)", v => { ints.Add(double.Parse(v, culture)); return true; });
+            Assert.True(ints.All(x => x == 1 || x == 2 || x == 3 || x == 4), "unexpected integer values");
+            Assert.True(ints.Contains(1), "missing 1");
+            Assert.True(ints.Contains(2), "missing 2");
+            Assert.True(ints.Contains(3), "missing 3");
+            Assert.True(ints.Contains(4), "missing 4");
+
+            AssertExpression("=RANDBETWEEN(1.34, 5.3)", v => double.Parse(v, culture) >= 2 && double.Parse(v, culture) < 5);
+            var randoms = new List<double>();
+            for (var i = 0; i < 30; i++)
+                AssertExpression("=RANDBETWEEN(-1.9, 1.9)", v => { randoms.Add(double.Parse(v, culture)); return true; });
+            Assert.True(randoms.All(x => x == -1 || x ==0 || x == 1), "unexpected random values");
+            Assert.True(randoms.Contains(-1), "missing -1");
+            Assert.True(randoms.Contains(0), "missing 0");
+            Assert.True(randoms.Contains(1), "missing 1");
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace JsonExcelExpressions.Eval
 {
@@ -10,8 +11,16 @@ namespace JsonExcelExpressions.Eval
         private readonly Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>> Registry
             = new Dictionary<string, Func<List<ExcelValue>, ExpressionScope, ExcelValue>>();
 
+        // https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient?view=netcore-3.1
+        // HttpClient is intended to be instantiated once per application, rather than per-use.
+        private static readonly Lazy<HttpClient> httpClient = new Lazy<HttpClient>();
+
+        private static readonly Lazy<Random> random = new Lazy<Random>();
+
         private Functions()
         {
+            Registry.Add("ARRAY", ARRAY); // Returns the serial number of a particular date
+            Registry.Add("ARRAYROW", ARRAYROW); // Returns the serial number of a particular date
             // https://support.office.com/en-us/article/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb
             RegisterCubeFunctions();
             RegisterDatabaseFunctions();
@@ -296,44 +305,44 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("DECIMAL", DECIMAL);  // Converts a text representation of a number in a given base into a decimal number
             // Registry.Add("DEGREES", DEGREES);  // Converts radians to degrees
             // Registry.Add("EVEN", EVEN);  // Rounds a number up to the nearest even integer
-            // Registry.Add("EXP", EXP);  // Returns e raised to the power of a given number
+            Registry.Add("EXP", EXP);  // Returns e raised to the power of a given number
             // Registry.Add("FACT", FACT);  // Returns the factorial of a number
             // Registry.Add("FACTDOUBLE", FACTDOUBLE);  // Returns the double factorial of a number
             Registry.Add("FLOOR", FLOOR);  // Rounds a number down, toward zero
             Registry.Add("FLOOR.MATH", FLOOR_MATH);  // Rounds a number down, to the nearest integer or to the nearest multiple of significance
             Registry.Add("FLOOR.PRECISE", FLOOR_PRECISE);  // Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.
             // Registry.Add("GCD", GCD);  // Returns the greatest common divisor
-            // Registry.Add("INT", INT);  // Rounds a number down to the nearest integer
+            Registry.Add("INT", INT);  // Rounds a number down to the nearest integer
             // Registry.Add("ISO.CEILING", ISO.CEILING);  // Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance
             // Registry.Add("LCM", LCM);  // Returns the least common multiple
-            // Registry.Add("LN", LN);  // Returns the natural logarithm of a number
-            // Registry.Add("LOG", LOG);  // Returns the logarithm of a number to a specified base
-            // Registry.Add("LOG10", LOG10);  // Returns the base-10 logarithm of a number
+            Registry.Add("LN", LN);  // Returns the natural logarithm of a number
+            Registry.Add("LOG", LOG);  // Returns the logarithm of a number to a specified base
+            Registry.Add("LOG10", LOG10);  // Returns the base-10 logarithm of a number
             // Registry.Add("MDETERM", MDETERM);  // Returns the matrix determinant of an array
             // Registry.Add("MINVERSE", MINVERSE);  // Returns the matrix inverse of an array
             // Registry.Add("MMULT", MMULT);  // Returns the matrix product of two arrays
-            // Registry.Add("MOD", MOD);  // Returns the remainder from division
+            Registry.Add("MOD", MOD);  // Returns the remainder from division
             // Registry.Add("MROUND", MROUND);  // Returns a number rounded to the desired multiple
             // Registry.Add("MULTINOMIAL", MULTINOMIAL);  // Returns the multinomial of a set of numbers
             // Registry.Add("MUNIT", MUNIT);  // Returns the unit matrix or the specified dimension
             // Registry.Add("ODD", ODD);  // Rounds a number up to the nearest odd integer
             Registry.Add("PI", PI);  // Returns the value of pi
-            // Registry.Add("POWER", POWER);  // Returns the result of a number raised to a power
-            // Registry.Add("PRODUCT", PRODUCT);  // Multiplies its arguments
+            Registry.Add("POWER", POWER);  // Returns the result of a number raised to a power
+            Registry.Add("PRODUCT", PRODUCT);  // Multiplies its arguments
             // Registry.Add("QUOTIENT", QUOTIENT);  // Returns the integer portion of a division
             // Registry.Add("RADIANS", RADIANS);  // Converts degrees to radians
-            // Registry.Add("RAND", RAND);  // Returns a random number between 0 and 1
+            Registry.Add("RAND", RAND);  // Returns a random number between 0 and 1
             // Registry.Add("RANDARRAY", RANDARRAY);  // [Office 365 button] Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.
-            // Registry.Add("RANDBETWEEN", RANDBETWEEN);  // Returns a random number between the numbers you specify
+            Registry.Add("RANDBETWEEN", RANDBETWEEN);  // Returns a random number between the numbers you specify
             // Registry.Add("ROMAN", ROMAN);  // Converts an Arabic numeral to Roman, as text
-            // Registry.Add("ROUND", ROUND);  // Rounds a number to a specified number of digits
-            // Registry.Add("ROUNDDOWN", ROUNDDOWN);  // Rounds a number down, toward zero
-            // Registry.Add("ROUNDUP", ROUNDUP);  // Rounds a number up, away from zero
+            Registry.Add("ROUND", ROUND);  // Rounds a number to a specified number of digits
+            Registry.Add("ROUNDDOWN", ROUNDDOWN);  // Rounds a number down, toward zero
+            Registry.Add("ROUNDUP", ROUNDUP);  // Rounds a number up, away from zero
             Registry.Add("SEC", SEC);  // Returns the secant of an angle
             Registry.Add("SECH", SECH);  // Returns the hyperbolic secant of an angle
             // Registry.Add("SERIESSUM", SERIESSUM);  // Returns the sum of a power series based on the formula
             // Registry.Add("SEQUENCE", SEQUENCE);  // [Office 365 button] Generates a list of sequential numbers in an array, such as 1, 2, 3, 4
-            // Registry.Add("SIGN", SIGN);  // Returns the sign of a number
+            Registry.Add("SIGN", SIGN);  // Returns the sign of a number
             Registry.Add("SIN", SIN);  // Returns the sine of the given angle
             Registry.Add("SINH", SINH);  // Returns the hyperbolic sine of a number
             // Registry.Add("SQRT", SQRT);  // Returns a positive square root
@@ -349,7 +358,7 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("SUMXMY2", SUMXMY2);  // Returns the sum of squares of differences of corresponding values in two arrays
             Registry.Add("TAN", TAN);  // Returns the tangent of a number
             Registry.Add("TANH", TANH);  // Returns the hyperbolic tangent of a number
-            // Registry.Add("TRUNC", TRUNC);  // Truncates a number to an integer
+            Registry.Add("TRUNC", TRUNC);  // Truncates a number to an integer
         }
 
         private void RegisterStatisticalFunctions()
@@ -532,6 +541,15 @@ namespace JsonExcelExpressions.Eval
                 return function(args, scope);
             else
                 throw new InvalidOperationException($"Unknown function name: {name}");
+        }
+
+        private ExcelValue ARRAY(List<ExcelValue> args, ExpressionScope scope)
+        {
+            return new ExcelValue.ArrayValue(args, scope.OutLanguage);
+        }
+        private ExcelValue ARRAYROW(List<ExcelValue> args, ExpressionScope scope)
+        {
+            return new ExcelValue.ArrayValue(args, scope.OutLanguage);
         }
     }
 }

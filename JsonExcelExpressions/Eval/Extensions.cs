@@ -12,6 +12,32 @@ namespace JsonExcelExpressions.Eval
             return args.Any(a => a is ExcelValue.ErrorValue);
         }
 
+        public static IEnumerable<double> FlattenNumbers(this IEnumerable<ExcelValue> args, bool ignoreErrorValues)
+        {
+            var numbers = new List<double>();
+            foreach (var arg in args)
+            {
+                if (arg is ExcelValue.ArrayValue)
+                {
+                    var items = (IEnumerable<ExcelValue>)arg.InnerValue;
+                    var childNumbers = items.FlattenNumbers(ignoreErrorValues);
+                    if (childNumbers != null)
+                        numbers.AddRange(childNumbers);
+                    else if (!ignoreErrorValues)
+                        return null;
+                }
+                else
+                {
+                    var number = arg.AsDecimal();
+                    if (number.HasValue)
+                        numbers.Add(number.Value);
+                    else if (!ignoreErrorValues)
+                        return null;
+                }
+            }
+            return numbers;
+        }
+
         public static bool NotDecimal(this List<ExcelValue> args, int index, double? defaultValue, out double value)
         {
             double? result = null;

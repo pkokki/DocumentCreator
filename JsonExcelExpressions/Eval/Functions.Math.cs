@@ -37,7 +37,7 @@ namespace JsonExcelExpressions.Eval
             return new ExcelValue.DecimalValue(Math.Log(d) / 2, scope.OutLanguage);
         }
         public ExcelValue ATAN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Atan(v));
-        public ExcelValue ATAN2(List<ExcelValue> args, ExpressionScope scope) => Math2(args, scope, 
+        public ExcelValue ATAN2(List<ExcelValue> args, ExpressionScope scope) => Math2(args, scope,
             (v1, v2) => Math.Atan2(v2, v1),
             (v1, v2) => v1 == 0 && v2 == 0
             );
@@ -45,7 +45,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue COS(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Cos(v));
         public ExcelValue COSH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Cosh(v));
         public ExcelValue COT(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 1.0 / Math.Tan(v), v => v == 0);
-        public ExcelValue COTH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => (Math.Exp(v) + Math.Exp(-v)) /(Math.Exp(v) - Math.Exp(-v)));
+        public ExcelValue COTH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => (Math.Exp(v) + Math.Exp(-v)) / (Math.Exp(v) - Math.Exp(-v)));
         public ExcelValue CSC(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 1.0 / Math.Sin(v));
         public ExcelValue CSCH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 2.0 / (Math.Exp(v) - Math.Exp(-v)));
         public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope) => new ExcelValue.DecimalValue(Math.PI, scope.OutLanguage);
@@ -56,26 +56,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue TAN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Tan(v));
         public ExcelValue TANH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Tanh(v));
 
-        public ExcelValue SUM(List<ExcelValue> args, ExpressionScope scope)
-        {
-            if (args.ContainErrorValues()) return ExcelValue.NA;
-            var result = 0.0;
-            foreach (var arg in args)
-            {
-                if (arg is ExcelValue.ArrayValue)
-                {
-                    ((IEnumerable<ExcelValue>)arg.InnerValue).ToList().ForEach(o => result += o.AsDecimal().Value);
-                }
-                else
-                {
-                    if (!arg.AsDecimal().HasValue)
-                        return ExcelValue.VALUE;
-                    result += arg.AsDecimal().Value;
-                }
-            }
-            return new ExcelValue.DecimalValue(result, scope.OutLanguage);
-        }
-
+        
         public ExcelValue ABS(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Abs(v));
         public ExcelValue CEILING(List<ExcelValue> args, ExpressionScope scope)
         {
@@ -164,6 +145,121 @@ namespace JsonExcelExpressions.Eval
             else
                 ceiling = Math.Floor(number / significance) * significance;
             return new ExcelValue.DecimalValue(sign * ceiling, scope.OutLanguage);
+        }
+
+        public ExcelValue ROUND(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotInteger(1, null, out int decimals)) return ExcelValue.VALUE;
+
+            double round;
+            if (decimals < 0)
+            {
+                var factor = Math.Pow(10, -decimals);
+                round = Math.Round(number / factor) * factor;
+            }
+            else
+            {
+                round = Math.Round(number, decimals);
+            }
+            return new ExcelValue.DecimalValue(round, scope.OutLanguage);
+        }
+        public ExcelValue ROUNDDOWN(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotInteger(1, null, out int decimals)) return ExcelValue.VALUE;
+
+            double round;
+            if (decimals < 0)
+            {
+                var factor = Math.Pow(10, -decimals);
+                round = Math.Truncate(number / factor) * factor;
+            }
+            else
+            {
+                var factor = Math.Pow(10, decimals);
+                round = Math.Truncate(number * factor) / factor;
+            }
+            return new ExcelValue.DecimalValue(round, scope.OutLanguage);
+        }
+        public ExcelValue ROUNDUP(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotInteger(1, null, out int decimals)) return ExcelValue.VALUE;
+
+            double round;
+            if (decimals < 0)
+            {
+                var factor = Math.Pow(10, -decimals);
+                if (number > 0)
+                    round = Math.Ceiling(number / factor) * factor;
+                else
+                    round = Math.Floor(number / factor) * factor;
+            }
+            else
+            {
+                var factor = Math.Pow(10, decimals);
+                if (number > 0)
+                    round = Math.Ceiling(number * factor) / factor;
+                else
+                    round = Math.Floor(number * factor) / factor;
+            }
+            return new ExcelValue.DecimalValue(round, scope.OutLanguage);
+        }
+
+        public ExcelValue TRUNC(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, 0, out double digits)) return ExcelValue.VALUE;
+
+            var factor = Math.Pow(10, digits);
+            var trunc = Math.Truncate(number * factor) / factor;
+            return new ExcelValue.DecimalValue(trunc, scope.OutLanguage);
+        }
+
+        public ExcelValue EXP(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Exp(v));
+        public ExcelValue INT(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Floor(v));
+        public ExcelValue LN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Log(v), v => v <= 0);
+        public ExcelValue LOG(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, 10, out double newBase)) return ExcelValue.VALUE;
+            if (number <= 0) return ExcelValue.VALUE;
+
+            return new ExcelValue.DecimalValue(Math.Log(number, newBase), scope.OutLanguage);
+        }
+        public ExcelValue LOG10(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Log10(v), v => v <= 0);
+        public ExcelValue MOD(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, null, out double divisor)) return ExcelValue.VALUE;
+            if (divisor == 0) return ExcelValue.VALUE;
+
+            var mod = number - divisor * Math.Floor(number / divisor);
+            return new ExcelValue.DecimalValue(mod, scope.OutLanguage);
+        }
+        public ExcelValue POWER(List<ExcelValue> args, ExpressionScope scope) => Math2(args, scope, (v1, v2) => Math.Pow(v1, v2));
+        public ExcelValue RAND(List<ExcelValue> args, ExpressionScope scope) => new ExcelValue.DecimalValue(random.Value.NextDouble(), scope.OutLanguage);
+        public ExcelValue RANDBETWEEN(List<ExcelValue> args, ExpressionScope scope) => Math2(args, scope, 
+            (v1, v2) => random.Value.Next((int)Math.Ceiling(v1), (int)Math.Round(v2)),
+            (v1, v2) => v1 > v2);
+        public ExcelValue SIGN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Sign(v));
+
+
+        public ExcelValue SUM(List<ExcelValue> args, ExpressionScope scope)
+        {
+            var numbers = args.FlattenNumbers(false);
+            if (numbers == null) return ExcelValue.VALUE;
+
+            return new ExcelValue.DecimalValue(numbers.Sum(), scope.OutLanguage);
+        }
+        public ExcelValue PRODUCT(List<ExcelValue> args, ExpressionScope scope)
+        {
+            var numbers = args.FlattenNumbers(false);
+            if (numbers == null) return ExcelValue.VALUE;
+
+            var product = numbers.Aggregate(1.0, (acc, val) => acc * val); ;
+            return new ExcelValue.DecimalValue(product, scope.OutLanguage);
         }
     }
 }
