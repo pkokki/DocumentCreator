@@ -282,9 +282,9 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("ATAN2", ATAN2);  // Returns the arctangent from x- and y-coordinates
             Registry.Add("ATANH", ATANH);  // Returns the inverse hyperbolic tangent of a number
             // Registry.Add("BASE", BASE);  // Converts a number into a text representation with the given radix (base)
-            // Registry.Add("CEILING", CEILING);  // Rounds a number to the nearest integer or to the nearest multiple of significance
-            // Registry.Add("CEILING.MATH", CEILING.MATH);  // Rounds a number up, to the nearest integer or to the nearest multiple of significance
-            // Registry.Add("CEILING.PRECISE", CEILING.PRECISE);  // Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.
+            Registry.Add("CEILING", CEILING);  // Rounds a number to the nearest integer or to the nearest multiple of significance
+            Registry.Add("CEILING.MATH", CEILING_MATH);  // Rounds a number up, to the nearest integer or to the nearest multiple of significance
+            Registry.Add("CEILING.PRECISE", CEILING_PRECISE);  // Rounds a number the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded up.
             // Registry.Add("COMBIN", COMBIN);  // Returns the number of combinations for a given number of objects
             // Registry.Add("COMBINA", COMBINA);  // Returns the number of combinations with repetitions for a given number of items
             Registry.Add("COS", COS);  // Returns the cosine of a number
@@ -299,9 +299,9 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("EXP", EXP);  // Returns e raised to the power of a given number
             // Registry.Add("FACT", FACT);  // Returns the factorial of a number
             // Registry.Add("FACTDOUBLE", FACTDOUBLE);  // Returns the double factorial of a number
-            // Registry.Add("FLOOR", FLOOR);  // Rounds a number down, toward zero
-            // Registry.Add("FLOOR.MATH", FLOOR.MATH);  // Rounds a number down, to the nearest integer or to the nearest multiple of significance
-            // Registry.Add("FLOOR.PRECISE", FLOOR.PRECISE);  // Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.
+            Registry.Add("FLOOR", FLOOR);  // Rounds a number down, toward zero
+            Registry.Add("FLOOR.MATH", FLOOR_MATH);  // Rounds a number down, to the nearest integer or to the nearest multiple of significance
+            Registry.Add("FLOOR.PRECISE", FLOOR_PRECISE);  // Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.
             // Registry.Add("GCD", GCD);  // Returns the greatest common divisor
             // Registry.Add("INT", INT);  // Rounds a number down to the nearest integer
             // Registry.Add("ISO.CEILING", ISO.CEILING);  // Returns a number that is rounded up to the nearest integer or to the nearest multiple of significance

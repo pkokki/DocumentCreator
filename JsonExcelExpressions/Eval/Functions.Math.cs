@@ -6,10 +6,6 @@ namespace JsonExcelExpressions.Eval
 {
     internal partial class Functions
     {
-        public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope)
-        {
-            return new ExcelValue.DecimalValue(/*3.14159265358979*/Math.PI, scope.OutLanguage);
-        }
 
         private ExcelValue Math1(List<ExcelValue> args, ExpressionScope scope, Func<double, double> oper, Func<double, bool> guard = null)
         {
@@ -27,7 +23,6 @@ namespace JsonExcelExpressions.Eval
             return new ExcelValue.DecimalValue(oper(n1, n2), scope.OutLanguage);
         }
 
-        public ExcelValue ABS(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Abs(v));
         public ExcelValue ACOS(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Acos(v), v => v < -1 || v > 1);
         public ExcelValue ACOSH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Acosh(v), v => v <= -1 || v == 0);
         public ExcelValue ASIN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Asin(v), v => v < -1 || v > 1);
@@ -53,6 +48,7 @@ namespace JsonExcelExpressions.Eval
         public ExcelValue COTH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => (Math.Exp(v) + Math.Exp(-v)) /(Math.Exp(v) - Math.Exp(-v)));
         public ExcelValue CSC(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 1.0 / Math.Sin(v));
         public ExcelValue CSCH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 2.0 / (Math.Exp(v) - Math.Exp(-v)));
+        public ExcelValue PI(List<ExcelValue> args, ExpressionScope scope) => new ExcelValue.DecimalValue(Math.PI, scope.OutLanguage);
         public ExcelValue SEC(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 1.0 / Math.Cos(v));
         public ExcelValue SECH(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => 2.0 / (Math.Exp(v) + Math.Exp(-v)));
         public ExcelValue SIN(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Sin(v));
@@ -78,6 +74,96 @@ namespace JsonExcelExpressions.Eval
                 }
             }
             return new ExcelValue.DecimalValue(result, scope.OutLanguage);
+        }
+
+        public ExcelValue ABS(List<ExcelValue> args, ExpressionScope scope) => Math1(args, scope, v => Math.Abs(v));
+        public ExcelValue CEILING(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, null, out double significance)) return ExcelValue.VALUE;
+            if (significance == 0)
+                return ExcelValue.ZERO;
+            var ceiling = Math.Ceiling(number / significance) * significance;
+            return new ExcelValue.DecimalValue(ceiling, scope.OutLanguage);
+        }
+        public ExcelValue CEILING_MATH(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            var significance = 0.0;
+            if (number >= 0 && args.NotDecimal(1, 1, out significance)) return ExcelValue.VALUE;
+            if (number < 0 && args.NotDecimal(1, -1, out significance)) return ExcelValue.VALUE;
+            if (args.NotInteger(2, 0, out int mode)) return ExcelValue.VALUE;
+            if (significance == 0)
+                return ExcelValue.ZERO;
+            significance = Math.Abs(significance);
+
+            double ceiling;
+            if (mode == 0 || number >= 0)
+                ceiling = Math.Ceiling(number / significance) * significance;
+            else
+                ceiling = Math.Floor(number / significance) * significance;
+            return new ExcelValue.DecimalValue(ceiling, scope.OutLanguage);
+        }
+        public ExcelValue CEILING_PRECISE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, 1, out double significance)) return ExcelValue.VALUE;
+            if (significance == 0)
+                return ExcelValue.ZERO;
+
+            var sign = Math.Sign(number);
+            number = Math.Abs(number);
+            significance = Math.Abs(significance);
+            double ceiling;
+            if (sign < 0)
+                ceiling = Math.Floor(number / significance) * significance;
+            else
+                ceiling = Math.Ceiling(number / significance) * significance;
+            return new ExcelValue.DecimalValue(sign * ceiling, scope.OutLanguage);
+        }
+        public ExcelValue FLOOR(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, null, out double significance)) return ExcelValue.VALUE;
+            if (significance == 0 || (number > 0 && significance < 0))
+                return ExcelValue.VALUE;
+            var ceiling = Math.Floor(number / significance) * significance;
+            return new ExcelValue.DecimalValue(ceiling, scope.OutLanguage);
+        }
+        public ExcelValue FLOOR_MATH(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            var significance = 0.0;
+            if (number >= 0 && args.NotDecimal(1, 1, out significance)) return ExcelValue.VALUE;
+            if (number < 0 && args.NotDecimal(1, -1, out significance)) return ExcelValue.VALUE;
+            if (args.NotInteger(2, 0, out int mode)) return ExcelValue.VALUE;
+            if (significance == 0)
+                return ExcelValue.ZERO;
+            significance = Math.Abs(significance);
+
+            double ceiling;
+            if (mode == 0 || number >= 0)
+                ceiling = Math.Floor(number / significance) * significance;
+            else
+                ceiling = Math.Ceiling(number / significance) * significance;
+            return new ExcelValue.DecimalValue(ceiling, scope.OutLanguage);
+        }
+        public ExcelValue FLOOR_PRECISE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotDecimal(0, null, out double number)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, 1, out double significance)) return ExcelValue.VALUE;
+            if (significance == 0)
+                return ExcelValue.ZERO;
+
+            var sign = Math.Sign(number);
+            number = Math.Abs(number);
+            significance = Math.Abs(significance);
+            double ceiling;
+            if (sign < 0)
+                ceiling = Math.Ceiling(number / significance) * significance;
+            else
+                ceiling = Math.Floor(number / significance) * significance;
+            return new ExcelValue.DecimalValue(sign * ceiling, scope.OutLanguage);
         }
     }
 }

@@ -247,7 +247,109 @@ namespace JsonExcelExpressions
             AssertExpression("=SUM(42,NA())", "#N/A");
             AssertExpression("=SUM(1.2,1.02,1.002)", "3,222");
             AssertExpression("=SUM(-5,-3)", "-8");
+        }
 
+        [Fact]
+        public void CEILING()
+        {
+            AssertExpression("=CEILING(4, 2)", "4");
+            AssertExpression("=CEILING(2.5, 1)", "3");
+            AssertExpression("=CEILING(-2.5, -2)", "-4");
+            AssertExpression("=CEILING(-2.5, 2)", "-2");
+            AssertExpression("=CEILING(1.5, 0.1)", "1,5");
+            AssertExpression("=CEILING(-5.5, 2)", "-4");
+            AssertExpression("=CEILING(0.234, 0.01)", "0,24");
+            AssertExpression("=CEILING(1723, 1000)", "2000");
+            AssertExpression("=CEILING(12345, 10000)", "20000");
+            AssertExpression("=CEILING(1234, 0)", "0");
+        }
+
+        [Fact]
+        public void CEILING_MATH()
+        {
+            AssertExpression("=CEILING.MATH(24.3, 5)", "25");
+            AssertExpression("=CEILING.MATH(6.7)", "7");
+            AssertExpression("=CEILING.MATH(-8.1, 2)", "-8");
+            AssertExpression("=CEILING.MATH(8.1, 2)", "10");
+            AssertExpression("=CEILING.MATH(-5.5, 2, -1)", "-6");
+            AssertExpression("=CEILING.MATH(-5.5, 2, 0)", "-4");
+            AssertExpression("=CEILING.MATH(9.99, 10, 0)", "10");
+
+            AssertExpression("=CEILING.MATH(5.2)", "6");
+            AssertExpression("=CEILING.MATH(5.2,2)", "6");
+            AssertExpression("=CEILING.MATH(5.2,-2)", "6");
+            AssertExpression("=CEILING.MATH(5.2,2,0)", "6");
+            AssertExpression("=CEILING.MATH(5.2,2,1)", "6");
+            AssertExpression("=CEILING.MATH(5.2,-2,0)", "6");
+            AssertExpression("=CEILING.MATH(5.2,-2,1)", "6");
+            AssertExpression("=CEILING.MATH(-5.2)", "-5");
+            AssertExpression("=CEILING.MATH(-5.2,2)", "-4");
+            AssertExpression("=CEILING.MATH(-5.2,-2)", "-4");
+            AssertExpression("=CEILING.MATH(-5.2,2,0)", "-4");
+            AssertExpression("=CEILING.MATH(-5.2,2,1)", "-6");
+            AssertExpression("=CEILING.MATH(-5.2,-2,0)", "-4");
+            AssertExpression("=CEILING.MATH(-5.2,-2,1)", "-6");
+        }
+
+        [Fact]
+        public void CEILING_PRECISE()
+        {
+            AssertExpression("=CEILING.PRECISE(4.3)", "5");
+            AssertExpression("=CEILING.PRECISE(-4.3)", "-4");
+            AssertExpression("=CEILING.PRECISE(4.3)", "5");
+            AssertExpression("=CEILING.PRECISE(4.3, 2)", "6");
+            AssertExpression("=CEILING.PRECISE(4.3, -2)", "6");
+            AssertExpression("=CEILING.PRECISE(-4.3, 2)", "-4");
+            AssertExpression("=CEILING.PRECISE(-4.3, 10)", "0");
+        }
+
+        [Fact]
+        public void FLOOR()
+        {
+            AssertExpression("=FLOOR(3.7,2)", "2");
+            AssertExpression("=FLOOR(-2.5,-2)", "-2");
+            AssertExpression("=FLOOR(2.5,-2)", "#VALUE!");
+            AssertExpression("=FLOOR(-2.5,2)", "-4");
+            AssertExpression("=FLOOR(2.5,2)", "2");
+            AssertExpression("=FLOOR(1.58,0.1)", "1,5");
+            AssertExpression("=FLOOR(-1.58,0.1)", "-1,6");
+            AssertExpression("=FLOOR(0.234,0.01)", "0,23");
+            AssertExpression("=FLOOR(2,0)", "#VALUE!");
+        }
+        [Fact]
+        public void FLOOR_MATH()
+        {
+            AssertExpression("=FLOOR.MATH(24.3,5)", "20");
+            AssertExpression("=FLOOR.MATH(6.7)", "6");
+            AssertExpression("=FLOOR.MATH(-8.1,2)", "-10");
+            AssertExpression("=FLOOR.MATH(-5.5,2,-1)", "-4");
+            AssertExpression("=FLOOR.MATH(5.2)", "5");
+            AssertExpression("=FLOOR.MATH(5.2,2)", "4");
+            AssertExpression("=FLOOR.MATH(5.2,-2)", "4");
+            AssertExpression("=FLOOR.MATH(5.2,2,0)", "4");
+            AssertExpression("=FLOOR.MATH(5.2,2,1)", "4");
+            AssertExpression("=FLOOR.MATH(5.2,-2,0)", "4");
+            AssertExpression("=FLOOR.MATH(5.2,-2,1)", "4");
+            AssertExpression("=FLOOR.MATH(-5.2)", "-6");
+            AssertExpression("=FLOOR.MATH(-5.2,2)", "-6");
+            AssertExpression("=FLOOR.MATH(-5.2,-2)", "-6");
+            AssertExpression("=FLOOR.MATH(-5.2,2,0)", "-6");
+            AssertExpression("=FLOOR.MATH(-5.2,2,1)", "-4");
+            AssertExpression("=FLOOR.MATH(-5.2,-2,0)", "-6");
+            AssertExpression("=FLOOR.MATH(-5.2,-2,1)", "-4");
+        }
+        [Fact]
+        public void FLOOR_PRECISE()
+        {
+            AssertExpression("=CEILING.PRECISE(5.2)", "6");
+            AssertExpression("=CEILING.PRECISE(5.2,2)", "6");
+            AssertExpression("=CEILING.PRECISE(5.2,-2)", "6");
+            AssertExpression("=CEILING.PRECISE(-5.2)", "-5");
+            AssertExpression("=CEILING.PRECISE(-5.2,2)", "-4");
+            AssertExpression("=CEILING.PRECISE(-5.2,-2)", "-4");
+            AssertExpression("=CEILING.PRECISE(0,-2)", "0");
+            AssertExpression("=CEILING.PRECISE(4,0)", "0");
+            AssertExpression("=CEILING.PRECISE(0,0)", "0");
         }
     }
 }
