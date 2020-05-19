@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Globalization;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,11 +18,11 @@ namespace JsonExcelExpressions
             processor = new ExpressionEvaluator(culture);
         }
 
-        protected void AssertExpression(string expression, string expected)
+        protected void AssertExpression(string expression, string expected, JObject source = null, CultureInfo culture = null)
         {
             // CONCATENATE("AssertExpression(""";SUBSTITUTE(SUBSTITUTE(FORMULATEXT(J25);"""";"\""");";";",");""", """;IFERROR(J25;"#N/A");""");")
             // CONCATENATE("AssertExpression(""";SUBSTITUTE(SUBSTITUTE(FORMULATEXT(B58);"""";"\""");";";",");""", """;IFERROR(B58;IF(ISNA(B58);"#N/A";"#VALUE!"));""");")
-            var result = processor.Evaluate(expression);
+            var result = processor.Evaluate(expression, source, culture);
             Assert.Null(result.Error);
             Assert.Equal(expected, result.Text);
         }

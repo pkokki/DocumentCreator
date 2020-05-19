@@ -89,6 +89,10 @@ namespace JsonExcelExpressions.Lang
             return text;
         }
 
+        public bool ToDecimal(string text, out double value)
+        {
+            return double.TryParse(text, NumberStyles.Number, culture, out value);
+        }
         public double ToDecimal(string value)
         {
             var result = double.Parse(value, NumberStyles.Number, culture);

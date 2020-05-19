@@ -20,11 +20,11 @@ namespace JsonExcelExpressions.Eval
                 if (arg is ExcelValue.ArrayValue)
                 {
                     var items = (IEnumerable<ExcelValue>)arg.InnerValue;
-                    var childNumbers = items.FlattenNumbers(ignoreErrorValues);
+                    var childNumbers = items.FlattenNumbers(true); // excel ignores child error values
                     if (childNumbers != null)
                         numbers.AddRange(childNumbers);
-                    else if (!ignoreErrorValues)
-                        return null;
+                    //else if (!ignoreErrorValues)
+                    //    return null;
                 }
                 else
                 {
@@ -104,6 +104,16 @@ namespace JsonExcelExpressions.Eval
             return value == null;
         }
 
+        public static bool NotArray(this List<ExcelValue> args, int index, IEnumerable<ExcelValue> defaultValue, out IEnumerable<ExcelValue> value)
+        {
+            value = null;
+            if (args.Count > index && args[index] is ExcelValue.ArrayValue arr)
+                value = arr.Values;
+            if (value == null)
+                value = defaultValue;
+            return value == null;
+        }
+
         private static readonly object theLock = new object();
         public static TValue TryGetAndAdd<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> factory)
         {
@@ -117,13 +127,17 @@ namespace JsonExcelExpressions.Eval
             }
         }
 
-        public static bool IsEqual(this double v1, double v2)
+        public static bool IsEqual(this double v1, double? v2)
         {
-            // https://docs.microsoft.com/en-us/dotnet/api/system.double.equals?view=netcore-3.1
-            // Define the tolerance for variation in their values
-            double difference = Math.Abs(v1 * .00001);
-            // Compare the values
-            return Math.Abs(v1 - v2) <= difference;
+            if (v2.HasValue)
+            {
+                // https://docs.microsoft.com/en-us/dotnet/api/system.double.equals?view=netcore-3.1
+                // Define the tolerance for variation in their values
+                double difference = Math.Abs(v1 * .00001);
+                // Compare the values
+                return Math.Abs(v1 - v2.Value) <= difference;
+            }
+            return false;
         }
         public static int CompareWith(this double v1, double v2)
         {

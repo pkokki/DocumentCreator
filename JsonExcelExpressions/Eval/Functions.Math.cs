@@ -253,6 +253,29 @@ namespace JsonExcelExpressions.Eval
 
             return new ExcelValue.DecimalValue(numbers.Sum(), scope.OutLanguage);
         }
+        public ExcelValue SUMIF(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotArray(0, null, out IEnumerable<ExcelValue> range)) return ExcelValue.VALUE;
+            var criteria = args.Count > 1 ? args[1] : null;
+            if (criteria == null) return ExcelValue.NA;
+            if (args.NotArray(2, range, out IEnumerable<ExcelValue> sum_range)) return ExcelValue.VALUE;
+
+            var selected = new List<ExcelValue>();
+            var filter = ExcelCriteria.Resolve(criteria, scope.OutLanguage);
+            foreach (var pair in range.Zip(sum_range, (a, b) => new { Predicate = a, Number = b }))
+            {
+                if (filter(pair.Predicate))
+                    selected.Add(pair.Number);
+            }
+
+            var numbers = selected.FlattenNumbers(false);
+            if (numbers == null) return ExcelValue.VALUE;
+
+            return new ExcelValue.DecimalValue(numbers.Sum(), scope.OutLanguage);
+        }
+
+        
+
         public ExcelValue PRODUCT(List<ExcelValue> args, ExpressionScope scope)
         {
             var numbers = args.FlattenNumbers(false);

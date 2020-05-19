@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using Xunit;
@@ -250,6 +251,61 @@ namespace JsonExcelExpressions
             AssertExpression("=SUM(42,NA())", "#VALUE!");
             AssertExpression("=SUM(1.2,1.02,1.002)", "3,222");
             AssertExpression("=SUM(-5,-3)", "-8");
+
+            AssertExpression("=SUM(5,15,30)", "50");
+            AssertExpression("=SUM(5,\"a\",30)", "#VALUE!");
+            AssertExpression("=SUM({5;15;30}, 2)", "52");
+            AssertExpression("=SUM({5;15;30})", "50");
+            AssertExpression("=SUM({5,15,30}, 2)", "52");
+            AssertExpression("=SUM({5;\"a\";30}, 2)", "37");
+            AssertExpression("=SUM({5;15;30}, {5;15;30}, 2)", "102");
+        }
+
+        [Fact]
+        public void SUMIF_with_arrays()
+        {
+            AssertExpression("=SUMIF({5;15;30}, \">10\")", "45");
+            AssertExpression("=SUMIF({5;15;30}, \">10\", {1;2;3})", "5");
+            AssertExpression("=SUMIF({5;15;30}, \"<10\", {1;2;3})", "1");
+            AssertExpression("=SUMIF({5;10;15;30}, \">=10\")", "55");
+            AssertExpression("=SUMIF({5;10;15;30}, \"<=15\")", "30");
+            AssertExpression("=SUMIF({5;10;15;10}, \"<>10\")", "20");
+            AssertExpression("=SUMIF({\"AAA\";\"BBB\";\"CAB\";\"AAA\"}, \"?A?\", {1;2;3;4})", "8");
+            AssertExpression("=SUMIF({\"BBB\",\"AAA\",\"CAB\",\"AAA\"}, \"?A?\", {1,2,3,4})", "10");
+            //AssertExpression("=SUMIF({\"AAA\";\"BBB\";\"CAB\";\"AAA\"}, \"a*\", {1;2;3;4})", "5");
+            //AssertExpression("=SUMIF({5,15,30,15}, 15)", "30");
+        }
+
+        [Fact]
+        public void SUMIF_with_source_array()
+        {
+            var json1 = JObject.Parse("{a:[4, 10, 5, 9, 5, 7]}");
+            AssertExpression("=SUMIF(a, \"=5\")", "10", json1);
+            AssertExpression("=SUMIF(a, \">5\")", "26", json1);
+            AssertExpression("=SUMIF(a, \"<5\")", "4", json1);
+            AssertExpression("=SUMIF(a, \"<=5\")", "14", json1);
+            AssertExpression("=SUMIF(a, \"<>5\")", "30", json1);
+            AssertExpression("=SUMIF(a, \">=5\")", "36", json1);
+            AssertExpression("=SUMIF(a, \"=1\")", "0", json1);
+
+            var json2 = JObject.Parse("{a:[4, 10, 5, 9, 5, 7], b:[2, 3, 5, 7, 11, 13]}");
+            AssertExpression("=SUMIF(a, \"=5\", b)", "16", json2);
+        }
+
+        [Fact]
+        public void SUMIF_with_source_properties()
+        {
+            var json1 = JObject.Parse("{a:[{x:1, y:2}, {x:2, y:3}, {x:1, y:5}, {x:2, y:7}, {x:3, y:11}]}");
+            AssertExpression("=SUMIF(a.x, \"=1\")", "2", json1);
+            AssertExpression("=SUMIF(a.x, \"=1\", a.y)", "7", json1);
+
+            var json2 = JObject.Parse("{a:[{x:'Tom', y:2}, {x:'Jane', y:3}, {x:'Sam', y:5}, {x:'Lucy', y:7}, {x:'Tom', y:11}]}");
+            AssertExpression("=SUMIF(a.x, \"??m\", a.y)", "18", json2);
+            AssertExpression("=SUMIF(a.x, \"?a*\", a.y)", "8", json2);
+            AssertExpression("=SUMIF(a.x, \"?A*\", a.y)", "8", json2);
+
+            AssertExpression("=SUMIF(a.y, 3)", "3", json2);
+            AssertExpression("=SUMIF(a.x, \"Tom\", a.y)", "13", json2);
         }
 
         [Fact]
@@ -534,9 +590,16 @@ namespace JsonExcelExpressions
         [Fact]
         public void PRODUCT()
         {
-            AssertExpression("=PRODUCT(5,15,30)", "2250");
-            AssertExpression("=PRODUCT({5;15;30}, 2)", "4500");
-            AssertExpression("=PRODUCT({5,15,30}, 2)", "4500");
+            AssertExpression("=PRODUCT(5, 15, 30)", "2250");
+            AssertExpression("=PRODUCT({5; 15; 30})", "2250");
+            AssertExpression("=PRODUCT({5; 3 * 5; 30})", "2250"); // this is not supported by excel
+            AssertExpression("=PRODUCT({5; TRUNC(15.9); 30})", "2250"); // this is not supported by excel
+            AssertExpression("=PRODUCT({5; 15; 30}, 2)", "4500");
+            AssertExpression("=PRODUCT({5; 15; 30}, 2)", "4500");
+            AssertExpression("=PRODUCT(5, \"a\", 30)", "#VALUE!");
+            AssertExpression("=PRODUCT({5; \"a\"; 30}, 2)", "300");
+            AssertExpression("=PRODUCT({5; 15; 30}, {5, 15, 30}, 2)", "10125000");
+
         }
 
         [Fact]

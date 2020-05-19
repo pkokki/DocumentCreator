@@ -19,8 +19,6 @@ namespace JsonExcelExpressions.Eval
 
         private Functions()
         {
-            Registry.Add("ARRAY", ARRAY); // Returns the serial number of a particular date
-            Registry.Add("ARRAYROW", ARRAYROW); // Returns the serial number of a particular date
             // https://support.office.com/en-us/article/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb
             RegisterCubeFunctions();
             RegisterDatabaseFunctions();
@@ -349,7 +347,7 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("SQRTPI", SQRTPI);  // Returns the square root of (number * pi)
             // Registry.Add("SUBTOTAL", SUBTOTAL);  // Returns a subtotal in a list or database
             Registry.Add("SUM", SUM);  // Adds its arguments
-            // Registry.Add("SUMIF", SUMIF);  // Adds the cells specified by a given criteria
+            Registry.Add("SUMIF", SUMIF);  // Adds the cells specified by a given criteria
             // Registry.Add("SUMIFS", SUMIFS);  // [2019] Adds the cells in a range that meet multiple criteria
             // Registry.Add("SUMPRODUCT", SUMPRODUCT);  // Returns the sum of the products of corresponding array components
             // Registry.Add("SUMSQ", SUMSQ);  // Returns the sum of the squares of the arguments
@@ -539,6 +537,10 @@ namespace JsonExcelExpressions.Eval
         {
             if (Registry.TryGetValue(name, out var function))
                 return function(args, scope);
+            else if (name == "ARRAY")
+                return ARRAY(args, scope);
+            else if (name == "ARRAYROW")
+                return ARRAYROW(args, scope);
             else
                 throw new InvalidOperationException($"Unknown function name: {name}");
         }
