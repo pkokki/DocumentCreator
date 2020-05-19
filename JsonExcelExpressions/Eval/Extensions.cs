@@ -104,6 +104,15 @@ namespace JsonExcelExpressions.Eval
             return value == null;
         }
 
+        public static bool NotArray(this IEnumerable<ExcelValue> args, int index, ExcelValue.ArrayValue defaultValue, out ExcelValue.ArrayValue value)
+        {
+            value = null;
+            if (args.Count() > index && args.ElementAt(index) is ExcelValue.ArrayValue arr)
+                value = arr;
+            if (value == null)
+                value = defaultValue;
+            return value == null;
+        }
         public static bool NotArray(this List<ExcelValue> args, int index, IEnumerable<ExcelValue> defaultValue, out IEnumerable<ExcelValue> value)
         {
             value = null;

@@ -138,7 +138,7 @@ namespace JsonExcelExpressions.Eval
         {
             if (result.Value is IEnumerable<ExcelValue> values)
             {
-                result.Value = new JArray(values.Select(o => o.InnerValue).ToArray());
+                result.Value = new JArray(values.Select(o => JToken.FromObject(o.InnerValue)).ToArray());
             }
             else if (result.Value is decimal d)
             {

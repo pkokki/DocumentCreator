@@ -4,18 +4,20 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
 namespace JsonExcelExpressions.Eval
 {
-    public abstract class ExcelValue
+    public abstract class ExcelValue : IComparable<ExcelValue>
     {
         #region Singletons
 
         public static readonly ExcelValue NA = new ErrorValue("#N/A");
         public static readonly ExcelValue VALUE = new ErrorValue("#VALUE!");
         public static readonly ExcelValue DIV0 = new ErrorValue("#DIV/0!");
+        public static readonly ExcelValue REF = new ErrorValue("#REF!");
         public static readonly ExcelValue TRUE = BooleanValue._TRUE;
         public static readonly ExcelValue FALSE = BooleanValue._FALSE;
         public static readonly ExcelValue NULL = new NullValue();
@@ -184,10 +186,11 @@ namespace JsonExcelExpressions.Eval
         #endregion
 
         #region Properties
-
+        
         internal Language Language { get; }
         public object InnerValue { get; }
         public string Text { get; }
+        public virtual bool SingleValue => true;
 
         #endregion
 
@@ -203,22 +206,28 @@ namespace JsonExcelExpressions.Eval
         }
         public virtual ExcelValue ElementAt(int index)
         {
-            throw new InvalidOperationException($"{this.GetType().Name} is single-valued. ElementAt is not supported.");
+            return REF;
         }
+
+        public abstract int CompareTo(ExcelValue other);
 
         #endregion
 
         #region Private classes
         internal class ErrorValue : ExcelValue
         {
-            public ErrorValue(string text) : base(null, text, Language.Invariant)
+            internal ErrorValue(string text) : base(null, text, Language.Invariant)
             {
             }
+
+            public override bool SingleValue => false;
 
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
 
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal() { return null; }
+
+            public override int CompareTo(ExcelValue other) => this == other || other == NULL ? 0 : 1;
         }
 
         internal class NullValue : ExcelValue
@@ -229,6 +238,7 @@ namespace JsonExcelExpressions.Eval
             internal override string ToString(Language language, ExpressionFormat info) { return string.Empty; }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal() { return null; }
+            public override int CompareTo(ExcelValue other) => this == other ? 0 : 1;
         }
 
         internal class TextValue : ExcelValue
@@ -246,6 +256,7 @@ namespace JsonExcelExpressions.Eval
                 return null;
             }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
+            public override int CompareTo(ExcelValue other) => other is DecimalValue ? 1 : (other is TextValue ? Text.CompareTo(other.Text): -1);
         }
 
         internal class JsonObjectValue : ExcelValue
@@ -256,6 +267,7 @@ namespace JsonExcelExpressions.Eval
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
+            public override int CompareTo(ExcelValue other) => -1;
         }
 
         internal class ArrayValue : ExcelValue
@@ -281,13 +293,35 @@ namespace JsonExcelExpressions.Eval
 
             public IEnumerable<ExcelValue> Values => values;
 
+            public ExcelValue GetRow(int rowNum)
+            {
+                if (rowNum < 1 || rowNum > values.Count())
+                    return REF;
+                return values.ElementAt(rowNum - 1);
+            }
+            public ExcelValue GetColumn(int colNum)
+            {
+                if (colNum < 1)
+                    return REF;
+                var column = values.Select(v => v.ElementAt(colNum));
+                if (column.Any(o => o == REF)) return REF;
+                return new ArrayValue(column, Language);
+            }
+            public override ExcelValue ElementAt(int num)
+            {
+                return values.ElementAtOrDefault(num - 1) ?? REF;
+            }
+            public override bool SingleValue => false;
+
+            public bool IsVector
+            {
+                get { return values.All(o => o.SingleValue); }
+            }
+
             protected internal override bool? AsBoolean() { return asBoolean; }
             protected internal override double? AsDecimal() { return asDecimal; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
-            public override ExcelValue ElementAt(int index)
-            {
-                return values.ElementAt(index);
-            }
+            public override int CompareTo(ExcelValue other) => -1;
         }
 
         internal class SourceReferenceValue : ExcelValue
@@ -298,6 +332,7 @@ namespace JsonExcelExpressions.Eval
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
+            public override int CompareTo(ExcelValue other) => -1;
         }
 
         internal class BooleanValue : ExcelValue
@@ -316,6 +351,7 @@ namespace JsonExcelExpressions.Eval
             protected internal override bool? AsBoolean() { return (bool)InnerValue; }
             protected internal override double? AsDecimal() { return (bool)InnerValue ? 1 : 0; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
+            public override int CompareTo(ExcelValue other) => other is ErrorValue ? -1 : (other is BooleanValue ? ((bool)InnerValue).CompareTo((bool)other.InnerValue) : 1);
         }
 
         internal class RangeValue : ExcelValue
@@ -326,6 +362,7 @@ namespace JsonExcelExpressions.Eval
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal() { return null; }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
+            public override int CompareTo(ExcelValue other) => -1;
         }
 
         internal class DateValue : DecimalValue
@@ -367,6 +404,7 @@ namespace JsonExcelExpressions.Eval
                     return language.ToString((double)InnerValue, info);
                 return Text;
             }
+            public override int CompareTo(ExcelValue other) => other is DecimalValue ? ((double)InnerValue).CompareTo((double)other.InnerValue) : -1;
         }
 
         #endregion
