@@ -24,10 +24,10 @@ namespace JsonExcelExpressions
             Assert.Equal(43967, ExcelValue.ToDateSerial(new DateTime(2020, 5, 16)));
 
             Assert.Null(ExcelValue.ToDateSerial(0, 0, 0, 0, 0, -1));
-            Assert.Equal(0M, ExcelValue.ToDateSerial(0, 0, 0, 0, 0, 0));
-            Assert.Equal(0.0000115741M, ExcelValue.ToDateSerial(0, 0, 0, 0, 0, 1));
-            Assert.Equal(0.4668171296M, ExcelValue.ToDateSerial(0, 0, 0, 11, 12, 13));
-            Assert.Equal(0.9999884259M, ExcelValue.ToDateSerial(0, 0, 0, 23, 59, 59));
+            Assert.Equal(0.0, ExcelValue.ToDateSerial(0, 0, 0, 0, 0, 0));
+            Assert.Equal(0.0000115741, ExcelValue.ToDateSerial(0, 0, 0, 0, 0, 1));
+            Assert.Equal(0.4668171296, ExcelValue.ToDateSerial(0, 0, 0, 11, 12, 13));
+            Assert.Equal(0.9999884259, ExcelValue.ToDateSerial(0, 0, 0, 23, 59, 59));
         }
 
         [Fact]
@@ -35,9 +35,9 @@ namespace JsonExcelExpressions
         {
             Assert.Null(ExcelValue.FromDateSerial(-1));
             Assert.Null(ExcelValue.FromDateSerial(0));
-            Assert.Equal(new DateTime(1900, 1, 1, 6, 0, 0), ExcelValue.FromDateSerial(0.25M));
-            Assert.Equal(new DateTime(1900, 1, 1, 12, 0, 0), ExcelValue.FromDateSerial(0.5M));
-            Assert.Equal(new DateTime(1900, 1, 1, 18, 0, 0), ExcelValue.FromDateSerial(0.75M));
+            Assert.Equal(new DateTime(1900, 1, 1, 6, 0, 0), ExcelValue.FromDateSerial(0.25));
+            Assert.Equal(new DateTime(1900, 1, 1, 12, 0, 0), ExcelValue.FromDateSerial(0.5));
+            Assert.Equal(new DateTime(1900, 1, 1, 18, 0, 0), ExcelValue.FromDateSerial(0.75));
             Assert.Equal(new DateTime(1900, 1, 1), ExcelValue.FromDateSerial(1));
             Assert.Equal(new DateTime(1900, 1, 2), ExcelValue.FromDateSerial(2));
             Assert.Equal(new DateTime(1900, 2, 28), ExcelValue.FromDateSerial(59));

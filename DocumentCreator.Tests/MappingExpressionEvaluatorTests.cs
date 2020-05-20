@@ -114,7 +114,7 @@ namespace DocumentCreator
             var result = results.ElementAt(2);
             Assert.Null(result.Error);
             Assert.Equal("7", result.Text);
-            Assert.Equal(7M, result.Value);
+            Assert.Equal(7.0, result.Value);
         }
 
         [Fact]

@@ -43,7 +43,7 @@ namespace JsonExcelExpressions.Eval
         }
         private void ConvertPercentages()
         {
-            ReplaceWithPrevious(part => part.IsPostfixOperator("%"), operand => operand / 100M);
+            ReplaceWithPrevious(part => part.IsPostfixOperator("%"), operand => operand / ExcelValue.HUNDRED);
         }
         private void PerformExponentiation()
         {

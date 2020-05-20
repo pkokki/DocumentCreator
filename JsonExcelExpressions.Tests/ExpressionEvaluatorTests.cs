@@ -19,7 +19,7 @@ namespace JsonExcelExpressions.Tests
             var output = processor.Evaluate("a+b", JObject.Parse("{a:3, b:4}"));
 
             Assert.True(output.Error == null, output.Error);
-            Assert.Equal(7, output.Value);
+            Assert.Equal(7.0, output.Value);
             Assert.Equal("7", output.Text);
             Assert.Equal("__A1", output.Name);
         }
@@ -42,7 +42,7 @@ namespace JsonExcelExpressions.Tests
             var output = processor.Evaluate("a.a1.a11 + 1.5 * a.a2.a21", JObject.Parse("{a:{ a1: {a11:3}, a2: {a21:5}}}"));
 
             Assert.True(output.Error == null, output.Error);
-            Assert.Equal(10.5M, output.Value);
+            Assert.Equal(10.5, output.Value);
             Assert.Equal("10,5", output.Text);
         }
         [Fact]
@@ -63,7 +63,7 @@ namespace JsonExcelExpressions.Tests
             var output = processor.Evaluate("10+a[1].x*2", JObject.Parse("{a:[{ x: 3, y: 5}, { x: 7, y: 11}]}"));
 
             Assert.True(output.Error == null, output.Error);
-            Assert.Equal(24, output.Value);
+            Assert.Equal(24.0, output.Value);
             Assert.Equal("24", output.Text);
         }
         [Fact]

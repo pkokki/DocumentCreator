@@ -7,6 +7,8 @@ namespace JsonExcelExpressions.Lang
 {
     internal class Language
     {
+        private const double MIN_NUMBER = (double)decimal.MinValue;
+        private const double MAX_NUMBER = (double)decimal.MaxValue;
         private readonly CultureInfo culture;
 
 
@@ -59,22 +61,41 @@ namespace JsonExcelExpressions.Lang
             return ExcelValue.NA.ToString();
         }
 
-        public string ToString(decimal value, ExpressionFormat info = null)
+        public string ToString(double value, ExpressionFormat info = null)
         {
-            info ??= ExpressionFormat.General;
-            var format = info.GetFormat(null);
-            if (!format.NeedsDate)
-                return string.Format(culture, format.Format, value);
-            // Should start from beginning in order to use the overriden methods
-            var date = ExcelValue.FromDateSerial(value);
-            if (date.HasValue)
-                return ToString(date.Value, info);
-            return ExcelValue.NA.ToString();
+            string text;
+            if (value < MIN_NUMBER || value > MAX_NUMBER)
+            {
+                text = ExcelValue.VALUE.ToString();
+            }
+            else
+            {
+                info ??= ExpressionFormat.General;
+                var format = info.GetFormat(null);
+                if (format.NeedsDate)
+                {
+                    var date = ExcelValue.FromDateSerial(value);
+                    // Should start from beginning in order to use the overriden methods
+                    if (date.HasValue)
+                        text = ToString(date.Value, info);
+                    else
+                       text = ExcelValue.NA.ToString();
+                }
+                else
+                {
+                    text = string.Format(culture, format.Format, Convert.ToDecimal(value));
+                }
+            }
+            return text;
         }
 
-        public decimal ToDecimal(string value)
+        public bool ToDecimal(string text, out double value)
         {
-            var result = decimal.Parse(value, NumberStyles.Number, culture);
+            return double.TryParse(text, NumberStyles.Number, culture, out value);
+        }
+        public double ToDecimal(string value)
+        {
+            var result = double.Parse(value, NumberStyles.Number, culture);
             // Check for wrong thousands separators
             if (value != ToString(result))
                 throw new ArgumentException($"Wrong decimal text: '{value}' -> '{result}'");
@@ -99,9 +120,9 @@ namespace JsonExcelExpressions.Lang
             return culture.TextInfo.ToTitleCase(text);
         }
 
-        public bool TryParseDecimal(string value, out decimal result)
+        public bool TryParseDecimal(string value, out double result)
         {
-            return decimal.TryParse(value, NumberStyles.Any, culture, out result);
+            return double.TryParse(value, NumberStyles.Any, culture, out result);
         }
 
         public bool TryParseDateTime(string value, out DateTime result)

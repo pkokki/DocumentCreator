@@ -33,6 +33,7 @@ namespace JsonExcelExpressions.Eval
             values[key] = value;
         }
 
+        
         public ExcelValue Get(string key)
         {
             if (sourceValues.ContainsKey(key))
@@ -43,7 +44,21 @@ namespace JsonExcelExpressions.Eval
                 return values[key];
             if (key.Contains(':'))
                 return GetRangeValues(key);
-            throw new InvalidOperationException($"Name or cell {key} not found in scope.");
+            return ExcelValue.NULL;
+            //throw new InvalidOperationException($"Name or cell {key} not found in scope.");
+        }
+
+        public bool Contains(string key)
+        {
+            if (sourceValues.ContainsKey(key))
+                return true;
+            if (sources.Any(o => o.Name == key || o.Cell == key))
+                return true;
+            if (values.ContainsKey(key))
+                return true;
+            if (key.Contains(':'))
+                return !(GetRangeValues(key).Values.First() is ExcelValue.NullValue);
+            return false;
         }
 
         public ExcelValue Get(ExcelValue key, ExcelValue path)
@@ -68,7 +83,7 @@ namespace JsonExcelExpressions.Eval
             throw new InvalidOperationException();
         }
 
-        private ExcelValue GetRangeValues(string key)
+        private ExcelValue.ArrayValue GetRangeValues(string key)
         {
             var rangeCells = key.Split(':');
             var startCell = new CellAddress(rangeCells[0]);

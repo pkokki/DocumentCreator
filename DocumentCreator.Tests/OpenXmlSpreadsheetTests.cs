@@ -54,7 +54,7 @@ namespace DocumentCreator
 
             var z = results.First(o => o.Name == "z");
             Assert.Null(z.Error);
-            Assert.Equal(3M, z.Value);
+            Assert.Equal(3.0, z.Value);
         }
 
         [Fact]

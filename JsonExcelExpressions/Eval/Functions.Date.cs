@@ -33,7 +33,7 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue DAY(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -43,7 +43,7 @@ namespace JsonExcelExpressions.Eval
         }
         public ExcelValue MONTH(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(1, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -53,7 +53,7 @@ namespace JsonExcelExpressions.Eval
         }
         public ExcelValue YEAR(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(1900, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -64,7 +64,7 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue HOUR(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -75,7 +75,7 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue MINUTE(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -86,7 +86,7 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue SECOND(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.NA;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.NA;
             if (serial == 0)
                 return new ExcelValue.DecimalValue(0, scope.OutLanguage, ExpressionFormat.General);
             var date = ExcelValue.FromDateSerial(serial);
@@ -97,8 +97,8 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue DATEDIF(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial1)) return ExcelValue.VALUE;
-            if (args.NotDecimal(1, null, out decimal serial2)) return ExcelValue.VALUE;
+            if (args.NotDecimal(0, null, out double serial1)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, null, out double serial2)) return ExcelValue.VALUE;
 
             if (serial1 < 0 || serial2 < 0 || serial1 > serial2) return ExcelValue.VALUE;
 
@@ -130,13 +130,13 @@ namespace JsonExcelExpressions.Eval
                     break;
                 default: return ExcelValue.VALUE;
             }
-            return new ExcelValue.DecimalValue((decimal)result, scope.OutLanguage);
+            return new ExcelValue.DecimalValue(result, scope.OutLanguage);
         }
 
         public ExcelValue DAYS(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial1)) return ExcelValue.VALUE;
-            if (args.NotDecimal(1, null, out decimal serial2)) return ExcelValue.VALUE;
+            if (args.NotDecimal(0, null, out double serial1)) return ExcelValue.VALUE;
+            if (args.NotDecimal(1, null, out double serial2)) return ExcelValue.VALUE;
 
             if (serial1 < 0 || serial2 < 0) return ExcelValue.VALUE;
 
@@ -146,14 +146,14 @@ namespace JsonExcelExpressions.Eval
 
         public ExcelValue DATEVALUE(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.VALUE;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.VALUE;
 
             return new ExcelValue.DecimalValue(serial, scope.OutLanguage, ExpressionFormat.General);
         }
 
         public ExcelValue TIMEVALUE(List<ExcelValue> args, ExpressionScope scope)
         {
-            if (args.NotDecimal(0, null, out decimal serial)) return ExcelValue.VALUE;
+            if (args.NotDecimal(0, null, out double serial)) return ExcelValue.VALUE;
 
             return new ExcelValue.DecimalValue(serial - Math.Truncate(serial), scope.OutLanguage, ExpressionFormat.General);
         }
