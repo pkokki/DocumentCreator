@@ -256,7 +256,7 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("FORMULATEXT", FORMULATEXT);  // Returns the formula at the given reference as text
             // Registry.Add("GETPIVOTDATA", GETPIVOTDATA);  // Returns data stored in a PivotTable report
             Registry.Add("HLOOKUP", HLOOKUP);  // Looks in the top row of an array and returns the value of the indicated cell
-            // Registry.Add("HYPERLINK", HYPERLINK);  // Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet
+            Registry.Add("HYPERLINK", HYPERLINK);  // Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet
             Registry.Add("INDEX", INDEX);  // Uses an index to choose a value from a reference or array
             // Registry.Add("INDIRECT", INDIRECT);  // Returns a reference indicated by a text value
             Registry.Add("LOOKUP", LOOKUP);  // Looks up values in a vector or array

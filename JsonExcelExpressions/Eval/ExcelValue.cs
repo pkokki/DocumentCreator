@@ -246,6 +246,9 @@ namespace JsonExcelExpressions.Eval
             public TextValue(string text, Language language) : base(text, text, language)
             {
             }
+            public TextValue(object value, string text, Language language) : base(value, text, language)
+            {
+            }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal()
             {
@@ -257,6 +260,17 @@ namespace JsonExcelExpressions.Eval
             }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
             public override int CompareTo(ExcelValue other) => other is DecimalValue ? 1 : (other is TextValue ? Text.CompareTo(other.Text): -1);
+        }
+
+        internal class HyperlinkValue : TextValue
+        {
+            public HyperlinkValue(string url, string title, Language language) 
+                : base(JObject.Parse($"{{ url: \"{url}\", text: \"{title ?? url}\" }}"), url, language)
+            {
+                Title = title ?? url;
+            }
+
+            public string Title { get; }
         }
 
         internal class JsonObjectValue : ExcelValue

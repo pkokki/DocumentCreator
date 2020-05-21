@@ -174,5 +174,21 @@ namespace JsonExcelExpressions
             AssertExpression("=SUM(CHOOSE(2, x, y, z))", "600", json);
 
         }
+
+        [Fact]
+        public void HYPERLINK()
+        {
+            var result = processor.Evaluate("=HYPERLINK(\"https://www.github.com\")", null, culture);
+            Assert.Null(result.Error);
+            Assert.Equal("https://www.github.com", result.Text);
+            Assert.Equal("https://www.github.com", ((JObject)result.Value)["url"].ToString());
+            Assert.Equal("https://www.github.com", ((JObject)result.Value)["text"].ToString());
+
+            result = processor.Evaluate("=HYPERLINK(\"https://www.github.com\", \"GitHub is how people build software\")", null, culture);
+            Assert.Null(result.Error);
+            Assert.Equal("https://www.github.com", result.Text);
+            Assert.Equal("https://www.github.com", ((JObject)result.Value)["url"].ToString());
+            Assert.Equal("GitHub is how people build software", ((JObject)result.Value)["text"].ToString());
+        }
     }
 }

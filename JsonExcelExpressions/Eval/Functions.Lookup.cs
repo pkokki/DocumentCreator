@@ -275,5 +275,15 @@ namespace JsonExcelExpressions.Eval
                 return args[index];
             return ExcelValue.NA;
         }
+        
+        public ExcelValue HYPERLINK(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotText(0, null, scope.OutLanguage, out string linkUrl)) return ExcelValue.VALUE;
+            var linkText = args.Count > 1 ? args[1].Text : null;
+            if (!Uri.IsWellFormedUriString(linkUrl, UriKind.Absolute))
+                return ExcelValue.VALUE;
+
+            return new ExcelValue.HyperlinkValue(linkUrl, linkText, scope.OutLanguage);
+        }
     }
 }
