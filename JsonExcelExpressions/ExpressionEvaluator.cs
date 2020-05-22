@@ -51,8 +51,8 @@ namespace JsonExcelExpressions
                 var cell = exprName;
                 var tokens = helper.Parse(sourcePayload, expression);
                 var result = Evaluate(exprName, cell, tokens, scope, null);
-                var translatedResult = helper.TranslateResult(result);
-                results.Add(translatedResult);
+                result.Value = helper.TranslateResult(result.Value);
+                results.Add(result);
                 ++index;
             }
             return results;

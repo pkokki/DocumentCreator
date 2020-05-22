@@ -212,7 +212,9 @@ namespace JsonExcelExpressions
 }");
             AssertExpression("=UNIQUE(data2.country)", "['USA','China','India','Brazil','Mexico','Greece','Indonesia']", json1);
             AssertExpression("=UNIQUE(data2.country,,1)", "['Brazil','Greece','Indonesia']", json1);
-            //AssertExpression("=UNIQUE(data2.country & \" \" & data2.prefix)", "600", json1);
+            AssertExpression("=UNIQUE(data2.country & \" \" & data2.prefix)", "['USA 1','China 86','India 91','Brazil 55','Mexico 52','Greece 30','Indonesia 62']", json1);
+            AssertExpression("=UNIQUE(data2.country & 1,,1)", "['Brazil1','Greece1','Indonesia1']", json1);
+            AssertExpression("=UNIQUE(2 & data2.country,,1)", "['2Brazil','2Greece','2Indonesia']", json1);
         }
     }
 }
