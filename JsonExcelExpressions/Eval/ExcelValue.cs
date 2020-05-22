@@ -83,6 +83,8 @@ namespace JsonExcelExpressions.Eval
 
         internal static ExcelValue Create(JToken token, Language language)
         {
+            if (token == null)
+                return NA;
             switch (token.Type)
             {
                 case JTokenType.Object: return new JsonObjectValue((JObject)token, language);
@@ -246,6 +248,9 @@ namespace JsonExcelExpressions.Eval
             public TextValue(string text, Language language) : base(text, text, language)
             {
             }
+            public TextValue(object value, string text, Language language) : base(value, text, language)
+            {
+            }
             protected internal override bool? AsBoolean() { return null; }
             protected internal override double? AsDecimal()
             {
@@ -257,6 +262,17 @@ namespace JsonExcelExpressions.Eval
             }
             internal override string ToString(Language language, ExpressionFormat info) { return Text; }
             public override int CompareTo(ExcelValue other) => other is DecimalValue ? 1 : (other is TextValue ? Text.CompareTo(other.Text): -1);
+        }
+
+        internal class HyperlinkValue : TextValue
+        {
+            public HyperlinkValue(string url, string title, Language language) 
+                : base(JObject.Parse($"{{ url: \"{url}\", text: \"{title ?? url}\" }}"), url, language)
+            {
+                Title = title ?? url;
+            }
+
+            public string Title { get; }
         }
 
         internal class JsonObjectValue : ExcelValue
@@ -431,14 +447,47 @@ namespace JsonExcelExpressions.Eval
 
         public static ExcelValue operator +(ExcelValue a, ExcelValue b)
         {
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x + y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x + b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a + x), b.Language);
+            }
             return MathOperation(a, b, (a, b) => a + b);
         }
         public static ExcelValue operator -(ExcelValue a, ExcelValue b)
         {
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x - y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x - b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a - x), b.Language);
+            }
             return MathOperation(a, b, (a, b) => a - b);
         }
         public static ExcelValue operator *(ExcelValue a, ExcelValue b)
         {
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x * y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x * b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a * x), b.Language);
+            }
             return MathOperation(a, b, (a, b) => a * b);
         }
         public static ExcelValue operator /(ExcelValue a, ExcelValue b)
@@ -446,14 +495,38 @@ namespace JsonExcelExpressions.Eval
             var denominator = b.AsDecimal();
             if (denominator == 0.0)
                 return DIV0;
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x / y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x / b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a / x), b.Language);
+            }
             return MathOperation(a, b, (a, b) => a / b);
         }
         public static ExcelValue operator -(ExcelValue a)
         {
+            if (a is ArrayValue arr1)
+                return new ArrayValue(arr1.Values.Select(x => -x), a.Language);
             return a * MINUS_ONE;
         }
         public static ExcelValue operator ^(ExcelValue a, ExcelValue b)
         {
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x ^ y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x ^ b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a ^ x), b.Language);
+            }
             return MathOperation(a, b, (a, b) => Math.Pow(a, b));
         }
         public static ExcelValue operator &(ExcelValue a, ExcelValue b)
@@ -462,9 +535,22 @@ namespace JsonExcelExpressions.Eval
                 return a;
             if (b is ErrorValue)
                 return b;
+
+            if (a is ArrayValue arr1)
+            {
+                if (b is ArrayValue arr2)
+                    return new ArrayValue(arr1.Values.Zip(arr2.Values, (x, y) => x & y), a.Language);
+                else
+                    return new ArrayValue(arr1.Values.Select(x => x & b), a.Language);
+            }
+            else if (b is ArrayValue arr2)
+            {
+                return new ArrayValue(arr2.Values.Select(x => a & x), b.Language);
+            }
             var value = $"{a.Text}{b.Text}";
             return new TextValue(value, a.Language);
         }
+
         #endregion
 
     }

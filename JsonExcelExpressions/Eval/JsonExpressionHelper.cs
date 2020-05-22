@@ -18,7 +18,7 @@ namespace JsonExcelExpressions.Eval
             var tokens = new List<ExcelFormulaToken>();
             foreach (var sourceToken in sourceTokens)
             {
-                    var sourcePath = sourceToken.Value;
+                var sourcePath = sourceToken.Value;
                 if (sourceToken.Type == ExcelFormulaTokenType.Operand 
                     && sourceToken.Subtype == ExcelFormulaTokenSubtype.Range 
                     && !Regex.IsMatch(sourcePath, "__[Aa][0-9]+"))
@@ -134,18 +134,18 @@ namespace JsonExcelExpressions.Eval
             return new ExcelFormulaToken(tokenValue, ExcelFormulaTokenType.Operand, subtype);
         }
 
-        public EvaluationResult TranslateResult(EvaluationResult result)
+        public object TranslateResult(object value)
         {
-            if (result.Value is IEnumerable<ExcelValue> values)
+            if (value is IEnumerable<ExcelValue> values)
             {
-                result.Value = new JArray(values.Select(o => JToken.FromObject(o.InnerValue)).ToArray());
+                value = new JArray(values.Select(o => TranslateResult(o.InnerValue)).ToArray());
             }
-            else if (result.Value is decimal d)
+            else if (value is decimal d)
             {
                 if (d >= int.MinValue && d <= int.MaxValue && (d % 1) == 0)
-                    result.Value = Convert.ToInt32(d);
+                    value = Convert.ToInt32(d);
             }
-            return result;
+            return value;
         }
     }
 }

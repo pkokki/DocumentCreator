@@ -249,28 +249,28 @@ namespace JsonExcelExpressions.Eval
         {
             // Registry.Add("ADDRESS", ADDRESS);  // Returns a reference as text to a single cell in a worksheet
             // Registry.Add("AREAS", AREAS);  // Returns the number of areas in a reference
-            // Registry.Add("CHOOSE", CHOOSE);  // Chooses a value from a list of values
+            Registry.Add("CHOOSE", CHOOSE);  // Chooses a value from a list of values
             // Registry.Add("COLUMN", COLUMN);  // Returns the column number of a reference
             Registry.Add("COLUMNS", COLUMNS);  // Returns the number of columns in a reference
             // Registry.Add("FILTER", FILTER);  // [Office 365 button] Filters a range of data based on criteria you define
             // Registry.Add("FORMULATEXT", FORMULATEXT);  // Returns the formula at the given reference as text
             // Registry.Add("GETPIVOTDATA", GETPIVOTDATA);  // Returns data stored in a PivotTable report
-            // Registry.Add("HLOOKUP", HLOOKUP);  // Looks in the top row of an array and returns the value of the indicated cell
-            // Registry.Add("HYPERLINK", HYPERLINK);  // Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet
+            Registry.Add("HLOOKUP", HLOOKUP);  // Looks in the top row of an array and returns the value of the indicated cell
+            Registry.Add("HYPERLINK", HYPERLINK);  // Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet
             Registry.Add("INDEX", INDEX);  // Uses an index to choose a value from a reference or array
-            // Registry.Add("INDIRECT", INDIRECT);  // Returns a reference indicated by a text value
+            Registry.Add("INDIRECT", INDIRECT);  // Returns a reference indicated by a text value
             Registry.Add("LOOKUP", LOOKUP);  // Looks up values in a vector or array
-            // Registry.Add("MATCH", MATCH);  // Looks up values in a reference or array
+            Registry.Add("MATCH", MATCH);  // Looks up values in a reference or array
             // Registry.Add("OFFSET", OFFSET);  // Returns a reference offset from a given reference
             // Registry.Add("ROW", ROW);  // Returns the row number of a reference
             Registry.Add("ROWS", ROWS);  // Returns the number of rows in a reference
             // Registry.Add("RTD", RTD);  // Retrieves real-time data from a program that supports COM automation
-            // Registry.Add("SORT", SORT);  // [Office 365 button] Sorts the contents of a range or array
-            // Registry.Add("SORTBY", SORTBY);  // [Office 365 button] Sorts the contents of a range or array based on the values in a corresponding range or array
+            //Registry.Add("SORT", SORT);  // [Office 365 button] Sorts the contents of a range or array
+            Registry.Add("SORTBY", SORTBY);  // [Office 365 button] Sorts the contents of a range or array based on the values in a corresponding range or array
             // Registry.Add("TRANSPOSE", TRANSPOSE);  // Returns the transpose of an array
-            // Registry.Add("UNIQUE", UNIQUE);  // [Office 365 button] Returns a list of unique values in a list or range
-            // Registry.Add("VLOOKUP", VLOOKUP);  // Looks in the first column of an array and moves across the row to return the value of a cell
-            // Registry.Add("XLOOKUP", XLOOKUP);  // [Office 365 button] Searches a range or an array, and returns an item corresponding to the first match it finds. If a match doesn't exist, then XLOOKUP can return the closest (approximate) match. 
+            Registry.Add("UNIQUE", UNIQUE);  // [Office 365 button] Returns a list of unique values in a list or range
+            Registry.Add("VLOOKUP", VLOOKUP);  // Looks in the first column of an array and moves across the row to return the value of a cell
+            Registry.Add("XLOOKUP", XLOOKUP);  // [Office 365 button] Searches a range or an array, and returns an item corresponding to the first match it finds. If a match doesn't exist, then XLOOKUP can return the closest (approximate) match. 
             // Registry.Add("XMATCH", XMATCH);  // [Office 365 button] Returns the relative position of an item in an array or range of cells. 
         }
 

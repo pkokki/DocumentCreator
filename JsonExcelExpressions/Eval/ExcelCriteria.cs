@@ -18,8 +18,8 @@ namespace JsonExcelExpressions.Eval
                 {
                     if (TryResolveLogical(text, language, out predicate))
                         return predicate;
-                    if (TryResolveRegex(text, out predicate))
-                        return predicate;
+                    if (IsRegex(text, out string pattern))
+                        return v => Regex.IsMatch(v.Text, pattern, RegexOptions.IgnoreCase);
                     predicate = v => v.Text == text;
                 }
             }
@@ -50,9 +50,8 @@ namespace JsonExcelExpressions.Eval
             return predicate != null;
         }
 
-        private static bool TryResolveRegex(string text, out Func<ExcelValue, bool> predicate)
+        public static bool IsRegex(string text, out string pattern)
         {
-            predicate = null;
             char prev = (char)0;
             var sb = new StringBuilder();
             var isRegex = false;
@@ -82,12 +81,9 @@ namespace JsonExcelExpressions.Eval
                 }
                 prev = ch;
             }
-            if (isRegex)
-            {
-                var pattern = $"^{sb}$";
-                predicate = v => Regex.IsMatch(v.Text, pattern, RegexOptions.IgnoreCase);
-            }
+            pattern = $"^{sb}$";
             return isRegex;
         }
+
     }
 }
