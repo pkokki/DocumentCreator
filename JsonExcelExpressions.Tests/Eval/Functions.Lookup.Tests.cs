@@ -190,5 +190,29 @@ namespace JsonExcelExpressions
             Assert.Equal("https://www.github.com", ((JObject)result.Value)["url"].ToString());
             Assert.Equal("GitHub is how people build software", ((JObject)result.Value)["text"].ToString());
         }
+
+        [Fact]
+        public void UNIQUE()
+        {
+            var json1 = JObject.Parse(@"
+{
+    data2: [
+        { country: ""USA"", prefix: 1},
+        { country: ""China"", prefix: 86},
+        { country: ""China"", prefix: 86},
+        { country: ""India"", prefix: 91},
+        { country: ""USA"", prefix: 1},
+        { country: ""Brazil"", prefix: 55},
+        { country: ""Mexico"", prefix: 52},
+        { country: ""Greece"", prefix: 30},
+        { country: ""Indonesia"", prefix: 62},
+        { country: ""India"", prefix: 91},
+        { country: ""Mexico"", prefix: 52},
+    ]
+}");
+            AssertExpression("=UNIQUE(data2.country)", "['USA','China','India','Brazil','Mexico','Greece','Indonesia']", json1);
+            AssertExpression("=UNIQUE(data2.country,,1)", "['Brazil','Greece','Indonesia']", json1);
+            //AssertExpression("=UNIQUE(data2.country & \" \" & data2.prefix)", "600", json1);
+        }
     }
 }

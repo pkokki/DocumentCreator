@@ -268,7 +268,7 @@ namespace JsonExcelExpressions.Eval
             // Registry.Add("SORT", SORT);  // [Office 365 button] Sorts the contents of a range or array
             // Registry.Add("SORTBY", SORTBY);  // [Office 365 button] Sorts the contents of a range or array based on the values in a corresponding range or array
             // Registry.Add("TRANSPOSE", TRANSPOSE);  // Returns the transpose of an array
-            // Registry.Add("UNIQUE", UNIQUE);  // [Office 365 button] Returns a list of unique values in a list or range
+            Registry.Add("UNIQUE", UNIQUE);  // [Office 365 button] Returns a list of unique values in a list or range
             Registry.Add("VLOOKUP", VLOOKUP);  // Looks in the first column of an array and moves across the row to return the value of a cell
             Registry.Add("XLOOKUP", XLOOKUP);  // [Office 365 button] Searches a range or an array, and returns an item corresponding to the first match it finds. If a match doesn't exist, then XLOOKUP can return the closest (approximate) match. 
             // Registry.Add("XMATCH", XMATCH);  // [Office 365 button] Returns the relative position of an item in an array or range of cells. 

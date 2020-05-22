@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace JsonExcelExpressions.Eval
 {
@@ -284,6 +285,20 @@ namespace JsonExcelExpressions.Eval
                 return ExcelValue.VALUE;
 
             return new ExcelValue.HyperlinkValue(linkUrl, linkText, scope.OutLanguage);
+        }
+
+        public ExcelValue UNIQUE(List<ExcelValue> args, ExpressionScope scope)
+        {
+            // UNIQUE(array,[by_col],[exactly_once])
+            if (args.NotArray(0, null, out ExcelValue.ArrayValue array)) return ExcelValue.VALUE;
+            if (args.NotBoolean(1, false, out bool byColumn)) return ExcelValue.VALUE;
+            if (args.NotBoolean(2, false, out bool exactlyOnce)) return ExcelValue.VALUE;
+
+            var unique = array.Values
+                .GroupBy(o => o.InnerValue)
+                .Where(o => exactlyOnce ? o.Count() == 1 : true)
+                .Select(o => o.First());
+            return new ExcelValue.ArrayValue(unique, scope.OutLanguage);
         }
     }
 }
