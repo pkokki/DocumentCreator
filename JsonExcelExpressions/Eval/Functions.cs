@@ -258,15 +258,15 @@ namespace JsonExcelExpressions.Eval
             Registry.Add("HLOOKUP", HLOOKUP);  // Looks in the top row of an array and returns the value of the indicated cell
             Registry.Add("HYPERLINK", HYPERLINK);  // Creates a shortcut or jump that opens a document stored on a network server, an intranet, or the Internet
             Registry.Add("INDEX", INDEX);  // Uses an index to choose a value from a reference or array
-            // Registry.Add("INDIRECT", INDIRECT);  // Returns a reference indicated by a text value
+            Registry.Add("INDIRECT", INDIRECT);  // Returns a reference indicated by a text value
             Registry.Add("LOOKUP", LOOKUP);  // Looks up values in a vector or array
             Registry.Add("MATCH", MATCH);  // Looks up values in a reference or array
             // Registry.Add("OFFSET", OFFSET);  // Returns a reference offset from a given reference
             // Registry.Add("ROW", ROW);  // Returns the row number of a reference
             Registry.Add("ROWS", ROWS);  // Returns the number of rows in a reference
             // Registry.Add("RTD", RTD);  // Retrieves real-time data from a program that supports COM automation
-            // Registry.Add("SORT", SORT);  // [Office 365 button] Sorts the contents of a range or array
-            // Registry.Add("SORTBY", SORTBY);  // [Office 365 button] Sorts the contents of a range or array based on the values in a corresponding range or array
+            //Registry.Add("SORT", SORT);  // [Office 365 button] Sorts the contents of a range or array
+            Registry.Add("SORTBY", SORTBY);  // [Office 365 button] Sorts the contents of a range or array based on the values in a corresponding range or array
             // Registry.Add("TRANSPOSE", TRANSPOSE);  // Returns the transpose of an array
             Registry.Add("UNIQUE", UNIQUE);  // [Office 365 button] Returns a list of unique values in a list or range
             Registry.Add("VLOOKUP", VLOOKUP);  // Looks in the first column of an array and moves across the row to return the value of a cell

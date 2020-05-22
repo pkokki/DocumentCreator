@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -84,40 +85,6 @@ namespace JsonExcelExpressions.Eval
             var matchMode = approximateMatch ? -1 : (ExcelCriteria.IsRegex(args[0].Text, out pattern) ? 2 : 0);
 
             return XLOOKUP(args[0], lookupVector, resultVector, ExcelValue.NA, matchMode, 2, pattern);
-
-            //Func<ExcelValue, bool> comparer;
-            //if (approximateMatch)
-            //{
-            //    comparer = v => v.CompareTo(lookupValue) > 0;
-            //}
-            //else
-            //{
-            //    if (lookupValue is ExcelValue.TextValue 
-            //        && ExcelCriteria.TryResolveRegex(lookupValue.Text, out Func<ExcelValue, bool> rxComparer))
-            //        comparer = rxComparer;
-            //    else
-            //        comparer = v => v.CompareTo(lookupValue) == 0;
-            //}
-
-            //var result = ExcelValue.NA;
-            //foreach (var pair in lookupVector.Values.Zip(resultVector.Values, (a, b) => new { A = a, B = b }))
-            //{
-            //    if (approximateMatch)
-            //    {
-            //        if (comparer(pair.A))
-            //            break;
-            //        result = pair.B;
-            //    }
-            //    else
-            //    {
-            //        if (comparer(pair.A))
-            //        {
-            //            result = pair.B;
-            //            break;
-            //        }
-            //    }
-            //}
-            //return result;
         }
 
         public ExcelValue VLOOKUP(List<ExcelValue> args, ExpressionScope scope)
@@ -299,6 +266,56 @@ namespace JsonExcelExpressions.Eval
                 .Where(o => exactlyOnce ? o.Count() == 1 : true)
                 .Select(o => o.First());
             return new ExcelValue.ArrayValue(unique, scope.OutLanguage);
+        }
+
+        public ExcelValue SORTBY(List<ExcelValue> args, ExpressionScope scope)
+        {
+            // SORTBY(array, by_array1, [sort_order1], [by_array2, sort_order2],…) 
+            if (args.NotArray(0, null, out ExcelValue.ArrayValue arrayToSort)) return ExcelValue.VALUE;
+            var argsCount = args.Count;
+            if (argsCount < 2) return ExcelValue.NA;
+
+            var matrix = arrayToSort.Values.Select(v => new List<ExcelValue> { v }).ToList();
+            var sorters = argsCount / 2;
+            var index = 1;
+            var asc = new List<int> { 0 };
+            while (index < argsCount)
+            {
+                if (args.NotArray(1, null, out ExcelValue.ArrayValue sortBy)) return ExcelValue.VALUE;
+                ++index;
+                if (args.NotInteger(2, 1, out int sortOrder)) return ExcelValue.VALUE;
+                if (sortOrder != 1 && sortOrder != -1) return ExcelValue.VALUE;
+                asc.Add(sortOrder);
+                ++index;
+                
+                var arraySortBy = sortBy.Values.ToArray();
+                for (var i = 0; i < matrix.Count; i++)
+                    matrix[i].Add(arraySortBy[i]);
+            }
+            matrix.Sort((a1, a2) => 
+            {
+                var result = -1;
+                var column = 1;
+                do
+                {
+                    result = asc[column] * a1[column].CompareTo(a2[column]);
+                    ++column;
+                } while (result != 0 && column <= sorters);
+                return result;
+            });
+            return new ExcelValue.ArrayValue(matrix.Select(r => r[0]), scope.OutLanguage);
+        }
+
+        public ExcelValue INDIRECT(List<ExcelValue> args, ExpressionScope scope)
+        {
+            if (args.NotText(0, null, scope.OutLanguage, out string refText)) return ExcelValue.VALUE;
+
+            var newArgs = new List<ExcelValue> 
+            {
+                new ExcelValue.TextValue("N3", scope.OutLanguage), 
+                new ExcelValue.TextValue(refText, scope.OutLanguage)
+            };
+            return MAPVALUE(newArgs, scope);
         }
     }
 }

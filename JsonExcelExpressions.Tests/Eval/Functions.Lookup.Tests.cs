@@ -216,5 +216,35 @@ namespace JsonExcelExpressions
             AssertExpression("=UNIQUE(data2.country & 1,,1)", "['Brazil1','Greece1','Indonesia1']", json1);
             AssertExpression("=UNIQUE(2 & data2.country,,1)", "['2Brazil','2Greece','2Indonesia']", json1);
         }
+
+        [Fact]
+        public void SORTBY()
+        {
+            var json = JObject.Parse(@"
+{
+    data: [
+        { country: ""USA"", prefix: 1},
+        { country: ""China"", prefix: 86},
+        { country: ""India"", prefix: 91},
+        { country: ""Brazil"", prefix: 55},
+        { country: ""Greece"", prefix: 30},
+        { country: ""Indonesia"", prefix: 62},
+        { country: ""Mexico"", prefix: 52},
+    ]
+}");
+            AssertExpression("=SORTBY(data.country, data.prefix)", "['USA','Greece','Mexico','Brazil','Indonesia','China','India']", json);
+            AssertExpression("=SORTBY(data.prefix, data.country)", "['55','86','30','91','62','52','1']", json);
+            AssertExpression("=SORTBY(data.prefix, data.country, -1)", "['1','52','62','91','30','86','55']", json);
+
+        }
+
+        [Fact]
+        public void INDIRECT()
+        {
+            var json = JObject.Parse(@"{x: 1, y2: 22, z: {a:3, b:4}}");
+            AssertExpression("=INDIRECT(\"a\")", "#N/A", json);
+            AssertExpression("=INDIRECT(\"x\")", "1", json);
+            AssertExpression("=INDIRECT(\"y\" & (1+1))", "22", json);
+        }
     }
 }

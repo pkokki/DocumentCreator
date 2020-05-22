@@ -83,6 +83,8 @@ namespace JsonExcelExpressions.Eval
 
         internal static ExcelValue Create(JToken token, Language language)
         {
+            if (token == null)
+                return NA;
             switch (token.Type)
             {
                 case JTokenType.Object: return new JsonObjectValue((JObject)token, language);
