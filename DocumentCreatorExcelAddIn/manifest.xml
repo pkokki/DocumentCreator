@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
-  <Id>89f75f0f-0177-4f4f-9d56-759a66a5075a</Id>
+  <Id>1a7880e7-9dc1-4c16-8c3b-c57c27529f44</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>pkokki</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
@@ -10,7 +10,7 @@
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-80.png"/>
   <SupportUrl DefaultValue="https://github.com/pkokki/DocumentCreator"/>
   <AppDomains>
-    <AppDomain>contoso.com</AppDomain>
+    <AppDomain>pkokki.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Workbook"/>
