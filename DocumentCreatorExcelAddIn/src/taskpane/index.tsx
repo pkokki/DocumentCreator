@@ -1,21 +1,28 @@
 import "office-ui-fabric-react/dist/css/fabric.min.css";
-import App from "./components/App";
 import { AppContainer } from "react-hot-loader";
 import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-/* global AppCpntainer, Component, document, Office, module, require */
+import { Provider } from "react-redux";
+
+import App from "./App";
+import configureStore from "./store/store";
+/* global AppContainer, Component, document, Office, module, require */
 
 initializeIcons();
 
 let isOfficeInitialized = false;
 
-const title = "Contoso Task Pane Add-in";
+const title = "DocumentCreator Task Pane Add-in";
+const store = configureStore();
 
 const render = Component => {
+  console.log("index.render");
   ReactDOM.render(
     <AppContainer>
-      <Component title={title} isOfficeInitialized={isOfficeInitialized} />
+      <Provider store={store}>
+        <Component title={title} isOfficeInitialized={isOfficeInitialized} />
+      </Provider>
     </AppContainer>,
     document.getElementById("container")
   );
@@ -23,13 +30,15 @@ const render = Component => {
 
 /* Render application after Office initializes */
 Office.initialize = () => {
+  console.log("index.initialize");
   isOfficeInitialized = true;
   render(App);
 };
 
 if ((module as any).hot) {
-  (module as any).hot.accept("./components/App", () => {
-    const NextApp = require("./components/App").default;
+  (module as any).hot.accept("./App", () => {
+    console.log("index.hot");
+    const NextApp = require("./App").default;
     render(NextApp);
   });
 }
