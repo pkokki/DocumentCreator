@@ -7,7 +7,8 @@ export const environment = {
   endpoints: [
     { "name": "docker", "url": "http://localhost:6001/api" },
     { "name": "iisexpress", "url": "https://localhost:44381/api" },
-    { "name": "standalone", "url": "https://localhost:5001/api" }
+    { "name": "standalone", "url": "https://localhost:5001/api" },
+    { "name": "azure", "url": "https://doc-creator.azurewebsites.net/api" }
   ]
 };
 
