@@ -10,7 +10,7 @@ An opinionated solution for creating documents from JSON objects (API payloads) 
 
 ## Getting Started
 
-Create Word documents and HTML pages by combining Word templates (documents with content controls) and JSON data via transformations defined as Excel formulas. Try the [quickstart](https://document-creator.azurewebsites.net/#/) to create a document in four steps.
+Create Word documents and HTML pages by combining Word templates (documents with content controls) and JSON data via transformations defined as Excel formulas. Try the [quickstart](https://doc-creator.azurewebsites.net/#/) to create a document in four steps.
 
 ## Transformation examples
 
@@ -49,7 +49,7 @@ we can evaluate the following expressions
 
 See the [full list](https://github.com/pkokki/DocumentCreator/wiki/Supported-Excel-Functions) of supported Excel functions. Suggest the implementation of missing functions by [opening an issue](https://github.com/pkokki/DocumentCreator/issues/new).
 
-You can test it live [here](https://document-creator.azurewebsites.net/#/expressions). 
+You can test it live [here](https://doc-creator.azurewebsites.net/#/expressions). 
 
 ## Installation
 
