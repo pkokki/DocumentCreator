@@ -1,3 +1,5 @@
+import { Dispatch } from 'react';
+
 /**
  * Domain types
  */
@@ -17,7 +19,13 @@ export interface TemplateField {
 }
 
 export interface Mapping {
-  name: string;
+  mappingName: string;
+  mappingVersion: string;
+  templateName: string;
+  templateVersion: string;
+  timestamp: Date;
+  size: number;
+  fileName: string;
 }
 
 /**
@@ -27,22 +35,34 @@ export interface DocumentCreatorState {
   readonly baseUrl: string;
   readonly pending: number;
   readonly error?: Error;
-  readonly availableTemplates: Template[];
+  readonly availableTemplates?: Template[];
+  readonly availableMappings?: Mapping[];
   readonly activeTemplate?: Template;
+  readonly activeMappingName?: string;
+  readonly activeWorksheetId?: string;
 }
 
 /**
  * Action type constants
  */
+export const INITIALIZE_OFFICE = "INITIALIZE_OFFICE";
 export const SET_BASE_URL = "SET_BASE_URL";
 export const REQUEST_FAILED = "REQUEST_FAILED";
 export const REQUEST_TEMPLATES = "REQUEST_TEMPLATES";
 export const RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES";
 export const REQUEST_TEMPLATE = "REQUEST_TEMPLATE";
 export const RECEIVE_TEMPLATE = "RECEIVE_TEMPLATE";
+export const ACTIVATE_WORKSHEET = "ACTIVATE_WORKSHEET";
+export const REQUEST_MAPPINGS = "REQUEST_MAPPINGS";
+export const RECEIVE_MAPPINGS = "RECEIVE_MAPPINGS";
+export const SELECT_MAPPING = "SELECT_MAPPING";
 /**
  * Action types
  */
+interface InitializeOfficeAction {
+  type: typeof INITIALIZE_OFFICE;
+  dispatch: Dispatch<DocumentCreatorActionTypes>;
+}
 interface SetBaseUrlAction {
   type: typeof SET_BASE_URL;
   url: string;
@@ -67,11 +87,31 @@ interface ReceiveTemplateAction {
   type: typeof RECEIVE_TEMPLATE;
   payload: Template;
 }
+interface ActivateWorksheetAction {
+  type: typeof ACTIVATE_WORKSHEET;
+  worksheetId: string;
+}
+interface RequestMappingsAction {
+  type: typeof REQUEST_MAPPINGS;
+}
+interface ReceiveMappingsAction {
+  type: typeof RECEIVE_MAPPINGS;
+  payload: Mapping[];
+}
+interface SelectMappingAction {
+  type: typeof SELECT_MAPPING;
+  name: string;
+}
 
 export type DocumentCreatorActionTypes =
+  | InitializeOfficeAction
   | SetBaseUrlAction
   | RequestTemplatesAction
   | ReceiveTemplatesAction
   | RequestTemplateAction
   | ReceiveTemplateAction
-  | RequestFailedAction;
+  | RequestFailedAction
+  | RequestMappingsAction
+  | ReceiveMappingsAction
+  | SelectMappingAction
+  | ActivateWorksheetAction;

@@ -5,8 +5,7 @@ import AppStatus from "./components/AppStatus";
 import Settings from "./components/Settings";
 import TemplateSelector from "./components/TemplateSelector";
 import MappingSelector from "./components/MappingSelector";
-import Commander from "./components/Commander";
-import Progress from './components/Progress';
+import Progress from "./components/Progress";
 
 interface AppProps {
   title: string;
@@ -24,10 +23,13 @@ const App: React.FC<AppProps> = (props: AppProps) => {
     <div>
       <Header logo="assets/logo-filled.png" title={title} />
       <section className="ms-welcome__main">
-        <Settings />
+        <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">
+          Templates and Mappings
+        </h2>
         <TemplateSelector />
         <MappingSelector />
-        <Commander />
+        <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">Settings</h2>
+        <Settings />
         <AppStatus />
       </section>
     </div>

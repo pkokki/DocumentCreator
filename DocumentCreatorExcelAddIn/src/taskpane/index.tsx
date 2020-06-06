@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 
 import App from "./App";
 import configureStore from "./store/store";
+import { initializeOffice } from './store/dc/actions';
 /* global AppContainer, Component, document, Office, module, require */
 
 initializeIcons();
@@ -28,10 +29,18 @@ const render = Component => {
   );
 };
 
+/*
+  "Can it be done with just dispatch arguments?" -> action creator. 
+  "Can it be done with previous state and action?" -> reducer 
+  "Can it be done from just state?" -> probably a component. 
+  So "where does the business logic lives" -> everywhere.
+*/
+
 /* Render application after Office initializes */
 Office.initialize = () => {
   console.log("index.initialize");
   isOfficeInitialized = true;
+  store.dispatch(initializeOffice(store.dispatch));
   render(App);
 };
 
