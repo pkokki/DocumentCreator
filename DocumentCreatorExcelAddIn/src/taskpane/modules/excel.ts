@@ -1,17 +1,13 @@
 import { Dispatch } from "react";
 import { DocumentCreatorActionTypes, Template } from "../store/dc/types";
-import { activateWorksheet } from "../store/dc/actions";
+import { activateWorksheet, raiseError } from "../store/dc/actions";
 
 var _workbookOnActivated: OfficeExtension.EventHandlerResult<Excel.WorksheetActivatedEventArgs>;
 var _dispatch: Dispatch<DocumentCreatorActionTypes>;
 
-function errorHandlerFunction(error: any): Error {
-  var err: Error;
-  if (error instanceof Error) err = error;
-  else if (error) err = new Error(error.toString());
-  else err = new Error("An unexpected error occurred.");
-  console.error("Excel.run", err);
-  return err;
+function errorHandlerFunction(error: any): void {
+  console.error("Excel.run", error);
+  _dispatch(raiseError(error));
 }
 
 async function handleWorkbookActivation(event: Excel.WorksheetActivatedEventArgs): Promise<any> {
@@ -21,11 +17,11 @@ async function handleWorkbookActivation(event: Excel.WorksheetActivatedEventArgs
       await context.sync();
     });
   } catch (error) {
-    return errorHandlerFunction(error);
+    errorHandlerFunction(error);
   }
 }
 
-async function unregisterEventHandler<T>(eventHandler: OfficeExtension.EventHandlerResult<T>): Promise<void | Error> {
+async function unregisterEventHandler<T>(eventHandler: OfficeExtension.EventHandlerResult<T>): Promise<void> {
   if (eventHandler) {
     try {
       return Excel.run(eventHandler.context, async function(context) {
@@ -35,7 +31,7 @@ async function unregisterEventHandler<T>(eventHandler: OfficeExtension.EventHand
         console.log("Event handler successfully removed.");
       });
     } catch (error) {
-      return errorHandlerFunction(error);
+      errorHandlerFunction(error);
     }
   }
   return Promise.resolve();
@@ -98,7 +94,7 @@ function initializeExcel(dispatch: Dispatch<DocumentCreatorActionTypes>) {
   getActiveWorksheet();
 }
 
-async function fillActiveSheet(template: Template): Promise<boolean | Error> {
+async function fillActiveSheet(template: Template): Promise<boolean> {
   try {
     return Excel.run(async context => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
@@ -129,14 +125,16 @@ async function fillActiveSheet(template: Template): Promise<boolean | Error> {
       const range2 = sheet.getRange("A4:D" + (cellData.length + 3));
       range2.values = cellData;
       range2.format.autofitColumns();
-      return context.sync();
+      await context.sync();
+      return true;
     });
   } catch (error) {
-    return errorHandlerFunction(error);
+    errorHandlerFunction(error);
+    return false;
   }
 }
 
-async function activateSheet(name: string, createIfNotExists: boolean): Promise<boolean | Error> {
+async function activateSheet(name: string, createIfNotExists: boolean): Promise<boolean> {
   console.log("activateSheet", name, createIfNotExists);
   try {
     return Excel.run(async context => {
@@ -158,11 +156,12 @@ async function activateSheet(name: string, createIfNotExists: boolean): Promise<
       return false;
     });
   } catch (error) {
-    return errorHandlerFunction(error);
+    errorHandlerFunction(error);
+    return false;
   }
 }
 
-async function testMappings(templateName: string, mappingName: string): Promise<void | Error> {
+async function testMappings(templateName: string, mappingName: string): Promise<void> {
   console.log("testMappings", templateName, mappingName);
   try {
     return Excel.run(async (context) => {
@@ -170,7 +169,7 @@ async function testMappings(templateName: string, mappingName: string): Promise<
     });
   }
   catch (error) {
-    return errorHandlerFunction(error);
+    errorHandlerFunction(error);
   }
 }
 
@@ -179,4 +178,4 @@ export const ExcelHelper = {
   fillActiveSheet: fillActiveSheet,
   testMappings: testMappings,
   activateSheet: activateSheet
-};
+}

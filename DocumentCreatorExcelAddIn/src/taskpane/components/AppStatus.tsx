@@ -1,47 +1,35 @@
 import * as React from "react";
-import { Spinner, SpinnerSize, IStackStyles, Stack, IStackTokens, IStackItemStyles } from "office-ui-fabric-react";
-import { RootState } from '../store/store';
-import { connect, ConnectedProps } from 'react-redux';
-
-const stackStyles: IStackStyles = {
-  root: {
-    width: "100%",
-    //background: DefaultPalette.themeTertiary
-  }
-};
-const stackItemStyles: IStackItemStyles = {
-  root: {
-    alignItems: "center",
-    //background: DefaultPalette.themePrimary,
-    //color: DefaultPalette.white,
-    display: "flex",
-    //height: 20,
-    justifyContent: "flex-start"
-  }
-};
-const stackTokens: IStackTokens = {
-  childrenGap: 5,
-  padding: 5
-};
+import { Spinner, SpinnerSize, MessageBar, MessageBarType } from "office-ui-fabric-react";
+import { RootState } from "../store/store";
+import { connect, ConnectedProps } from "react-redux";
+import { resetError } from '../store/dc/actions';
 
 const mapState = (state: RootState) => ({
-  error: state.dc.error,
+  errorMessage: state.dc.errorMessage,
   pendingRequests: state.dc.pending
 });
-const connector = connect(mapState, {});
+const mapDispatch = {
+  resetError: resetError
+};
+const connector = connect(mapState, mapDispatch);
 type Props = ConnectedProps<typeof connector>;
 
 const AppStatus = (props: Props) => {
-  return (
-    <Stack horizontal styles={stackStyles} tokens={stackTokens}>
-      <Stack.Item grow={11} styles={stackItemStyles}>
-        <span>{props.error?.message }</span>
-      </Stack.Item>
-      <Stack.Item grow styles={stackItemStyles}>
-        {props.pendingRequests > 0 ? <Spinner size={SpinnerSize.xSmall} /> : null}
-      </Stack.Item>
-    </Stack>
-  );
+  if (props.errorMessage)
+    return (
+      <MessageBar
+        messageBarType={MessageBarType.error}
+        isMultiline={false}
+        onDismiss={props.resetError}
+        dismissButtonAriaLabel="Close"
+      >
+        {props.errorMessage}
+      </MessageBar>
+    );
+  else if (props.pendingRequests > 0) {
+    return (<Spinner size={SpinnerSize.xSmall} />);
+  }
+  return null;
 };
 
 export default connector(AppStatus);

@@ -3,7 +3,8 @@ import {
   DocumentCreatorActionTypes,
   REQUEST_TEMPLATES,
   RECEIVE_TEMPLATES,
-  REQUEST_FAILED,
+  RAISE_ERROR,
+  RESET_ERROR,
   SET_BASE_URL,
   REQUEST_TEMPLATE,
   RECEIVE_TEMPLATE,
@@ -41,8 +42,14 @@ export function documentCreatorReducer(state = initialState, action: DocumentCre
       };
     case RECEIVE_MAPPINGS:
       return { ...state, pending: state.pending - 1, availableMappings: action.payload || [] };
-    case REQUEST_FAILED:
-      return { ...state, pending: state.pending - 1, error: action.error };
+    case RAISE_ERROR:
+      return {
+        ...state,
+        pending: state.pending - (action.isHttp ? 1 : 0),
+        errorMessage: action.errorMessage || "An unexpected error occurred."
+      };
+    case RESET_ERROR:
+      return { ...state, errorMessage: undefined };
     case ACTIVATE_WORKSHEET:
       return { ...state, activeWorksheetId: action.worksheetId };
     case SELECT_MAPPING:

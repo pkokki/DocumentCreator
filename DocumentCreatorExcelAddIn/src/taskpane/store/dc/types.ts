@@ -34,7 +34,7 @@ export interface Mapping {
 export interface DocumentCreatorState {
   readonly baseUrl: string;
   readonly pending: number;
-  readonly error?: Error;
+  readonly errorMessage?: string;
   readonly availableTemplates?: Template[];
   readonly availableMappings?: Mapping[];
   readonly activeTemplate?: Template;
@@ -47,7 +47,8 @@ export interface DocumentCreatorState {
  */
 export const INITIALIZE_OFFICE = "INITIALIZE_OFFICE";
 export const SET_BASE_URL = "SET_BASE_URL";
-export const REQUEST_FAILED = "REQUEST_FAILED";
+export const RAISE_ERROR = "RAISE_ERROR";
+export const RESET_ERROR = "RESET_ERROR";
 export const REQUEST_TEMPLATES = "REQUEST_TEMPLATES";
 export const RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES";
 export const REQUEST_TEMPLATE = "REQUEST_TEMPLATE";
@@ -67,9 +68,13 @@ interface SetBaseUrlAction {
   type: typeof SET_BASE_URL;
   url: string;
 }
-interface RequestFailedAction {
-  type: typeof REQUEST_FAILED;
-  error: Error;
+interface RaiseErrorAction {
+  type: typeof RAISE_ERROR;
+  errorMessage: string;
+  isHttp: boolean;
+}
+interface ResetErrorAction {
+  type: typeof RESET_ERROR;
 }
 interface RequestTemplatesAction {
   type: typeof REQUEST_TEMPLATES;
@@ -110,7 +115,8 @@ export type DocumentCreatorActionTypes =
   | ReceiveTemplatesAction
   | RequestTemplateAction
   | ReceiveTemplateAction
-  | RequestFailedAction
+  | RaiseErrorAction
+  | ResetErrorAction
   | RequestMappingsAction
   | ReceiveMappingsAction
   | SelectMappingAction

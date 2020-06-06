@@ -23,6 +23,7 @@ const App: React.FC<AppProps> = (props: AppProps) => {
     <div>
       <Header logo="assets/logo-filled.png" title={title} />
       <section className="ms-welcome__main">
+        <AppStatus />
         <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">
           Templates and Mappings
         </h2>
@@ -30,7 +31,6 @@ const App: React.FC<AppProps> = (props: AppProps) => {
         <MappingSelector />
         <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">Settings</h2>
         <Settings />
-        <AppStatus />
       </section>
     </div>
   );

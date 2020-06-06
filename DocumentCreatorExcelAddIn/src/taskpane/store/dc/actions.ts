@@ -3,7 +3,7 @@ import {
   DocumentCreatorActionTypes,
   Template,
   INITIALIZE_OFFICE,
-  REQUEST_FAILED,
+  RAISE_ERROR,
   REQUEST_TEMPLATES,
   RECEIVE_TEMPLATES,
   SET_BASE_URL,
@@ -13,7 +13,8 @@ import {
   Mapping,
   REQUEST_MAPPINGS,
   RECEIVE_MAPPINGS,
-  SELECT_MAPPING
+  SELECT_MAPPING,
+  RESET_ERROR
 } from "./types";
 
 export function initializeOffice(dispatch: Dispatch<DocumentCreatorActionTypes>): DocumentCreatorActionTypes {
@@ -36,10 +37,16 @@ export function setBaseUrl(url: string): DocumentCreatorActionTypes {
     url: url
   };
 }
-export function requestFailed(error: Error): DocumentCreatorActionTypes {
+export function raiseError(errorMessage: string, isHttp: boolean = false): DocumentCreatorActionTypes {
   return {
-    type: REQUEST_FAILED,
-    error: error
+    type: RAISE_ERROR,
+    errorMessage: errorMessage,
+    isHttp: isHttp
+  };
+}
+export function resetError(): DocumentCreatorActionTypes {
+  return {
+    type: RESET_ERROR
   };
 }
 
@@ -70,25 +77,6 @@ export function receiveTemplate(template: Template): DocumentCreatorActionTypes 
     payload: template
   };
 }
-export function fetchTemplates(baseUrl: string) {
-  return async function(dispatch) {
-    dispatch(requestTemplates());
-    const response = await fetch(`${baseUrl}/templates`);
-    const json = await response.json();
-    if (json.error) return dispatch(requestFailed(json.error));
-    return dispatch(receiveTemplates(json));
-  };
-}
-
-export function fetchTemplate(baseUrl: string, name: string, version: string) {
-  return async function(dispatch) {
-    dispatch(requestTemplate(name, version));
-    const response = await fetch(`${baseUrl}/templates/${name}/versions/${version}`);
-    const json = await response.json();
-    if (json.error) return dispatch(requestFailed(json.error));
-    return dispatch(receiveTemplate(json));
-  };
-}
 
 export function requestMappings(): DocumentCreatorActionTypes {
   return {
@@ -102,19 +90,46 @@ export function receiveMappings(mappings: Mapping[]): DocumentCreatorActionTypes
     payload: mappings
   };
 }
-export function fetchMappings(baseUrl: string, templateName: string) {
-  console.log("fetchMappings");
-  return async function(dispatch) {
-    dispatch(requestMappings());
-    const response = await fetch(`${baseUrl}/templates/${templateName}/mappings`);
-    const json = await response.json();
-    if (json.error) return dispatch(requestFailed(json.error));
-    return dispatch(receiveMappings(json));
-  };
-}
+
 export function selectMapping(mappingName: string): DocumentCreatorActionTypes {
   return {
     type: SELECT_MAPPING,
     name: mappingName
+  };
+}
+
+/**
+ * Async action creators
+ */
+async function httpFetch<T>(
+  dispatch: Dispatch<DocumentCreatorActionTypes>,
+  url: string,
+  reqAction: DocumentCreatorActionTypes,
+  recvAction: (json: T) => DocumentCreatorActionTypes
+): Promise<void> {
+
+  dispatch(reqAction);
+  const response = await fetch(url);
+  if (!response.ok) return dispatch(raiseError(response.statusText, true));
+  const json = await response.json();
+  if (json.error) return dispatch(raiseError(json.error, true));
+  return dispatch(recvAction(json));
+}
+
+export function fetchTemplates(baseUrl: string) {
+  return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
+    return httpFetch(dispatch, `${baseUrl}/templates`, requestTemplates(), receiveTemplates);
+  };
+}
+
+export function fetchTemplate(baseUrl: string, name: string, version: string) {
+  return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
+    return httpFetch(dispatch, `${baseUrl}/templates/${name}/versions/${version}`, requestTemplate(name, version), receiveTemplate);
+  };
+}
+
+export function fetchMappings(baseUrl: string, templateName: string) {
+  return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
+    return httpFetch(dispatch, `${baseUrl}/templates/${templateName}/mappings`, requestMappings(), receiveMappings);
   };
 }
