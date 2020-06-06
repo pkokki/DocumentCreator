@@ -14,7 +14,8 @@ import {
   REQUEST_MAPPINGS,
   RECEIVE_MAPPINGS,
   SELECT_MAPPING,
-  RESET_ERROR
+  RESET_ERROR,
+  UPLOAD_TEMPLATE
 } from "./types";
 
 export function initializeOffice(dispatch: Dispatch<DocumentCreatorActionTypes>): DocumentCreatorActionTypes {
@@ -98,6 +99,12 @@ export function selectMapping(mappingName: string): DocumentCreatorActionTypes {
   };
 }
 
+export function uploadTemplateStart(): DocumentCreatorActionTypes {
+  return {
+    type: UPLOAD_TEMPLATE
+  };
+}
+
 /**
  * Async action creators
  */
@@ -107,9 +114,26 @@ async function httpFetch<T>(
   reqAction: DocumentCreatorActionTypes,
   recvAction: (json: T) => DocumentCreatorActionTypes
 ): Promise<void> {
-
   dispatch(reqAction);
   const response = await fetch(url);
+  if (!response.ok) return dispatch(raiseError(response.statusText, true));
+  const json = await response.json();
+  if (json.error) return dispatch(raiseError(json.error, true));
+  return dispatch(recvAction(json));
+}
+
+async function postFormData<T>(
+  dispatch: Dispatch<DocumentCreatorActionTypes>,
+  url: string,
+  formData: FormData,
+  reqAction: DocumentCreatorActionTypes,
+  recvAction: (json: T) => DocumentCreatorActionTypes
+): Promise<void> {
+  dispatch(reqAction);
+  const response = await fetch(url, {
+    body: formData,
+    method: "POST"
+  });
   if (!response.ok) return dispatch(raiseError(response.statusText, true));
   const json = await response.json();
   if (json.error) return dispatch(raiseError(json.error, true));
@@ -124,12 +148,28 @@ export function fetchTemplates(baseUrl: string) {
 
 export function fetchTemplate(baseUrl: string, name: string, version: string) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
-    return httpFetch(dispatch, `${baseUrl}/templates/${name}/versions/${version}`, requestTemplate(name, version), receiveTemplate);
+    return httpFetch(
+      dispatch,
+      `${baseUrl}/templates/${name}/versions/${version}`,
+      requestTemplate(name, version),
+      receiveTemplate
+    );
   };
 }
 
 export function fetchMappings(baseUrl: string, templateName: string) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
     return httpFetch(dispatch, `${baseUrl}/templates/${templateName}/mappings`, requestMappings(), receiveMappings);
+  };
+}
+
+export function uploadTemplate(baseUrl: string, templateName: string, file: File) {
+  return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
+    const formData = new FormData();
+    formData.append("name", templateName);
+    formData.append("FILE", file, file.name);
+    return postFormData(dispatch, `${baseUrl}/templates`, formData, uploadTemplateStart(), receiveTemplate).then(_ =>
+      fetchTemplates(baseUrl)
+    );
   };
 }

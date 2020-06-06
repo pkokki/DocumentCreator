@@ -32,6 +32,7 @@
     "office-ui-fabric-react": "^7.117.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-dropzone": "^11.0.1",
     "react-redux": "^7.2.0",
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",

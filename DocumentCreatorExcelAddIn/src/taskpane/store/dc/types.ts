@@ -57,6 +57,7 @@ export const ACTIVATE_WORKSHEET = "ACTIVATE_WORKSHEET";
 export const REQUEST_MAPPINGS = "REQUEST_MAPPINGS";
 export const RECEIVE_MAPPINGS = "RECEIVE_MAPPINGS";
 export const SELECT_MAPPING = "SELECT_MAPPING";
+export const UPLOAD_TEMPLATE = "UPLOAD_TEMPLATE";
 /**
  * Action types
  */
@@ -107,6 +108,9 @@ interface SelectMappingAction {
   type: typeof SELECT_MAPPING;
   name: string;
 }
+interface UploadTemplateAction {
+  type: typeof UPLOAD_TEMPLATE;
+}
 
 export type DocumentCreatorActionTypes =
   | InitializeOfficeAction
@@ -120,4 +124,5 @@ export type DocumentCreatorActionTypes =
   | RequestMappingsAction
   | ReceiveMappingsAction
   | SelectMappingAction
+  | UploadTemplateAction
   | ActivateWorksheetAction;

@@ -12,7 +12,8 @@ import {
   ACTIVATE_WORKSHEET,
   REQUEST_MAPPINGS,
   RECEIVE_MAPPINGS,
-  SELECT_MAPPING
+  SELECT_MAPPING,
+  UPLOAD_TEMPLATE
 } from "./types";
 import { ExcelHelper } from "../../modules/excel";
 
@@ -29,6 +30,7 @@ export function documentCreatorReducer(state = initialState, action: DocumentCre
     case REQUEST_TEMPLATE:
     case REQUEST_TEMPLATES:
     case REQUEST_MAPPINGS:
+    case UPLOAD_TEMPLATE:
       return { ...state, pending: state.pending + 1 };
     case RECEIVE_TEMPLATES:
       return { ...state, pending: state.pending - 1, availableTemplates: action.payload || [] };
