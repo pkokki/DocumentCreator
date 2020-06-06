@@ -17,10 +17,11 @@ import {
 } from "./types";
 import { ExcelHelper } from "../../modules/excel";
 
+const defaultMappingName = "M01";
 export const initialState: DocumentCreatorState = {
   baseUrl: "http://localhost:6001/api",
   pending: 0,
-  activeMappingName: "M01"
+  activeMappingName: defaultMappingName
 };
 
 export function documentCreatorReducer(state = initialState, action: DocumentCreatorActionTypes): DocumentCreatorState {
@@ -39,7 +40,7 @@ export function documentCreatorReducer(state = initialState, action: DocumentCre
         ...state,
         pending: state.pending - 1,
         activeTemplate: action.payload,
-        activeMappingName: undefined,
+        activeMappingName: defaultMappingName,
         availableMappings: undefined
       };
     case RECEIVE_MAPPINGS:

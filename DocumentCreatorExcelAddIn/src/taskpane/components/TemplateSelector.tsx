@@ -1,6 +1,6 @@
 import React = require("react");
 import { connect, ConnectedProps } from "react-redux";
-import { Stack, Dropdown, IDropdownOption, IDropdownStyles, DefaultButton, IStackTokens, TextField } from "office-ui-fabric-react";
+import { Stack, Dropdown, IDropdownOption, IDropdownStyles, IStackTokens, TextField, PrimaryButton } from "office-ui-fabric-react";
 import { useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { RootState } from "../store/store";
@@ -88,7 +88,7 @@ const TemplateSelector = (props: Props) => {
         styles={dropdownStyles}
       />
 
-      <DefaultButton
+      <PrimaryButton
         text="Fill active worksheet"
         onClick={async (_: any) => await ExcelHelper.fillActiveSheet(props.activeTemplate)}
         allowDisabledFocus
