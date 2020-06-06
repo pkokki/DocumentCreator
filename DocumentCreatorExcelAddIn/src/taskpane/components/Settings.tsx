@@ -1,5 +1,5 @@
 import React = require("react");
-import { Stack, TextField, ITextFieldStyles } from "office-ui-fabric-react";
+import { Stack, TextField, ITextFieldStyles, IStackTokens } from "office-ui-fabric-react";
 import { RootState } from "../store/store";
 import { connect, ConnectedProps } from "react-redux";
 import { setBaseUrl } from '../store/dc/actions';
@@ -17,9 +17,10 @@ const connector = connect(mapState, mapDispatch);
 type Props = ConnectedProps<typeof connector>;
 
 const textFieldStyles: Partial<ITextFieldStyles> = { fieldGroup: { width: 300 } };
+const stackTokens: IStackTokens = { childrenGap: 10, padding: 10 };
 
 const Settings = (props: Props) => (
-  <Stack>
+  <Stack tokens={stackTokens}>
     <TextField
       label="API base url"
       value={props.baseUrl}

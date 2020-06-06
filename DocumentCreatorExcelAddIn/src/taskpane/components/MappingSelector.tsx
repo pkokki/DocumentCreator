@@ -6,7 +6,7 @@ import {
   IComboBoxStyles,
   Stack,
   IStackTokens,
-  DefaultButton
+  PrimaryButton
 } from "office-ui-fabric-react";
 import { useEffect } from "react";
 import { Mapping } from "../store/dc/types";
@@ -16,7 +16,7 @@ import { fetchMappings, selectMapping } from "../store/dc/actions";
 import { ExcelHelper } from "../modules/excel";
 
 const comboboxStyles: Partial<IComboBoxStyles> = { container: { width: 300 } };
-const stackTokens: IStackTokens = { childrenGap: 10 };
+const stackTokens: IStackTokens = { childrenGap: 10, padding: 10 };
 
 const mapState = (state: RootState) => ({
   baseUrl: state.dc.baseUrl,
@@ -71,7 +71,7 @@ const MappingSelector = (props: Props) => {
         options={mappingOptions}
         styles={comboboxStyles}
       />
-      <DefaultButton
+      <PrimaryButton
         text="Test current mapping"
         onClick={async (_: any) =>
           await ExcelHelper.testMappings(props.activeTemplate.templateName, props.activeMappingName)

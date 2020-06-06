@@ -6,6 +6,7 @@ import Settings from "./components/Settings";
 import TemplateSelector from "./components/TemplateSelector";
 import MappingSelector from "./components/MappingSelector";
 import Progress from "./components/Progress";
+import { Pivot, PivotItem } from 'office-ui-fabric-react';
 
 interface AppProps {
   title: string;
@@ -16,22 +17,24 @@ const App: React.FC<AppProps> = (props: AppProps) => {
   const { title } = props;
   if (!props.isOfficeInitialized) {
     return (
-      <Progress title={title} logo="assets/logo-filled.png" message="Please sideload your addin to see app body." />
+      <Progress title={title} logo="assets/logo-filled.png" message="Please sideload the addin to see app body." />
     );
   }
   return (
     <div>
       <Header logo="assets/logo-filled.png" title={title} />
-      <section className="ms-welcome__main">
-        <AppStatus />
-        <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">
-          Templates and Mappings
-        </h2>
-        <TemplateSelector />
-        <MappingSelector />
-        <h2 className="ms-font-l ms-fontWeight-semilight ms-fontColor-neutralPrimary ms-u-slideUpIn20">Settings</h2>
-        <Settings />
-      </section>
+      <AppStatus />
+      <Pivot>
+        <PivotItem headerText="Templates">
+          <TemplateSelector />
+        </PivotItem>
+        <PivotItem headerText="Mappings">
+          <MappingSelector />
+        </PivotItem>
+        <PivotItem headerText="Settings">
+          <Settings />
+        </PivotItem>
+      </Pivot>
     </div>
   );
 };

@@ -24,7 +24,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = PropsFromRedux;
 
 const dropdownStyles: Partial<IDropdownStyles> = { dropdown: { width: 300 } };
-const stackTokens: IStackTokens = { childrenGap: 10 };
+const stackTokens: IStackTokens = { childrenGap: 10, padding: 10 };
 const templateOptions: IDropdownOption[] = [];
 
 function buildTemplateOptions(templates: Template[]) {
