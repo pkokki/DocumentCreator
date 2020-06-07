@@ -1,5 +1,12 @@
 import { Dispatch } from "react";
-import { DocumentCreatorActionTypes, Template } from "../store/dc/types";
+import {
+  DocumentCreatorActionTypes,
+  Template,
+  EvaluationRequest,
+  EvaluationExpression,
+  EvaluationSource,
+  EvaluationOutput
+} from "../store/dc/types";
 import { activateWorksheet, raiseError } from "../store/dc/actions";
 
 var _workbookOnActivated: OfficeExtension.EventHandlerResult<Excel.WorksheetActivatedEventArgs>;
@@ -7,32 +14,31 @@ var _dispatch: Dispatch<DocumentCreatorActionTypes>;
 
 function errorHandlerFunction(error: any): void {
   console.error("Excel.run", error);
-  _dispatch(raiseError(error));
+  _dispatch(raiseError(typeof error === "string" ? error : error.message || "An Excel.run error occurred."));
 }
 
 async function handleWorkbookActivation(event: Excel.WorksheetActivatedEventArgs): Promise<any> {
-  try {
-    return Excel.run(async function(context) {
+  return Excel.run(async function(context) {
+    try {
       _dispatch(activateWorksheet(event.worksheetId));
       await context.sync();
-    });
-  } catch (error) {
-    errorHandlerFunction(error);
-  }
+    } catch (error) {
+      errorHandlerFunction(error);
+    }
+  });
 }
 
 async function unregisterEventHandler<T>(eventHandler: OfficeExtension.EventHandlerResult<T>): Promise<void> {
   if (eventHandler) {
-    try {
-      return Excel.run(eventHandler.context, async function(context) {
+    return Excel.run(eventHandler.context, async function(context) {
+      try {
         eventHandler.remove();
         await context.sync();
         eventHandler = null;
-        console.log("Event handler successfully removed.");
-      });
-    } catch (error) {
-      errorHandlerFunction(error);
-    }
+      } catch (error) {
+        errorHandlerFunction(error);
+      }
+    });
   }
   return Promise.resolve();
 }
@@ -94,14 +100,52 @@ function initializeExcel(dispatch: Dispatch<DocumentCreatorActionTypes>) {
   getActiveWorksheet();
 }
 
-async function fillActiveSheet(template: Template): Promise<boolean> {
-  try {
-    return Excel.run(async context => {
+async function formatActiveSheet(): Promise<void> {
+  return Excel.run(async context => {
+    try {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      const range1 = sheet.getRange("A1:N3");
-      range1.values = [
-        ["TEMPLATE:", template.templateName, null, null, null, null, null, null, null, null, null, null, null, null],
-        ["FIELDS", null, null, null, null, "MAPPING", null, null, null, null, null, null, "SOURCES", null],
+      const usedRange = sheet.getUsedRange();
+      usedRange.load("columnCount");
+      const colProps = usedRange.getColumnProperties({
+        columnIndex: true,
+        format: {
+          borders: {
+            color: true,
+            style: true
+          },
+          fill: {
+            color: true
+          },
+          font: {
+            name: true,
+            size: true
+          },
+          columnWidth: true
+        }
+      });
+      await context.sync();
+
+      colProps.value.forEach(props => {
+        console.log(props);
+      });
+      //await context.sync();
+    } catch (error) {
+      errorHandlerFunction(error);
+    }
+  });
+}
+async function fillActiveSheet(template: Template): Promise<boolean> {
+  return Excel.run(async context => {
+    try {
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+      const usedRange = sheet.getUsedRange();
+      usedRange.clear("All");
+      await context.sync();
+
+      const templateName = template ? template.templateName : "#NEW";
+      sheet.getRange("A1:N2").values = [
+        ["FIELDS", templateName, null, null, null, "MAPPING", null, null, null, null, null, null, "SOURCES", null],
         [
           "Name",
           "ParentId",
@@ -119,25 +163,72 @@ async function fillActiveSheet(template: Template): Promise<boolean> {
           "Value"
         ]
       ];
-      range1.format.autofitColumns();
-      const cellData = [];
-      template.fields.map(field => cellData.push([field.name, field.parent, field.isCollection, field.content]));
-      const range2 = sheet.getRange("A4:D" + (cellData.length + 3));
-      range2.values = cellData;
-      range2.format.autofitColumns();
+      sheet.getRange("A1:N1").set({
+        format: {
+          fill: {
+            color: "#4472C4"
+          },
+          font: {
+            color: "white",
+            bold: true
+          }
+        }
+      });
+      sheet.getRanges(`B1:C1, G1:H1`).format.font.color = "orange";
+      sheet.getRange("A2:N2").set({
+        format: {
+          fill: {
+            color: "#4472C4"
+          },
+          font: {
+            color: "white"
+          }
+        }
+      });
+
+      if (template && template.fields && template.fields.length) {
+        const cellData = [];
+        template.fields.map(field =>
+          cellData.push([field.name, field.parent, field.isCollection ? true : null, field.content])
+        );
+
+        const lastRow = cellData.length + 2;
+        const range2 = sheet.getRange("A3:D" + lastRow);
+        range2.values = cellData;
+        range2.format.autofitColumns();
+
+        sheet.getRanges(`A3:D${lastRow}, I3:K${lastRow}`).set({
+          format: {
+            fill: { color: "#BFBFBF" },
+            borders: { tintAndShade: -0.25 }
+          }
+        }, { throwOnReadOnly: false });
+        sheet.getRanges(`F3:H${lastRow}, M3:N${lastRow}`).set({
+          format: {
+            fill: { color: "white" },
+            borders: { tintAndShade: -0.25 }
+          }
+        }, { throwOnReadOnly: false });
+        sheet.getRanges(`F3:F${lastRow}, J3:J${lastRow}`).format.font.bold = true;
+        sheet.getRanges(`E3:E${lastRow}, L3:L${lastRow}`).set({
+          format: {
+            columnWidth: 6.75,
+            fill: { color: "white" }
+          }
+        }, { throwOnReadOnly: false });
+      }
       await context.sync();
       return true;
-    });
-  } catch (error) {
-    errorHandlerFunction(error);
-    return false;
-  }
+    } catch (error) {
+      errorHandlerFunction(error);
+      return false;
+    }
+  });
 }
 
 async function activateSheet(name: string, createIfNotExists: boolean): Promise<boolean> {
-  console.log("activateSheet", name, createIfNotExists);
-  try {
-    return Excel.run(async context => {
+  return Excel.run(async context => {
+    try {
       var sheets = context.workbook.worksheets;
       sheets.load("items/name");
       await context.sync();
@@ -154,28 +245,98 @@ async function activateSheet(name: string, createIfNotExists: boolean): Promise<
         return true;
       }
       return false;
-    });
-  } catch (error) {
-    errorHandlerFunction(error);
-    return false;
-  }
+    } catch (error) {
+      errorHandlerFunction(error);
+      return false;
+    }
+  });
 }
 
-async function testMappings(templateName: string, mappingName: string): Promise<void> {
-  console.log("testMappings", templateName, mappingName);
-  try {
-    return Excel.run(async (context) => {
-      return context.sync();
-    });
-  }
-  catch (error) {
-    errorHandlerFunction(error);
-  }
+async function getEvaluationPayload(templateName: string): Promise<EvaluationRequest> {
+  return Excel.run(async context => {
+    try {
+      // Get range
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
+      const usedRange = sheet.getUsedRange(true);
+      usedRange.load(["formulas", "rowCount", "columnCount"]);
+      await context.sync();
+
+      if (usedRange.rowCount >= 3 && usedRange.columnCount >= 6) {
+        const payload: EvaluationRequest = {
+          templateName: templateName,
+          expressions: [],
+          sources: []
+        };
+
+        usedRange.formulas.forEach((row, rowIndex) => {
+          if (rowIndex >= 2) {
+            if (row[0] && row[0] !== "" && row[5] && row[5] !== "") {
+              const expression: EvaluationExpression = {
+                name: row[0],
+                cell: "F" + (rowIndex + 1),
+                expression: row[5],
+                parent: row[1] !== "" ? row[1] : null,
+                isCollection: !!row[2],
+                content: row[3] !== "" ? row[3] : null
+              };
+              payload.expressions.push(expression);
+            }
+
+            if (row.length >= 14 && row[12] && row[12] !== "") {
+              const source: EvaluationSource = {
+                name: row[12],
+                cell: "N" + (rowIndex + 1),
+                payload: JSON.parse(row[13])
+              };
+              payload.sources.push(source);
+            }
+          }
+        });
+
+        return payload;
+      }
+      return undefined;
+    } catch (error) {
+      errorHandlerFunction(error);
+      return undefined;
+    }
+  });
+}
+
+async function setEvaluationResult(evalRequest: EvaluationRequest, evalResponse: EvaluationOutput): Promise<void> {
+  return Excel.run(async context => {
+    try {
+      const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+      sheet.getRange("I3:K100").clear("All");
+      evalResponse.results.forEach(result => {
+        const expr = evalRequest.expressions.find(e => e.name === result.name);
+        if (expr) {
+          const rowIndex = expr.cell.substr(1);
+          // I: =IFNA(FORMULATEXT(F3);"")
+          // K: =IF(ISNA(FORMULATEXT(F3));"";IF(F3=J3;1;IF(F3=IFNA(VALUE(J3);J3);1;2)))
+          sheet.getRange(`I${rowIndex}:K${rowIndex}`).formulas = [
+            [
+              `=IFNA(FORMULATEXT(F${rowIndex}),"")`,
+              result.error || result.text,
+              `=IF(ISNA(FORMULATEXT(F${rowIndex})),"",IF(F${rowIndex}=J${rowIndex},1,IF(F${rowIndex}=IFNA(VALUE(J${rowIndex}),J${rowIndex}),1,2)))`
+            ]
+          ];
+        }
+      });
+      await context.sync();
+    } catch (error) {
+      errorHandlerFunction(error);
+      return undefined;
+    }
+  });
 }
 
 export const ExcelHelper = {
   initializeExcel: initializeExcel,
+  formatActiveSheet: formatActiveSheet,
   fillActiveSheet: fillActiveSheet,
-  testMappings: testMappings,
+  getEvaluationPayload: getEvaluationPayload,
+  setEvaluationResult: setEvaluationResult,
   activateSheet: activateSheet
-}
+};

@@ -28,6 +28,39 @@ export interface Mapping {
   fileName: string;
 }
 
+export interface EvaluationRequest {
+  templateName: string;
+  expressions: EvaluationExpression[];
+  sources: EvaluationSource[];
+}
+
+export interface EvaluationExpression {
+  name: string;
+  cell: string;
+  expression: string;
+  parent: string;
+  isCollection: boolean;
+  content: string;
+}
+
+export interface EvaluationSource {
+  name: string;
+  cell: string;
+  payload: {};
+}
+
+export interface EvaluationOutput {
+  results: EvaluationResult[],
+  total: number;
+  errors: number;
+}
+
+export interface EvaluationResult {
+  name: string;
+  value: any;
+  text: string;
+  error: string;
+}
 /**
  * State
  */
@@ -58,6 +91,8 @@ export const REQUEST_MAPPINGS = "REQUEST_MAPPINGS";
 export const RECEIVE_MAPPINGS = "RECEIVE_MAPPINGS";
 export const SELECT_MAPPING = "SELECT_MAPPING";
 export const UPLOAD_TEMPLATE = "UPLOAD_TEMPLATE";
+export const REQUEST_EVALUATION = "REQUEST_EVALUATION";
+export const RECEIVE_EVALUATION = "RECEIVE_EVALUATION";
 /**
  * Action types
  */
@@ -111,6 +146,13 @@ interface SelectMappingAction {
 interface UploadTemplateAction {
   type: typeof UPLOAD_TEMPLATE;
 }
+interface RequestEvaluationAction {
+  type: typeof REQUEST_EVALUATION;
+}
+interface ReceiveEvaluationAction {
+  type: typeof RECEIVE_EVALUATION;
+  payload: EvaluationOutput;
+}
 
 export type DocumentCreatorActionTypes =
   | InitializeOfficeAction
@@ -125,4 +167,6 @@ export type DocumentCreatorActionTypes =
   | ReceiveMappingsAction
   | SelectMappingAction
   | UploadTemplateAction
+  | RequestEvaluationAction
+  | ReceiveEvaluationAction
   | ActivateWorksheetAction;

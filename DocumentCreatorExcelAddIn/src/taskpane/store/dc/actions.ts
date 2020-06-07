@@ -15,7 +15,11 @@ import {
   RECEIVE_MAPPINGS,
   SELECT_MAPPING,
   RESET_ERROR,
-  UPLOAD_TEMPLATE
+  UPLOAD_TEMPLATE,
+  EvaluationRequest,
+  REQUEST_EVALUATION,
+  RECEIVE_EVALUATION,
+  EvaluationOutput
 } from "./types";
 
 export function initializeOffice(dispatch: Dispatch<DocumentCreatorActionTypes>): DocumentCreatorActionTypes {
@@ -105,50 +109,114 @@ export function uploadTemplateStart(): DocumentCreatorActionTypes {
   };
 }
 
+export function requestEvaluation(): DocumentCreatorActionTypes {
+  return {
+    type: REQUEST_EVALUATION
+  };
+}
+
+export function receiveEvaluation(result: EvaluationOutput): DocumentCreatorActionTypes {
+  return {
+    type: RECEIVE_EVALUATION,
+    payload: result
+  };
+}
+
 /**
  * Async action creators
  */
 async function httpFetch<T>(
   dispatch: Dispatch<DocumentCreatorActionTypes>,
   url: string,
+  init: any,
   reqAction: DocumentCreatorActionTypes,
   recvAction: (json: T) => DocumentCreatorActionTypes
-): Promise<void> {
+) {
   dispatch(reqAction);
-  const response = await fetch(url);
-  if (!response.ok) return dispatch(raiseError(response.statusText, true));
-  const json = await response.json();
-  if (json.error) return dispatch(raiseError(json.error, true));
-  return dispatch(recvAction(json));
+  const response = await fetch(url, init);
+  if (response.ok) {
+    const json = await response.json();
+    if (json.error) {
+      dispatch(raiseError(json.error, true));
+      return undefined;
+    } else {
+      dispatch(recvAction(json));
+      return <T>json;
+    }
+  } else {
+    var errors = "";
+    const json = await response.json();
+    if (json.errors) {
+      for (const key in json.errors) {
+        const error = json.errors[key];
+        errors += `: ${error}`;
+      }
+    }
+    dispatch(raiseError(`${response.status} (${response.statusText}) ${json.title} ${errors}`, true));
+    return undefined;
+  }
 }
 
-async function postFormData<T>(
+async function httpFetchGet<T>(
   dispatch: Dispatch<DocumentCreatorActionTypes>,
   url: string,
-  formData: FormData,
   reqAction: DocumentCreatorActionTypes,
   recvAction: (json: T) => DocumentCreatorActionTypes
-): Promise<void> {
-  dispatch(reqAction);
-  const response = await fetch(url, {
-    body: formData,
-    method: "POST"
-  });
-  if (!response.ok) return dispatch(raiseError(response.statusText, true));
-  const json = await response.json();
-  if (json.error) return dispatch(raiseError(json.error, true));
-  return dispatch(recvAction(json));
+) {
+  return httpFetch(dispatch, url, undefined, reqAction, recvAction);
+}
+
+async function httpFetchForm<T>(
+  dispatch: Dispatch<DocumentCreatorActionTypes>,
+  url: string,
+  body: any,
+  reqAction: DocumentCreatorActionTypes,
+  recvAction: (json: T) => DocumentCreatorActionTypes
+) {
+  return httpFetch(
+    dispatch,
+    url,
+    {
+      body: body,
+      method: "POST"
+    },
+    reqAction,
+    recvAction
+  );
+}
+
+async function httpFetchPost<T>(
+  dispatch: Dispatch<DocumentCreatorActionTypes>,
+  url: string,
+  body: {},
+  reqAction: DocumentCreatorActionTypes,
+  recvAction: (json: T) => DocumentCreatorActionTypes
+) {
+  return httpFetch(
+    dispatch,
+    url,
+    {
+      body: JSON.stringify(body),
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json;charset=UTF-8"
+      }
+    },
+    reqAction,
+    recvAction
+  );
 }
 
 export function fetchTemplates(baseUrl: string) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
-    return httpFetch(dispatch, `${baseUrl}/templates`, requestTemplates(), receiveTemplates);
+    return httpFetchGet(dispatch, `${baseUrl}/templates`, requestTemplates(), receiveTemplates);
   };
 }
 
 export function fetchTemplate(baseUrl: string, name: string, version: string) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
-    return httpFetch(
+    return httpFetchGet(
       dispatch,
       `${baseUrl}/templates/${name}/versions/${version}`,
       requestTemplate(name, version),
@@ -159,7 +227,7 @@ export function fetchTemplate(baseUrl: string, name: string, version: string) {
 
 export function fetchMappings(baseUrl: string, templateName: string) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
-    return httpFetch(dispatch, `${baseUrl}/templates/${templateName}/mappings`, requestMappings(), receiveMappings);
+    return httpFetchGet(dispatch, `${baseUrl}/templates/${templateName}/mappings`, requestMappings(), receiveMappings);
   };
 }
 
@@ -168,8 +236,20 @@ export function uploadTemplate(baseUrl: string, templateName: string, file: File
     const formData = new FormData();
     formData.append("name", templateName);
     formData.append("FILE", file, file.name);
-    return postFormData(dispatch, `${baseUrl}/templates`, formData, uploadTemplateStart(), receiveTemplate).then(_ =>
-      fetchTemplates(baseUrl)
+    const template = await httpFetchForm(
+      dispatch,
+      `${baseUrl}/templates`,
+      formData,
+      uploadTemplateStart(),
+      receiveTemplate
     );
+    fetchTemplates(baseUrl);
+    return template;
+  };
+}
+
+export function fetchEvaluation(baseUrl: string, evalRequest: EvaluationRequest) {
+  return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
+    return await httpFetchPost(dispatch, `${baseUrl}/evaluations`, evalRequest, requestEvaluation(), receiveEvaluation);
   };
 }

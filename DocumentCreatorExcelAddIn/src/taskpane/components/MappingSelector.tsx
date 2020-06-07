@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { Mapping } from "../store/dc/types";
 import { RootState } from "../store/store";
 import { ConnectedProps, connect } from "react-redux";
-import { fetchMappings, selectMapping } from "../store/dc/actions";
+import { fetchMappings, selectMapping, fetchEvaluation } from "../store/dc/actions";
 import { ExcelHelper } from "../modules/excel";
 
 const comboboxStyles: Partial<IComboBoxStyles> = { container: { width: 300 } };
@@ -26,7 +26,8 @@ const mapState = (state: RootState) => ({
 });
 const mapDispatch = {
   getMappings: fetchMappings,
-  selectMapping: selectMapping
+  selectMapping: selectMapping,
+  fetchEvaluation: fetchEvaluation
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -71,13 +72,18 @@ const MappingSelector = (props: Props) => {
         options={mappingOptions}
         styles={comboboxStyles}
       />
+
       <PrimaryButton
-        text="Test current mapping"
-        onClick={async (_: any) =>
-          await ExcelHelper.testMappings(props.activeTemplate.templateName, props.activeMappingName)
-        }
-        allowDisabledFocus
-        disabled={!props.activeTemplate || !props.activeMappingName}
+        text="Evaluate expressions"
+        onClick={async (_: any) => {
+          const request = await ExcelHelper.getEvaluationPayload(props.activeTemplate ? props.activeTemplate.templateName : null);
+          if (request) {
+            const response = await props.fetchEvaluation(props.baseUrl, request);
+            console.log("Test current mapping response", response);
+            if (response)
+              await ExcelHelper.setEvaluationResult(request, response);
+          }
+        }}
       />
     </Stack>
   );

@@ -25,13 +25,13 @@ type Props = PropsFromRedux;
 
 const dropdownStyles: Partial<IDropdownStyles> = { dropdown: { width: 300 } };
 const stackTokens: IStackTokens = { childrenGap: 10, padding: 10 };
-const templateOptions: IDropdownOption[] = [];
+const templateOptions: IDropdownOption[] = [{ key: "", text: "" }];
 
 function buildTemplateOptions(templates: Template[]) {
   const items = templates.map(t => {
     return { key: t.templateName, text: t.templateName, data: t };
   });
-  templateOptions.splice(0, templateOptions.length, ...items);
+  templateOptions.splice(1, templateOptions.length - 1, ...items);
 }
 
 const TemplateSelector = (props: Props) => {
@@ -44,6 +44,7 @@ const TemplateSelector = (props: Props) => {
   });
 
   var newTemplateName = "T101";
+  const selectedKey = props.activeTemplate ? props.activeTemplate.templateName : null;
   // https://react-dropzone.js.org/
   const onDrop = useCallback(acceptedFiles => {
     console.log(acceptedFiles);
@@ -79,20 +80,24 @@ const TemplateSelector = (props: Props) => {
 
       <Dropdown
         label="... or select an existing template:"
-        selectedKey={props.activeTemplate ? props.activeTemplate.templateName : null}
-        onChange={(_: any, option?: IDropdownOption) =>
-          props.selectTemplate(props.baseUrl, option.data.templateName, option.data.version)
-        }
+        selectedKey={selectedKey}
+        onChange={(_: any, option?: IDropdownOption) => {
+          if (option.data)
+            props.selectTemplate(props.baseUrl, option.data.templateName, option.data.version)
+        }}
         placeholder="Select an option"
         options={templateOptions}
         styles={dropdownStyles}
       />
 
       <PrimaryButton
-        text="Fill active worksheet"
+        text={props.activeTemplate ? "Fill active worksheet": "Initialize active worksheet"}
         onClick={async (_: any) => await ExcelHelper.fillActiveSheet(props.activeTemplate)}
-        allowDisabledFocus
-        disabled={!props.activeTemplate}
+      />
+
+      <PrimaryButton
+        text={"Format active worksheet"}
+        onClick={async (_: any) => await ExcelHelper.formatActiveSheet()}
       />
     </Stack>
   );
