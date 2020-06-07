@@ -7,10 +7,10 @@
     <Authors>Panos Kokkinidis</Authors>
     <Company>-</Company>
     <Product>JsonExcelExpressions</Product>
-    <PackageProjectUrl>https://document-creator.azurewebsites.net/#/expressions</PackageProjectUrl>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
-    <Version>0.2.0</Version>
+    <PackageProjectUrl>https://doc-creator.azurewebsites.net/#/expressions</PackageProjectUrl>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
+    <Version>0.3.0</Version>
     <Copyright>Copyright © Panos, 2020</Copyright>
     <PackageTags>c-sharp;expression-evaluator;excel-formula;json;math-expressions;</PackageTags>
     <Description>A C# library for parsing and evaluating excel-type and arithmetic expressions with inputs from JSON objects.</Description>
