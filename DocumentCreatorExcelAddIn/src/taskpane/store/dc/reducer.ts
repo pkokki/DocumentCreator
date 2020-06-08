@@ -1,21 +1,7 @@
 import {
   DocumentCreatorState,
   DocumentCreatorActionTypes,
-  REQUEST_TEMPLATES,
-  RECEIVE_TEMPLATES,
-  RAISE_ERROR,
-  RESET_ERROR,
-  SET_BASE_URL,
-  REQUEST_TEMPLATE,
-  RECEIVE_TEMPLATE,
-  INITIALIZE_OFFICE,
-  ACTIVATE_WORKSHEET,
-  REQUEST_MAPPINGS,
-  RECEIVE_MAPPINGS,
-  SELECT_MAPPING,
-  UPLOAD_TEMPLATE,
-  REQUEST_EVALUATION,
-  RECEIVE_EVALUATION
+  DocumentCreatorActions
 } from "./types";
 import { ExcelHelper } from "../../modules/excel";
 
@@ -28,16 +14,16 @@ export const initialState: DocumentCreatorState = {
 
 export function documentCreatorReducer(state = initialState, action: DocumentCreatorActionTypes): DocumentCreatorState {
   switch (action.type) {
-    case SET_BASE_URL:
+    case DocumentCreatorActions.SET_BASE_URL:
       return { ...state, baseUrl: action.url };
-    case REQUEST_TEMPLATE:
-    case REQUEST_TEMPLATES:
-    case REQUEST_MAPPINGS:
-    case UPLOAD_TEMPLATE:
+    case DocumentCreatorActions.REQUEST_TEMPLATE:
+    case DocumentCreatorActions.REQUEST_TEMPLATES:
+    case DocumentCreatorActions.REQUEST_MAPPINGS:
+    case DocumentCreatorActions.UPLOAD_TEMPLATE:
       return { ...state, pending: state.pending + 1 };
-    case RECEIVE_TEMPLATES:
+    case DocumentCreatorActions.RECEIVE_TEMPLATES:
       return { ...state, pending: state.pending - 1, availableTemplates: action.payload || [] };
-    case RECEIVE_TEMPLATE:
+    case DocumentCreatorActions.RECEIVE_TEMPLATE:
       return {
         ...state,
         pending: state.pending - 1,
@@ -45,25 +31,25 @@ export function documentCreatorReducer(state = initialState, action: DocumentCre
         activeMappingName: defaultMappingName,
         availableMappings: undefined
       };
-    case RECEIVE_MAPPINGS:
+    case DocumentCreatorActions.RECEIVE_MAPPINGS:
       return { ...state, pending: state.pending - 1, availableMappings: action.payload || [] };
-    case RAISE_ERROR:
+    case DocumentCreatorActions.RAISE_ERROR:
       return {
         ...state,
         pending: state.pending - (action.isHttp ? 1 : 0),
         errorMessage: action.errorMessage || "An unexpected error occurred."
       };
-    case REQUEST_EVALUATION:
+    case DocumentCreatorActions.REQUEST_EVALUATION:
       return { ...state, pending: state.pending + 1, lastEvaluation: { input: action.request, output: undefined } };
-    case RECEIVE_EVALUATION:
+    case DocumentCreatorActions.RECEIVE_EVALUATION:
       return { ...state, pending: state.pending - 1, lastEvaluation: { ...state.lastEvaluation, output: action.payload }  };
-      case RESET_ERROR:
+      case DocumentCreatorActions.RESET_ERROR:
       return { ...state, errorMessage: undefined };
-    case ACTIVATE_WORKSHEET:
+    case DocumentCreatorActions.ACTIVATE_WORKSHEET:
       return { ...state, activeWorksheetId: action.worksheetId };
-    case SELECT_MAPPING:
+    case DocumentCreatorActions.SELECT_MAPPING:
       return { ...state, activeMappingName: action.name };
-    case INITIALIZE_OFFICE:
+    case DocumentCreatorActions.INITIALIZE_OFFICE:
       ExcelHelper.initializeExcel(action.dispatch);
       return state;
     default:

@@ -81,80 +81,83 @@ export interface DocumentCreatorState {
 /**
  * Action type constants
  */
-export const INITIALIZE_OFFICE = "INITIALIZE_OFFICE";
-export const SET_BASE_URL = "SET_BASE_URL";
-export const RAISE_ERROR = "RAISE_ERROR";
-export const RESET_ERROR = "RESET_ERROR";
-export const REQUEST_TEMPLATES = "REQUEST_TEMPLATES";
-export const RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES";
-export const REQUEST_TEMPLATE = "REQUEST_TEMPLATE";
-export const RECEIVE_TEMPLATE = "RECEIVE_TEMPLATE";
-export const ACTIVATE_WORKSHEET = "ACTIVATE_WORKSHEET";
-export const REQUEST_MAPPINGS = "REQUEST_MAPPINGS";
-export const RECEIVE_MAPPINGS = "RECEIVE_MAPPINGS";
-export const SELECT_MAPPING = "SELECT_MAPPING";
-export const UPLOAD_TEMPLATE = "UPLOAD_TEMPLATE";
-export const REQUEST_EVALUATION = "REQUEST_EVALUATION";
-export const RECEIVE_EVALUATION = "RECEIVE_EVALUATION";
+export enum DocumentCreatorActions {
+  INITIALIZE_OFFICE = "INITIALIZE_OFFICE",
+  SET_BASE_URL = "SET_BASE_URL",
+  RAISE_ERROR = "RAISE_ERROR",
+  RESET_ERROR = "RESET_ERROR",
+  REQUEST_TEMPLATES = "REQUEST_TEMPLATES",
+  RECEIVE_TEMPLATES = "RECEIVE_TEMPLATES",
+  REQUEST_TEMPLATE = "REQUEST_TEMPLATE",
+  RECEIVE_TEMPLATE = "RECEIVE_TEMPLATE",
+  ACTIVATE_WORKSHEET = "ACTIVATE_WORKSHEET",
+  REQUEST_MAPPINGS = "REQUEST_MAPPINGS",
+  RECEIVE_MAPPINGS = "RECEIVE_MAPPINGS",
+  SELECT_MAPPING = "SELECT_MAPPING",
+  UPLOAD_TEMPLATE = "UPLOAD_TEMPLATE",
+  REQUEST_EVALUATION = "REQUEST_EVALUATION",
+  RECEIVE_EVALUATION = "RECEIVE_EVALUATION"
+}
+
 /**
  * Action types
  */
 interface InitializeOfficeAction {
-  type: typeof INITIALIZE_OFFICE;
+  type: typeof DocumentCreatorActions.INITIALIZE_OFFICE;
   dispatch: Dispatch<DocumentCreatorActionTypes>;
 }
 interface SetBaseUrlAction {
-  type: typeof SET_BASE_URL;
+  type: typeof DocumentCreatorActions.SET_BASE_URL;
   url: string;
 }
 interface RaiseErrorAction {
-  type: typeof RAISE_ERROR;
+  type: typeof DocumentCreatorActions.RAISE_ERROR;
   errorMessage: string;
   isHttp: boolean;
 }
 interface ResetErrorAction {
-  type: typeof RESET_ERROR;
+  type: typeof DocumentCreatorActions.RESET_ERROR;
 }
 interface RequestTemplatesAction {
-  type: typeof REQUEST_TEMPLATES;
+  type: typeof DocumentCreatorActions.REQUEST_TEMPLATES;
 }
 interface ReceiveTemplatesAction {
-  type: typeof RECEIVE_TEMPLATES;
+  type: typeof DocumentCreatorActions.RECEIVE_TEMPLATES;
   payload: Template[];
 }
 interface RequestTemplateAction {
-  type: typeof REQUEST_TEMPLATE;
+  type: typeof DocumentCreatorActions.REQUEST_TEMPLATE;
   name: string;
   version: string;
 }
 interface ReceiveTemplateAction {
-  type: typeof RECEIVE_TEMPLATE;
+  type: typeof DocumentCreatorActions.RECEIVE_TEMPLATE;
   payload: Template;
 }
 interface ActivateWorksheetAction {
-  type: typeof ACTIVATE_WORKSHEET;
+  type: typeof DocumentCreatorActions.ACTIVATE_WORKSHEET;
   worksheetId: string;
 }
 interface RequestMappingsAction {
-  type: typeof REQUEST_MAPPINGS;
+  type: typeof DocumentCreatorActions.REQUEST_MAPPINGS;
 }
 interface ReceiveMappingsAction {
-  type: typeof RECEIVE_MAPPINGS;
+  type: typeof DocumentCreatorActions.RECEIVE_MAPPINGS;
   payload: Mapping[];
 }
 interface SelectMappingAction {
-  type: typeof SELECT_MAPPING;
+  type: typeof DocumentCreatorActions.SELECT_MAPPING;
   name: string;
 }
 interface UploadTemplateAction {
-  type: typeof UPLOAD_TEMPLATE;
+  type: typeof DocumentCreatorActions.UPLOAD_TEMPLATE;
 }
 interface RequestEvaluationAction {
-  type: typeof REQUEST_EVALUATION;
+  type: typeof DocumentCreatorActions.REQUEST_EVALUATION;
   request: EvaluationRequest;
 }
 interface ReceiveEvaluationAction {
-  type: typeof RECEIVE_EVALUATION;
+  type: typeof DocumentCreatorActions.RECEIVE_EVALUATION;
   payload: EvaluationOutput;
 }
 
