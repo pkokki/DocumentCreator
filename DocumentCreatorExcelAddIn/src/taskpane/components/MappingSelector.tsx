@@ -79,7 +79,6 @@ const MappingSelector = (props: Props) => {
           const request = await ExcelHelper.getEvaluationPayload(props.activeTemplate ? props.activeTemplate.templateName : null);
           if (request) {
             const response = await props.fetchEvaluation(props.baseUrl, request);
-            console.log("Test current mapping response", response);
             if (response)
               await ExcelHelper.setEvaluationResult(request, response);
           }

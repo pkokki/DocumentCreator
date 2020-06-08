@@ -13,7 +13,9 @@ import {
   REQUEST_MAPPINGS,
   RECEIVE_MAPPINGS,
   SELECT_MAPPING,
-  UPLOAD_TEMPLATE
+  UPLOAD_TEMPLATE,
+  REQUEST_EVALUATION,
+  RECEIVE_EVALUATION
 } from "./types";
 import { ExcelHelper } from "../../modules/excel";
 
@@ -51,7 +53,11 @@ export function documentCreatorReducer(state = initialState, action: DocumentCre
         pending: state.pending - (action.isHttp ? 1 : 0),
         errorMessage: action.errorMessage || "An unexpected error occurred."
       };
-    case RESET_ERROR:
+    case REQUEST_EVALUATION:
+      return { ...state, pending: state.pending + 1, lastEvaluation: { input: action.request, output: undefined } };
+    case RECEIVE_EVALUATION:
+      return { ...state, pending: state.pending - 1, lastEvaluation: { ...state.lastEvaluation, output: action.payload }  };
+      case RESET_ERROR:
       return { ...state, errorMessage: undefined };
     case ACTIVATE_WORKSHEET:
       return { ...state, activeWorksheetId: action.worksheetId };

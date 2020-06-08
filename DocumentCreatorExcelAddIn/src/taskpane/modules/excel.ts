@@ -198,6 +198,18 @@ function formatRanges(sheet: Excel.Worksheet, lastRow: number) {
   });
 }
 
+function resolveNumFormat(numFormat: string): { id: number, code: string } {
+  var id = null;
+  var code = null;
+  if (numFormat && numFormat.length && numFormat !== "General") {
+    code = numFormat
+  }
+  return {
+    id: id,
+    code: code
+  };
+}
+
 async function formatActiveSheet(): Promise<void> {
   return Excel.run(async context => {
     try {
@@ -205,9 +217,7 @@ async function formatActiveSheet(): Promise<void> {
       const range = sheet.getUsedRange();
       range.load("rowCount");
       await context.sync();
-      console.log(range.rowCount);
       const lastRow = range.rowCount;
-      console.log(lastRow);
 
       sheet.getUsedRange().clear("Formats");
       await context.sync();
@@ -300,8 +310,9 @@ async function getEvaluationPayload(templateName: string): Promise<EvaluationReq
       // Get range
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       const usedRange = sheet.getUsedRange(true);
-      usedRange.load(["formulas", "rowCount", "columnCount"]);
+      usedRange.load(["formulas", "rowCount", "columnCount", "numberFormat"]);
       await context.sync();
+
 
       if (usedRange.rowCount >= 3 && usedRange.columnCount >= 6) {
         const payload: EvaluationRequest = {
@@ -313,13 +324,16 @@ async function getEvaluationPayload(templateName: string): Promise<EvaluationReq
         usedRange.formulas.forEach((row, rowIndex) => {
           if (rowIndex >= 2) {
             if (row[0] && row[0] !== "" && row[5] && row[5] !== "") {
+              const numberFormat = resolveNumFormat(usedRange.numberFormat[rowIndex][5]);
               const expression: EvaluationExpression = {
                 name: row[0],
                 cell: "F" + (rowIndex + 1),
                 expression: row[5],
                 parent: row[1] !== "" ? row[1] : null,
                 isCollection: !!row[2],
-                content: row[3] !== "" ? row[3] : null
+                content: row[3] !== "" ? row[3] : null,
+                numFormatId: numberFormat.id,
+                numFormatCode: numberFormat.code
               };
               payload.expressions.push(expression);
             }

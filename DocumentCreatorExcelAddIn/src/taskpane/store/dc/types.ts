@@ -41,6 +41,8 @@ export interface EvaluationExpression {
   parent: string;
   isCollection: boolean;
   content: string;
+  numFormatId?: number;
+  numFormatCode?: string;
 }
 
 export interface EvaluationSource {
@@ -73,6 +75,7 @@ export interface DocumentCreatorState {
   readonly activeTemplate?: Template;
   readonly activeMappingName?: string;
   readonly activeWorksheetId?: string;
+  readonly lastEvaluation?: { input: EvaluationRequest, output: EvaluationOutput }
 }
 
 /**
@@ -148,6 +151,7 @@ interface UploadTemplateAction {
 }
 interface RequestEvaluationAction {
   type: typeof REQUEST_EVALUATION;
+  request: EvaluationRequest;
 }
 interface ReceiveEvaluationAction {
   type: typeof RECEIVE_EVALUATION;

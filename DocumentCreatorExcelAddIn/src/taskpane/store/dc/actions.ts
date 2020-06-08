@@ -109,9 +109,10 @@ export function uploadTemplateStart(): DocumentCreatorActionTypes {
   };
 }
 
-export function requestEvaluation(): DocumentCreatorActionTypes {
+export function requestEvaluation(request: EvaluationRequest): DocumentCreatorActionTypes {
   return {
-    type: REQUEST_EVALUATION
+    type: REQUEST_EVALUATION,
+    request: request
   };
 }
 
@@ -250,6 +251,6 @@ export function uploadTemplate(baseUrl: string, templateName: string, file: File
 
 export function fetchEvaluation(baseUrl: string, evalRequest: EvaluationRequest) {
   return async function(dispatch: Dispatch<DocumentCreatorActionTypes>) {
-    return await httpFetchPost(dispatch, `${baseUrl}/evaluations`, evalRequest, requestEvaluation(), receiveEvaluation);
+    return await httpFetchPost(dispatch, `${baseUrl}/evaluations`, evalRequest, requestEvaluation(evalRequest), receiveEvaluation);
   };
 }
