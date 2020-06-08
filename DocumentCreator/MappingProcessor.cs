@@ -86,9 +86,18 @@ namespace DocumentCreator
             if (!string.IsNullOrEmpty(request.TemplateName))
             {
                 var template = repository.GetLatestTemplate(request.TemplateName);
-                if (template == null)
-                    return null;
-                templateFields = OpenXmlWordProcessing.FindTemplateFields(template.Buffer);
+                if (template != null)
+                    templateFields = OpenXmlWordProcessing.FindTemplateFields(template.Buffer);
+            }
+            if (templateFields == null)
+            {
+                templateFields = request.Expressions.Select(e => new TemplateField()
+                {
+                    Name = e.Name,
+                    Parent = e.Parent,
+                    IsCollection = e.IsCollection,
+                    Content = e.Content
+                });
             }
 
             var processor = new MappingExpressionEvaluator();

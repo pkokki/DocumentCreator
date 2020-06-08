@@ -47,6 +47,7 @@ namespace DocumentCreator
                 var result = new EvaluationResult()
                 {
                     Name = expression.Name,
+                    Cell = expression.Cell
                 };
                 scope.ParentName = expressions.FirstOrDefault(o => o.Name == expression.Parent)?.Cell;
                 var exprFormula = expression.Expression;

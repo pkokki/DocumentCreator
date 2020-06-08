@@ -71,7 +71,8 @@ namespace JsonExcelExpressions
         {
             var result = new EvaluationResult()
             {
-                Name = name
+                Name = name,
+                Cell = cell
             };
             try
             {

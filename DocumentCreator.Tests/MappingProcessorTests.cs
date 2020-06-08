@@ -117,5 +117,43 @@ namespace DocumentCreator
             Assert.Empty(processor.GetMappings("XXX", "XXX", "XXX"));
         }
 
+        [Fact]
+        public void Evaluate_NullTemplateName_OK()
+        {
+            var request = new EvaluationRequest()
+            {
+                Expressions = new List<MappingExpression>() 
+                {
+                    new MappingExpression()
+                    {
+                        Name = "E1",
+                        Expression = "1+1"
+                    }
+                }
+            };
+            var output = processor.Evaluate(request);
+
+            Assert.Equal("2", output.Results.First().Text);
+        }
+
+        [Fact]
+        public void Evaluate_ReturnsCell()
+        {
+            var request = new EvaluationRequest()
+            {
+                Expressions = new List<MappingExpression>()
+                {
+                    new MappingExpression()
+                    {
+                        Name = "E1",
+                        Cell = "A1",
+                        Expression = "1+1"
+                    }
+                }
+            };
+            var output = processor.Evaluate(request);
+
+            Assert.Equal("A1", output.Results.First().Cell);
+        }
     }
 }
