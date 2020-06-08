@@ -100,35 +100,121 @@ function initializeExcel(dispatch: Dispatch<DocumentCreatorActionTypes>) {
   getActiveWorksheet();
 }
 
+function formatHeaders(sheet: Excel.Worksheet) {
+  sheet.getRange("A1:N1").set({
+    format: {
+      fill: {
+        color: "#4472C4"
+      },
+      font: {
+        color: "white",
+        bold: true
+      }
+    }
+  });
+  sheet.getRanges(`B1:C1, G1:H1`).format.font.color = "orange";
+  sheet.getRange("A2:N2").set({
+    format: {
+      fill: {
+        color: "#4472C4"
+      },
+      font: {
+        color: "white"
+      }
+    }
+  });
+}
+
+function formatRanges(sheet: Excel.Worksheet, lastRow: number) {
+  const range3 = sheet.getRanges(`A3:D${lastRow}, F3:K${lastRow}, M3:N${lastRow}`);
+  range3.format.borders.getItem("EdgeTop").color = "#BFBFBF";
+  range3.format.borders.getItem("EdgeBottom").color = "#BFBFBF";
+  range3.format.borders.getItem("EdgeLeft").color = "#BFBFBF";
+  range3.format.borders.getItem("EdgeRight").color = "#BFBFBF";
+  range3.format.borders.getItem("InsideVertical").color = "#BFBFBF";
+  range3.format.borders.getItem("InsideHorizontal").color = "#BFBFBF";
+
+  // Read-only columns
+  sheet.getRanges(`A3:D${lastRow}, I3:K${lastRow}`).set({
+    format: {
+      fill: { color: "#F2F2F2" }
+    }
+  });
+  // Read-write columns
+  sheet.getRanges(`F3:H${lastRow}, M3:N${lastRow}`).set({
+    format: {
+      fill: { color: "white" }
+    }
+  });
+  // Expression columns
+  sheet.getRanges(`F3:F${lastRow}, J3:J${lastRow}`).set({
+    format: {
+      columnWidth: 200,
+      font: { bold: true }
+    }
+  });
+  // Formula column
+  sheet.getRange(`I3:I${lastRow}`).set({
+    format: {
+      font: { name: "Consolas", size: 9 }
+    }
+  });
+  // Check column
+  const checkColumn = sheet.getRange(`K3:K${lastRow}`);
+  checkColumn.set({
+    format: {
+      font: { color: "#F2F2F2" },
+      columnWidth: 25
+    }
+  });
+  const conditionalFormat = checkColumn.conditionalFormats.add(Excel.ConditionalFormatType.iconSet);
+  const iconSet = conditionalFormat.iconSet;
+  iconSet.style = Excel.IconSet.threeSymbols2;
+  iconSet.criteria = [
+    {} as any,
+    {
+      type: Excel.ConditionalFormatIconRuleType.number,
+      operator: Excel.ConditionalIconCriterionOperator.greaterThanOrEqual,
+      formula: "=0"
+    },
+    {
+      type: Excel.ConditionalFormatIconRuleType.number,
+      operator: Excel.ConditionalIconCriterionOperator.greaterThanOrEqual,
+      formula: "=1"
+    }
+  ];
+  // Source payload column
+  sheet.getRange(`N3:N${lastRow}`).set({
+    format: {
+      columnWidth: 125
+    }
+  });
+  // Separator columns
+  sheet.getRanges(`E1:E${lastRow}, L1:L${lastRow}`).set({
+    format: {
+      columnWidth: 6.75,
+      fill: { color: "white" }
+    }
+  });
+}
+
 async function formatActiveSheet(): Promise<void> {
   return Excel.run(async context => {
     try {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      const usedRange = sheet.getUsedRange();
-      usedRange.load("columnCount");
-      const colProps = usedRange.getColumnProperties({
-        columnIndex: true,
-        format: {
-          borders: {
-            color: true,
-            style: true
-          },
-          fill: {
-            color: true
-          },
-          font: {
-            name: true,
-            size: true
-          },
-          columnWidth: true
-        }
-      });
+      const range = sheet.getUsedRange();
+      range.load("rowCount");
+      await context.sync();
+      console.log(range.rowCount);
+      const lastRow = range.rowCount;
+      console.log(lastRow);
+
+      sheet.getUsedRange().clear("Formats");
       await context.sync();
 
-      colProps.value.forEach(props => {
-        console.log(props);
-      });
-      //await context.sync();
+      formatHeaders(sheet);
+      formatRanges(sheet, lastRow);
+      await context.sync();
     } catch (error) {
       errorHandlerFunction(error);
     }
@@ -139,8 +225,7 @@ async function fillActiveSheet(template: Template): Promise<boolean> {
     try {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
 
-      const usedRange = sheet.getUsedRange();
-      usedRange.clear("All");
+      sheet.getUsedRange().clear("All");
       await context.sync();
 
       const templateName = template ? template.templateName : "#NEW";
@@ -157,34 +242,13 @@ async function fillActiveSheet(template: Template): Promise<boolean> {
           "Comment",
           "Expression",
           "API result",
-          "Check",
+          "Ch",
           null,
           "Name",
           "Value"
         ]
       ];
-      sheet.getRange("A1:N1").set({
-        format: {
-          fill: {
-            color: "#4472C4"
-          },
-          font: {
-            color: "white",
-            bold: true
-          }
-        }
-      });
-      sheet.getRanges(`B1:C1, G1:H1`).format.font.color = "orange";
-      sheet.getRange("A2:N2").set({
-        format: {
-          fill: {
-            color: "#4472C4"
-          },
-          font: {
-            color: "white"
-          }
-        }
-      });
+      formatHeaders(sheet);
 
       if (template && template.fields && template.fields.length) {
         const cellData = [];
@@ -192,30 +256,8 @@ async function fillActiveSheet(template: Template): Promise<boolean> {
           cellData.push([field.name, field.parent, field.isCollection ? true : null, field.content])
         );
 
-        const lastRow = cellData.length + 2;
-        const range2 = sheet.getRange("A3:D" + lastRow);
-        range2.values = cellData;
-        range2.format.autofitColumns();
-
-        sheet.getRanges(`A3:D${lastRow}, I3:K${lastRow}`).set({
-          format: {
-            fill: { color: "#BFBFBF" },
-            borders: { tintAndShade: -0.25 }
-          }
-        }, { throwOnReadOnly: false });
-        sheet.getRanges(`F3:H${lastRow}, M3:N${lastRow}`).set({
-          format: {
-            fill: { color: "white" },
-            borders: { tintAndShade: -0.25 }
-          }
-        }, { throwOnReadOnly: false });
-        sheet.getRanges(`F3:F${lastRow}, J3:J${lastRow}`).format.font.bold = true;
-        sheet.getRanges(`E3:E${lastRow}, L3:L${lastRow}`).set({
-          format: {
-            columnWidth: 6.75,
-            fill: { color: "white" }
-          }
-        }, { throwOnReadOnly: false });
+        const lastRow = template.fields.length + 2;
+        formatRanges(sheet, lastRow);
       }
       await context.sync();
       return true;
@@ -308,7 +350,7 @@ async function setEvaluationResult(evalRequest: EvaluationRequest, evalResponse:
     try {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
 
-      sheet.getRange("I3:K100").clear("All");
+      sheet.getRange("I3:K100").clear("Contents");
       evalResponse.results.forEach(result => {
         const expr = evalRequest.expressions.find(e => e.name === result.name);
         if (expr) {
@@ -319,7 +361,7 @@ async function setEvaluationResult(evalRequest: EvaluationRequest, evalResponse:
             [
               `=IFNA(FORMULATEXT(F${rowIndex}),"")`,
               result.error || result.text,
-              `=IF(ISNA(FORMULATEXT(F${rowIndex})),"",IF(F${rowIndex}=J${rowIndex},1,IF(F${rowIndex}=IFNA(VALUE(J${rowIndex}),J${rowIndex}),1,2)))`
+              `=IF(ISNA(FORMULATEXT(F${rowIndex})),"",IF(F${rowIndex}=J${rowIndex},1,IF(F${rowIndex}=IFNA(VALUE(J${rowIndex}),J${rowIndex}),1,-1)))`
             ]
           ];
         }
