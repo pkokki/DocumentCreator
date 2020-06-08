@@ -202,7 +202,7 @@ function resolveNumFormat(numFormat: string): { id: number, code: string } {
   var id = null;
   var code = null;
   if (numFormat && numFormat.length && numFormat !== "General") {
-    code = numFormat
+    code = numFormat;
   }
   return {
     id: id,
