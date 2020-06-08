@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI
 {
-    public partial class Startup
+    partial class Startup
     {
         private void ConfigureDocumentCreatorServices(IServiceCollection services)
         {

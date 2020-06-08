@@ -35,15 +35,42 @@ namespace DocumentCreator.Core.Model
         public IEnumerable<EvaluationSource> Sources { get; set; }
     }
 
+    /// <summary>
+    /// An expression definition
+    /// </summary>
     public class MappingExpression
     {
+        /// <summary>
+        /// The name of the expression
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// The cell address of the expression - can be used for reference
+        /// </summary>
         public string Cell { get; set; }
+        /// <summary>
+        /// The excel formula
+        /// </summary>
         public string Expression { get; set; }
+        /// <summary>
+        /// The name of the parent expression (if exists)
+        /// </summary>
         public string Parent { get; set; }
+        /// <summary>
+        /// True if the expression is parent of other expressions
+        /// </summary>
         public bool IsCollection { get; set; }
+        /// <summary>
+        /// The content of the expression in the template (used for hide/show content)
+        /// </summary>
         public string Content { get; set; }
+        /// <summary>
+        /// The Excel format identifier of the cell for numeric expressions
+        /// </summary>
         public int? NumFormatId { get; set; }
+        /// <summary>
+        /// The Excel format code of the cell for numeric expressions
+        /// </summary>
         public string NumFormatCode { get; set; }
     }
 
