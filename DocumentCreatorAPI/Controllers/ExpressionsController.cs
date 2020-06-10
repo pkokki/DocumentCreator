@@ -5,6 +5,7 @@ using DocumentCreator.Core.Model;
 using JsonExcelExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DocumentCreatorAPI.Controllers
 {
@@ -13,6 +14,7 @@ namespace DocumentCreatorAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [SwaggerTag("Evaluate standalone Excel formulas")]
     public class ExpressionsController : ControllerBase
     {
         private readonly IMappingExpressionEvaluator processor;
@@ -37,6 +39,7 @@ namespace DocumentCreatorAPI.Controllers
         /// This is an API to evaluate expressions directly without template and mappings.
         /// The expressions are named __A1, __A2, etc and can be referenced in other expressions.
         /// </remarks>
+        /// <response code="200">Returns a list of evaluation results</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<EvaluationResult>))]
         public IActionResult EvaluateExpressions([FromBody]ExpressionEvaluationInput input)

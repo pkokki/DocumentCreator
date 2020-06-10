@@ -66,6 +66,8 @@ namespace DocumentCreatorAPI
                     }
                 });
 
+                // Swashbuckle.AspNetCore.Annotations
+                c.EnableAnnotations();
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -73,6 +75,7 @@ namespace DocumentCreatorAPI
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(DocumentCreator.Core.ITemplateProcessor).Assembly.GetName().Name}.xml"));
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(JsonExcelExpressions.IExpressionEvaluator).Assembly.GetName().Name}.xml"));
             });
+            services.AddSwaggerGenNewtonsoftSupport();
 
             services
                 .AddControllers()

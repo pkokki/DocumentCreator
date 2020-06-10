@@ -3,6 +3,7 @@ using DocumentCreator.Core;
 using DocumentCreator.Core.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace DocumentCreatorAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [SwaggerTag("Create and retrieve documents")]
     public class DocumentsController : ControllerBase
     {
         private readonly IDocumentProcessor processor;
@@ -50,7 +52,6 @@ namespace DocumentCreatorAPI.Controllers
         /// <response code="200">Returns a paged list of documents.</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResults<Document>))]
-        [Produces("application/json")]
         public IActionResult Get(
             [FromQuery]string templateName, 
             [FromQuery]string templateVersion, 
@@ -92,7 +93,7 @@ namespace DocumentCreatorAPI.Controllers
         [Route("{documentId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Produces("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/json")]
+        [Produces("application/vnd.openxmlformats-officedocument.wordprocessingml.document")]
         public IActionResult GetById([FromRoute]string documentId)
         {
             var document = processor.GetDocument(documentId);
