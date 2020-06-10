@@ -10,7 +10,10 @@ An opinionated solution for creating documents from JSON objects (API payloads) 
 
 ## Getting Started
 
-Create Word documents and HTML pages by combining Word templates (documents with content controls) and JSON data via transformations defined as Excel formulas. Try the [quickstart](https://doc-creator.azurewebsites.net/#/) to create a document in four steps.
+Create Word documents and HTML pages by combining Word templates (documents with content controls) and JSON data via transformations defined as Excel formulas. 
+
+* Try the [quickstart](https://doc-creator.azurewebsites.net/#/) to create a document in four steps.
+* View the [API documentation](https://doc-creator.azurewebsites.net/swagger/)
 
 ## Transformation examples
 
