@@ -13,13 +13,21 @@ using System.Threading.Tasks;
 
 namespace DocumentCreatorAPI
 {
-    public partial class Startup
+    partial class Startup
     {
+        private const string REPO_FILE_SYSTEM = "FileSystem";
+        private const string REPO_AZURITE = "Azurite";
+        private const string REPO_AZURE_BLOB = "AzureBlob";
+
         private void ConfigureDocumentCreatorServices(IServiceCollection services)
         {
             services.AddHttpContextAccessor();
 
-            services.AddSingleton<GlobalSettings>();
+            services.AddSingleton(new GlobalSettings()
+            {
+                DocumentRepositoryType = REPO_FILE_SYSTEM,
+                HtmlRepositoryType = REPO_FILE_SYSTEM
+            });
 
             services.AddScoped(sp => BuildDocumentRepository(sp));
             services.AddScoped(sp => BuildHtmlRepository(sp));
@@ -47,9 +55,9 @@ namespace DocumentCreatorAPI
             var settings = sp.GetService<GlobalSettings>();
             return settings.DocumentRepositoryType switch
             {
-                GlobalSettings.REPO_FILE_SYSTEM => new FileRepository(Env.ContentRootPath),
-                GlobalSettings.REPO_AZURITE => new AzuriteRepository(),
-                GlobalSettings.REPO_AZURE_BLOB => new AzureBlobRepository(Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING")),
+                REPO_FILE_SYSTEM => new FileRepository(Env.ContentRootPath),
+                REPO_AZURITE => new AzuriteRepository(),
+                REPO_AZURE_BLOB => new AzureBlobRepository(Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING")),
                 _ => throw new InvalidOperationException("Unknown IRepository!"),
             };
         }
@@ -59,8 +67,8 @@ namespace DocumentCreatorAPI
             var settings = sp.GetService<GlobalSettings>();
             return settings.HtmlRepositoryType switch
             {
-                GlobalSettings.REPO_FILE_SYSTEM => new HtmlFileRepository(Env.ContentRootPath, GetBaseUrl(sp)),
-                GlobalSettings.REPO_AZURE_BLOB => new AzureBlobStaticHtmlRepository(
+                REPO_FILE_SYSTEM => new HtmlFileRepository(Env.ContentRootPath, GetBaseUrl(sp)),
+                REPO_AZURE_BLOB => new AzureBlobStaticHtmlRepository(
                     Environment.GetEnvironmentVariable("AZURE_STORAGE_CONNECTION_STRING"),
                     Environment.GetEnvironmentVariable("AZURE_STORAGE_STATIC_WEBSITE")),
                 _ => throw new InvalidOperationException("Unknown IHtmlRepository!"),

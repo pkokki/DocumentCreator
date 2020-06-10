@@ -14,6 +14,7 @@
     <Copyright>Copyright © Panos, 2020</Copyright>
     <PackageTags>c-sharp;expression-evaluator;excel-formula;json;math-expressions;</PackageTags>
     <Description>A C# library for parsing and evaluating excel-type and arithmetic expressions with inputs from JSON objects.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

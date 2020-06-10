@@ -45,7 +45,7 @@
         }
     }
 
-    public enum ExcelFormulaTokenType
+    internal enum ExcelFormulaTokenType
     {
         Noop,
         Operand,
@@ -59,7 +59,7 @@
         Unknown
     };
 
-    public enum ExcelFormulaTokenSubtype
+    internal enum ExcelFormulaTokenSubtype
     {
         Nothing,
         Start,
